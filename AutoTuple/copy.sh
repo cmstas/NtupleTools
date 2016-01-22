@@ -12,6 +12,10 @@ elif [[ $dataSet == *"RunIISpring15MiniAODv2-FastAsympt25ns"* ]]
 then
   thedir="run2_fastsim"
   echo "25_FS"
+elif [[ $dataSet == *"RunIISpring15FSPremix"* ]] 
+then
+  thedir="run2_fastsim"
+  echo "25_FS_v1"
 elif [[ $dataSet == *"RunIISpring15MiniAODv2"* ]] 
 then
   thedir="run2_25ns_MiniAODv2"

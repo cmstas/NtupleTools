@@ -69,6 +69,7 @@ while (completelyDone == False):
   if ("25ns" in dataSet): thedir="run2_25ns";
   if ("RunIISpring15MiniAODv2" in dataSet): thedir="run2_25ns_MiniAODv2";
   if ("RunIISpring15MiniAODv2-FastAsympt25ns" in dataSet): thedir="run2_fastsim";
+  if ("RunIISpring15FSPremix" in dataSet): thedir="run2_fastsim";
   if (os.path.isfile("/hadoop/cms/store/group/" + thedir + "/" + dataSet + "/" + tag[4:] + "/merged_ntuple_1.root")): 
     completelyDone = True
     break
