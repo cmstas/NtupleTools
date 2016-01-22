@@ -37,8 +37,8 @@ int mergeScript(const string& fileList, const string& outFile ){
 	file>>ntupleLocation;
 	if (ntupleLocation.empty()) continue;
 	else{
-      cout << ("root://cmsxrootd.fnal.gov///" + ntupleLocation.substr(11)).c_str() << endl;
-      ch1.Add( ("root://cmsxrootd.fnal.gov///" + ntupleLocation.substr(11)).c_str() );
+      cout << ("/hadoop/cms/" + ntupleLocation.substr(11)).c_str() << endl;
+      ch1.Add( ("/hadoop/cms/" + ntupleLocation.substr(11)).c_str() );
 	}
   }
 
