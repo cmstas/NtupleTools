@@ -384,12 +384,3 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
 
   return nProblems;
 }
-
-
-#ifndef __CINT__
-int main()
-{
-  checkCMS3("");
-  return 0;
-}
-#endif
