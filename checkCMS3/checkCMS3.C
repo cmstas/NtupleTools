@@ -339,8 +339,8 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   if( isSUSY && isMerged ) {
 
     if( isScan ) {
-      cout << "\nThis file appears to have a range of sparm values.\nI'm not equipped to handle that; please check the values by eye, in a histogram." << endl;
-      if( humanUser ) chain->Draw("sparm_values");
+      cout << "\nThis appears to be a SUSY scan, with a range of sparm values." << endl;
+	  cout << "If you want to verify all of those sparm values, you'll need to do it manually." << endl;
     }
     else {
       cout << "\nFound these sparm values:" << endl;
