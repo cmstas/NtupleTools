@@ -41,9 +41,12 @@ if [ "$USERNAME" == "iandyckes" ]; then USERNAME="gdyckes"; fi
 if [ "$USERNAME" == "mderdzinski" ]; then USERNAME="mderdzin"; fi
 if [ "$USERNAME" == "rclsa" ]; then USERNAME="rcoelhol"; fi
 
+#this is where the unmerged files are
+unmerged=/hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$dateTime/0000/
+
 #check CMS3
 nRedo=`grep -r "Too few merged events\!" autoTupleLogs/copy_log_$shortName.log | awk '{print $5}'`
-root -b -q checkCMS3.C\(\"/hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$CMS3tag/merged/\",\"/hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$dateTime/0000/\",0,0,\"$dataSet\"\) > autoTupleLogs/copy_log_$shortName.log
+root -b -q checkCMS3.C\(\"/hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$CMS3tag/merged/\",\"$unmerged\",0,0,\"$dataSet\"\) > autoTupleLogs/copy_log_$shortName.log
 nProblems=`grep -r "Problems found:" autoTupleLogs/copy_log_$shortName.log | awk '{print $3}'`
 grep -r  "Too few merged events!" autoTupleLogs/copy_log_$shortName.log &>/dev/null
 mergingProblems=$?
@@ -55,6 +58,7 @@ then
   mkdir /hadoop/cms/store/group/snt/$thedir/$longName/$myDir 2> /dev/null
   mv /hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$CMS3tag/merged/*.root /hadoop/cms/store/group/snt/$thedir/$longName/$myDir/
   echo "mv /hadoop/cms/store/user/$USERNAME/$shortName/crab_$lName/$CMS3tag/merged/*.root /hadoop/cms/store/group/snt/$thedir/$longName/$myDir/"
+  cp $unmerged/metadata.txt /hadoop/cms/store/group/snt/$thedir/$longName/$myDir/metadata.txt
   echo "$longName" >> crab_status_logs/copy.txt
   root -b -l -q numEventsROOT.C\(\"/hadoop/cms/store/group/snt/$thedir/$longName/$myDir\"\) >> crab_status_logs/copy.txt 2>&1
 elif [ "$nProblems" == "1" ] && [ "$mergingProblems" == "0" ]

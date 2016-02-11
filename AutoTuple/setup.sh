@@ -73,6 +73,7 @@ cp ../../../checkCMS3/checkCMS3.C .
 cp ../../../checkCMS3/das_client.py .
 cp $CMSSW_BASE/*.db .
 cp ../../checkProxy.sh . 
+cp ../../makeMetaData.sh . 
 mkdir crab_status_logs
 . checkProxy.sh 
 python submit_crab_jobs.py $1
