@@ -80,13 +80,14 @@ while (completelyDone == False):
   #Here is where the unmerged files are
   unmerged = '/hadoop/cms/store/user/' + user + '/' + parts[0].split('/')[1] + '/' + crab_dir + '/' + dateTime + '/0000/'
 
-  #Make the metaData for the unmerged files
-  os.system('. makeMetaData.sh ' + unmerged + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' > ' + unmerged + 'metadata.txt' )
-
   #Submit all the jobs
   date=str(datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S'))
   os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + parts[0].split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + parts[2] + ' -e ' + parts[3] + ' -x ' + parts[1] + ' --overrideCrab >> ' + temp + '2')
   os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
+
+  #Make the metaData for the unmerged files
+  print '. makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' > ' + unmerged + 'metadata.txt' 
+  os.system('. makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' > ' + unmerged + 'metadata.txt' )
 
   #See if any jobs were submitted (will be false when resubmission not needed):
   file = open(temp, "r")
