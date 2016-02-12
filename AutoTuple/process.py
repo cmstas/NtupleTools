@@ -30,12 +30,12 @@ tag = lines[1]
 parts = lines[lineno].split()[0:5]
 parts.append(tag)
 parts.append(gtag)
-parts += lines[lineno].split()[5:]
+sparms = lines[lineno].split()[5:] or ""
 tempstr = parts[0].split('/')[1]+'_'+parts[0].split('/')[2]
 #now have some stupid additional requestname for SMSes
 requestname = tempstr[:100]
 
-name, xsec, kfactor, efactor, isdata, cms3tag, gtag, sparms = parts
+name, xsec, kfactor, efactor, isdata, cms3tag, gtag = parts
 
 #See if already exists
 dir="/hadoop/cms/store/group/snt/" + dir2 + "/" +name.split('/')[1]+"_"+name.split('/')[2]+'/'+tag[5:]+"/merged_ntuple_1.root"
