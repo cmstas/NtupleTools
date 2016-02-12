@@ -13,7 +13,7 @@ sparms=$7
 echo "xsec: $xsec"
 echo "k-fact: $kfact"
 echo "e-fact: $efact"
-echo "gtag: $gfact"
+echo "gtag: $gtag"
 echo "sparms: $sparms"
 echo " "
 echo "unmerged files are in: $unmergedFileDir"
@@ -48,7 +48,7 @@ do
     if [ "$n" -gt 1 ] ; then result+=`echo $line | tr '/' ' ' | awk '{print $NF}'  | tr '_.' ' ' | awk '{print $2}'` ; result+=" " ; fi
     n+=1
   done
-  echo "merged file $file constituents: $result"
+  echo "merged file constituents $file : $result"
 done
 
 echo " " 
@@ -59,7 +59,7 @@ do
   result=""
   for line in `cat $mergeLists/mergeFiles/mergeLists/merged_list_${file}.txt`
   do
-    if [ "$n" == 1 ] ; then echo "merged file $file nevents: $line" ; fi
+    if [ "$n" == 1 ] ; then echo "merged file nevents $file : $line" ; fi
     n=$(( $n + 1 ))
   done
 done
