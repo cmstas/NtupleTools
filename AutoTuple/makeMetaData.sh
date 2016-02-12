@@ -18,12 +18,12 @@ nFiles=`ls $unmergedFileDir/log | wc -l`
 for fileNo in `seq 1 $nFiles`
 do
   theLog=`tar xf $unmergedFileDir/log/cmsRun_${fileNo}.log.tar.gz -O`
-  theParsedLog=`echo $theLog | tr ' ' '\n' | grep "^root:"`
+  theParsedLog=`echo $theLog | tr ' ' '\n' | grep ".root$"`
   
   #Make sure there's only one file in each unmerged
   number=`echo $theParsedLog | tr ' ' '\n' | wc -l`
   if [ "$number" != "3" ] ; then echo "Warning! File $fileNo is Not 3" ; continue ; fi 
   
   #If all good, find the name of the file
-  echo $fileNo "`echo $theParsedLog | tr ' ' '\n' | tail -1 | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' `"
+  echo $fileNo "`echo $theParsedLog | tr ' ' '\n' | tail -1 | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,'`"
 done
