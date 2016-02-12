@@ -6,6 +6,7 @@ xsec=$3
 kfact=$4
 efact=$5
 gtag=$6
+sparms=$7
 #/hadoop/cms/store/user/cgeorge/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/crab_ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v/151217_030407/0000/
 #mergeLists=/home/users/cgeorge/NtupleTools/AutoTuple/CMSSW_7_4_14/crab/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1
 
@@ -13,6 +14,7 @@ echo "xsec: $xsec"
 echo "k-fact: $kfact"
 echo "e-fact: $efact"
 echo "gtag: $gfact"
+echo "sparms: $sparms"
 echo " "
 echo "unmerged files are in: $unmergedFileDir"
 echo " " 

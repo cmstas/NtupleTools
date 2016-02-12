@@ -34,20 +34,13 @@ parts += lines[lineno].split()[5:]
 tempstr = parts[0].split('/')[1]+'_'+parts[0].split('/')[2]
 #now have some stupid additional requestname for SMSes
 requestname = tempstr[:100]
-#Parts contents:
-  #0 - name 
-  #1 - xsec
-  #2 - k-factor
-  #3 - e-factor
-  #4 - is data
-  #5 - CMS3tag
-  #6 - gtag
-  #7 - sparms
+
+name, xsec, kfactor, efactor, isdata, cms3tag, gtag, sparms = parts
 
 #See if already exists
-dir="/hadoop/cms/store/group/snt/" + dir2 + "/" +parts[0].split('/')[1]+"_"+parts[0].split('/')[2]+'/'+tag[5:]+"/merged_ntuple_1.root"
+dir="/hadoop/cms/store/group/snt/" + dir2 + "/" +name.split('/')[1]+"_"+name.split('/')[2]+'/'+tag[5:]+"/merged_ntuple_1.root"
 if os.path.isfile(dir):
-  os.system('echo "%s alreadyThere" >> crab_status_logs/pp.txt' % (parts[0].split('/')[1]+'_'+parts[0].split('/')[2]))
+  os.system('echo "%s alreadyThere" >> crab_status_logs/pp.txt' % (name.split('/')[1]+'_'+name.split('/')[2]))
   sys.exit()
 
 #Figure out output directory
@@ -57,10 +50,10 @@ if (dateTime == "0"):
   dateTime=timeFile.readline().rstrip("\n")
 
 completelyDone = False
-dataSet = parts[0].split('/')[1] + '_' + parts[0].split('/')[2]
+dataSet = name.split('/')[1] + '_' + name.split('/')[2]
 nLoops = 0
 nEventsIn = 0
-temp = "autoTupleLogs/temp" + parts[0].split('/')[1] + ".txt"
+temp = "autoTupleLogs/temp" + name.split('/')[1] + ".txt"
 
 while (completelyDone == False):
   #See if jobs already done.
@@ -78,16 +71,16 @@ while (completelyDone == False):
   crab_dir = 'crab_' + requestname
 
   #Here is where the unmerged files are
-  unmerged = '/hadoop/cms/store/user/' + user + '/' + parts[0].split('/')[1] + '/' + crab_dir + '/' + dateTime + '/0000/'
+  unmerged = '/hadoop/cms/store/user/' + user + '/' + name.split('/')[1] + '/' + crab_dir + '/' + dateTime + '/0000/'
 
   #Submit all the jobs
   date=str(datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S'))
-  os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + parts[0].split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + parts[2] + ' -e ' + parts[3] + ' -x ' + parts[1] + ' --overrideCrab >> ' + temp + '2')
+  os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + name.split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + kfactor + ' -e ' + efactor + ' -x ' + xsec + ' --overrideCrab >> ' + temp + '2')
   os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
 
   #Make the metaData for the unmerged files
-  print './makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' ' + parts[6] + ' > ' + unmerged + 'metadata.txt' 
-  os.system('./makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' ' + parts[6] + ' > tempMetaData.txt' ) 
+  print './makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
+  os.system('./makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
   os.system('mv tempMetaData.txt ' + unmerged + 'metadata.txt')
 
   #See if any jobs were submitted (will be false when resubmission not needed):
@@ -102,8 +95,8 @@ while (completelyDone == False):
   if (nLeft == 0): 
     completelyDone = True
     os.system('echo "%s done" >> crab_status_logs/pp.txt' % (dataSet))
-    os.system('. copy.sh %s %s %s' % (parts[0], tag, dateTime))
-    print "running: . copy.sh %s %s %s " % (parts[0], tag, dateTime)
+    os.system('. copy.sh %s %s %s' % (name, tag, dateTime))
+    print "running: . copy.sh %s %s %s " % (name, tag, dateTime)
     continue
  
   #Get ID numbers of jobs submitted
