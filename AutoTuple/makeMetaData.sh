@@ -47,3 +47,16 @@ do
   done
   echo "merged file $file: $result"
 done
+
+echo " " 
+echo "Here is the nEvents in each merged file: " 
+for file in `seq 1 $nMergeLists`
+do
+  n=0
+  result=""
+  for line in `cat $mergeLists/mergeFiles/mergeLists/merged_list_${file}.txt`
+  do
+    if [ "$n" == 1 ] ; then echo "merged file $file: $line" ; fi
+    n=$(( $n + 1 ))
+  done
+done
