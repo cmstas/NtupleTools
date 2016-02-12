@@ -1,8 +1,15 @@
 #!/bin/bash
 
 unmergedFileDir=$1 
+xsec=$2
+kfact=$3
+efact=$4
 #/hadoop/cms/store/user/cgeorge/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/crab_ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v/151217_030407/0000/
 
+echo $xsec
+echo $kfact
+echo $efact
+echo " "
 echo "unmerged files are in $unmergedFileDir"
 echo "Here is the correspondence between unmerged and MINIAOD: "
 

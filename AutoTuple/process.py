@@ -78,7 +78,7 @@ while (completelyDone == False):
   unmerged = /hadoop/cms/store/user/' + user + '/' + parts[0].split('/')[1] + '/' + crab_dir + '/' + dateTime + '/0000/
 
   #Make the metaData for the unmerged files
-  os.system('. makeMetaData.sh ' + unmerged + ' > ' + unmerged + 'metadata.txt' )
+  os.system('. makeMetaData.sh ' + unmerged + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' > ' + unmerged + 'metadata.txt' )
 
   #Submit all the jobs
   date=str(datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S'))
