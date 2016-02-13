@@ -393,9 +393,13 @@ do
       while [ "$numDirs" -gt "1" ]
       do
         if [ ! -e /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 )) ]; then echo "does not exist, not copying"; numDirs=$(( $numDirs - 1 )); continue; fi
+        #First the logs
+        mv /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 ))/log/* /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/0000/log/
+        rmdir /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 ))/log
+        #Then the files
         mv /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 ))/* /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/0000/
-         rmdir /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 ))
-         numDirs=$(( $numDirs - 1 )) 
+        rmdir /hadoop/cms/store/user/$USERNAME/$short_filename/crab_${crab_filename}/$dateTime/000$(( $numDirs-1 ))
+        numDirs=$(( $numDirs - 1 )) 
       done
       nice -n 10 python process.py $file $fileNumber $dateTime &
       let "fileNumber += 1"
