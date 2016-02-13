@@ -55,6 +55,7 @@ nLoops = 0
 nEventsIn = 0
 temp = "autoTupleLogs/temp" + name.split('/')[1] + ".txt"
 
+firstPass = True
 while (completelyDone == False):
   #See if jobs already done.
   thedir="run2_25ns"
@@ -63,7 +64,8 @@ while (completelyDone == False):
   if ("RunIISpring15MiniAODv2" in dataSet): thedir="run2_25ns_MiniAODv2";
   if ("RunIISpring15MiniAODv2-FastAsympt25ns" in dataSet): thedir="run2_fastsim";
   if ("RunIISpring15FSPremix" in dataSet): thedir="run2_fastsim";
-  if (os.path.isfile("/hadoop/cms/store/group/" + thedir + "/" + dataSet + "/" + tag[4:] + "/merged_ntuple_1.root")): 
+  finalDir = "/hadoop/cms/store/group/" + thedir + "/" + dataSet + "/" + tag.replace("CMS3_","") + "/merged_ntuple_1.root"
+  if (os.path.isfile(finalDir)): 
     completelyDone = True
     break
 
@@ -75,14 +77,21 @@ while (completelyDone == False):
 
   #Submit all the jobs
   date=str(datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S'))
-  os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + name.split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + kfactor + ' -e ' + efactor + ' -x ' + xsec + ' --overrideCrab >> ' + temp + '2')
-  os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
 
   #Make the metaData for the unmerged files
-  print './makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
-  os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
-  os.system('cp tempMetaData.txt ' + unmerged + 'metadata.txt')
-  os.system('cp tempMetaData.txt /nfs-7/userdata/metadataBank/metadata__%s__%s__%s.txt' % (requestname, user, dateTime))
+  if firstPass:
+      os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + name.split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + kfactor + ' -e ' + efactor + ' -x ' + xsec + ' --overrideCrab >> ' + temp + '2')
+      # Yes, I know this is not beautiful.
+      os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' ' + ' > tempMetaData.txt' ) 
+      os.system('cp tempMetaData.txt ' + unmerged + 'metadata.txt')
+      # mirror the central snt directory structure for metadata files
+      metadata_basedir=finalDir.replace("/hadoop/cms/store/group/","").split("merged_ntuple_")[0]
+      metadatadir= "/nfs-7/userdata/metadataBank/%s/" % metadata_basedir
+      os.system('mkdir -p {0} ; chmod a+w {0}'.format(metadatadir))
+      os.system('cp tempMetaData.txt %s/metadata.txt' % (metadatadir))
+      firstPass = False
+
+  os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
 
   #See if any jobs were submitted (will be false when resubmission not needed):
   file = open(temp, "r")
