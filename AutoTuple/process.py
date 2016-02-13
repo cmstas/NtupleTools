@@ -79,8 +79,8 @@ while (completelyDone == False):
   os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
 
   #Make the metaData for the unmerged files
-  print './makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
-  os.system('./makeMetaData.sh ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
+  print './makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
+  os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
   os.system('mv tempMetaData.txt ' + unmerged + 'metadata.txt')
 
   #See if any jobs were submitted (will be false when resubmission not needed):
