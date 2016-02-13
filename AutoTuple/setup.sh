@@ -56,8 +56,8 @@ fi
 cp ../../submitMergeJobs.sh .
 cp ../../submit_crab_jobs.py  .
 cp ../../$1 .
-cp ../../monitor.sh . 
-cp ../../process.py .
+ln -s ../../monitor.sh . 
+ln -s ../../process.py .
 cp ../../pirate.txt .
 cp ../../theDir.txt .
 cp ../../FindLumisPerJob.sh . 
@@ -73,7 +73,8 @@ cp ../../../checkCMS3/checkCMS3.C .
 cp ../../../checkCMS3/das_client.py .
 cp $CMSSW_BASE/*.db .
 cp ../../checkProxy.sh . 
-cp ../../makeMetaData.sh . 
+ln -s ../../makeMetaData.sh . 
+chmod a+x makeMetaData.sh
 mkdir crab_status_logs
 . checkProxy.sh 
 python submit_crab_jobs.py $1
