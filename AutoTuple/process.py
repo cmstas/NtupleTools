@@ -81,7 +81,8 @@ while (completelyDone == False):
   #Make the metaData for the unmerged files
   print './makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
   os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
-  os.system('mv tempMetaData.txt ' + unmerged + 'metadata.txt')
+  os.system('cp tempMetaData.txt ' + unmerged + 'metadata.txt')
+  os.system('cp tempMetaData.txt /nfs-7/userdata/metadataBank/metadata__%s__%s__%s.txt' % (requestname, user, dateTime))
 
   #See if any jobs were submitted (will be false when resubmission not needed):
   file = open(temp, "r")
