@@ -79,8 +79,8 @@ while (completelyDone == False):
   os.system('./submitMergeJobs.sh cfg/' + dataSet + '_cfg.sh ' + date + ' > ' + temp)  
 
   #Make the metaData for the unmerged files
-  print './makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
-  os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
+  print './makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' > ' + unmerged + 'metadata.txt' 
+  os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' > tempMetaData.txt' ) 
   os.system('cp tempMetaData.txt ' + unmerged + 'metadata.txt')
   os.system('cp tempMetaData.txt /nfs-7/userdata/metadataBank/metadata__%s__%s__%s.txt' % (requestname, user, dateTime))
 

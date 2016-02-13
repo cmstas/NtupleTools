@@ -6,8 +6,9 @@ mergeLists=$3
 xsec=$4
 kfact=$5
 efact=$6
-gtag=$7
-sparms=$8
+cms3tag=$7
+gtag=$8
+sparms=$9
 #/hadoop/cms/store/user/cgeorge/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/crab_ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v/151217_030407/0000/
 #mergeLists=/home/users/cgeorge/NtupleTools/AutoTuple/CMSSW_7_4_14/crab/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1
 
@@ -15,6 +16,7 @@ echo "sampleName: $sampleName"
 echo "xsec: $xsec"
 echo "k-fact: $kfact"
 echo "e-fact: $efact"
+echo "cms3tag: $cms3tag"
 echo "gtag: $gtag"
 echo "sparms: $sparms"
 echo " "
