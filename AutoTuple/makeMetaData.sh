@@ -32,8 +32,9 @@ do
   theParsedLog=`echo $theLog | tr ' ' '\n' | grep ".root$"`
   
   #Make sure there's only one file in each unmerged
-  number=`echo $theParsedLog | tr ' ' '\n' | wc -l`
-  if [ "$number" != "3" ] ; then echo "Warning! File $fileNo is Not 3" ; continue ; fi 
+  check1=`echo $theParsedLog | tr ' ' '\n' | head -1 | awk '{print $NF}' | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,' | sed 's,^/,,' `
+  check2=`echo $theParsedLog | tr ' ' '\n' | tail -1 | awk '{print $NF}' | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,' | sed 's,^/,,' `
+  if [ "$check1" != "$check2" ] ; then echo "Warning! Suspect Multiple Files: $check1 and $check2" ; continue ; fi 
   
   #If all good, find the name of the file
   echo "unmerged " $fileNo "`echo $theParsedLog | tr ' ' '\n' | tail -1 | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,'`"
