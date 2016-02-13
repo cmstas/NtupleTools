@@ -2,10 +2,14 @@
 #include <TString.h>
 #include <TChain.h>
 
-void counts(TString folder, bool do_effective = false)
+void counts(TString location, bool do_effective = false, bool single_file = false)
 {
     TChain * ch = new TChain("Events");
-    ch->Add(folder+"/*.root");
+    if(single_file) {
+      ch->Add(location);
+    } else {
+      ch->Add(location+"/*.root");
+    }
     if(do_effective){
       int pos_weight = ch->GetEntries("genps_weight > 0");
       int neg_weight = ch->GetEntries() - pos_weight;
