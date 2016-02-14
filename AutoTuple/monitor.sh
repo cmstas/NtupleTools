@@ -155,6 +155,14 @@ do
     status_filename="crab_status_logs/${crab_filename}_log.txt"
     tagDir=`echo $CMS3tag | cut -c 6-`
 
+    if   [[ $crab_filename == *"50ns"* ]]; then theDir="run2_50ns"
+    elif [[ $crab_filename == *"RunIISpring15MiniAODv2-FastAsympt25ns"* ]] ; then theDir="run2_fastsim"
+    elif [[ $crab_filename == *"RunIISpring15FSPremix"* ]] ; then theDir="run2_fastsim"
+    elif [[ $crab_filename == *"RunIISpring15MiniAODv2"* ]] ; then theDir="run2_25ns_MiniAODv2"
+    elif [[ $crab_filename == *"25ns"* ]]; then theDir="run2_25ns"
+    else :
+    fi
+
     #if crab directory doesn't exist (i.e. was added), make and submit crab jobs
     if [ ! -d crab_${crab_filename} ] && [ "${WHICHDONE[$fileNumber]}" != "invalid" ] && [ ! -e crab_status_logs/noCrab_${crab_filename}.txt ]
     then
