@@ -3,6 +3,7 @@ from Configuration.EventContent.EventContent_cff   import *
 
 import CMS3.NtupleMaker.configProcessName as configProcessName
 configProcessName.name="PAT"
+configProcessName.isFastSim=False
 
 # CMS3
 process = cms.Process("CMS3")
@@ -100,7 +101,7 @@ applyResiduals=False #application of residual corrections. Have to be set to Tru
 if usePrivateSQlite:
     from CondCore.DBCommon.CondDBSetup_cfi import *
     import os
-    era="Summer15_50nsV4_MC"
+    era="Summer15_25nsV5_MC"
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
                                connect = cms.string( "sqlite_file:"+era+".db" ),
                                toGet =  cms.VPSet(
