@@ -22,19 +22,19 @@ echo "sparms: $sparms"
 echo " "
 echo "unmerged files are in: $unmergedFileDir"
 echo " " 
-echo "Here is the correspondence between unmerged and MINIAOD: "
+echo "Here be the correspondence between unmerged and MINIAOD: "
 
 nFiles=`ls $unmergedFileDir/log | wc -l`
 
 for fileNo in `seq 1 $nFiles`
 do
   theLog=`tar xf $unmergedFileDir/log/cmsRun_${fileNo}.log.tar.gz -O`
-  theParsedLog=`echo $theLog | tr ' ' '\n' | grep ".root$"`
+  theParsedLog=`echo $theLog | tr ' ' '\n' | tr '?' '\n' | grep ".root$" | grep -v "[\<\(\"\']" | grep -v "^/"`
   
   #Make sure there's only one file in each unmerged
   check1=`echo $theParsedLog | tr ' ' '\n' | head -1 | awk '{print $NF}' | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,' | sed 's,^/,,' `
   check2=`echo $theParsedLog | tr ' ' '\n' | tail -1 | awk '{print $NF}' | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,' | sed 's,^/,,' `
-  if [ "$check1" != "$check2" ] ; then echo "Warning! Suspect Multiple Files: $check1 and $check2" ; continue ; fi 
+  if [ "$check1" != "$check2" ] ; then echo "Argh matey! Suspect Multiple Files: $check1 and $check2" ; continue ; fi 
   
   #If all good, find the name of the file
   echo "unmerged " $fileNo "`echo $theParsedLog | tr ' ' '\n' | tail -1 | sed 's,/, ,3' | awk '{print $2}' | tr '?' ' ' | awk '{print $1}' | sed 's,.*/store,/store,'`"
@@ -42,7 +42,7 @@ done
 
 nMergeLists=`ls $mergeLists/mergeFiles/mergeLists | wc -l`
 echo " " 
-echo "Here is the correspondence between merged and unmerged: " 
+echo "Here be the correspondence between merged and unmerged: " 
 
 for file in `seq 1 $nMergeLists`
 do
@@ -57,7 +57,7 @@ do
 done
 
 echo " " 
-echo "Here is the nEvents in each merged file: " 
+echo "Here be the nEvents in each merged file: " 
 for file in `seq 1 $nMergeLists`
 do
   n=0

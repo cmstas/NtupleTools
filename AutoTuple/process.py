@@ -83,6 +83,7 @@ while (completelyDone == False):
       os.system('python makeListsForMergingCrab3.py -c ' + crab_dir + ' -d ' + unmerged + ' -o /hadoop/cms/store/user/' + user + '/' + name.split('/')[1] + '/' + crab_dir + '/' + parts[5] + '/merged/ -s ' + dataSet + ' -k ' + kfactor + ' -e ' + efactor + ' -x ' + xsec + ' --overrideCrab >> ' + temp + '2')
       # Yes, I know this is not beautiful.
       os.system('./makeMetaData.sh ' + name + ' ' + unmerged + ' ' + tempstr + ' ' + xsec + ' ' + kfactor + ' ' + efactor + ' ' + cms3tag + ' ' + gtag + ' ' + sparms + ' ' + ' > tempMetaData.txt' ) 
+      os.system('chmod a+w tempMetaData.txt')
       os.system('cp tempMetaData.txt ' + unmerged + 'metadata.txt')
       # mirror the central snt directory structure for metadata files
       metadata_basedir=finalDir.replace("/hadoop/cms/store/group/","").split("merged_ntuple_")[0]

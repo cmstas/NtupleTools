@@ -189,7 +189,7 @@ if __name__ == '__main__':
         #     submit_condor_jobs(d_parsed, merged_file_num, output_dir) # FIXME uncomment so we submit condor jobs if unmerged don't exist
         #     continue
 
-        print pfx, "found all unmerged files"
+        print pfx, "found all unmerged files in %s dir" % unmerged_location
 
         os.system("mkdir -p %s/mergeLists/" % shortname)
 
