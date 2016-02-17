@@ -1,0 +1,4 @@
+#!/bin/bash
+
+CMSSW_VER=CMSSW_7_4_14
+SCRAMARCHAG=slc6_amd64_gcc491
