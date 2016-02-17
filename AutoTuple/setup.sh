@@ -6,14 +6,15 @@ if [ $# -eq 0 ]
 fi
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
 
+era=`less $1 | head -2 | tail -1 | tr '_-' ' ' | awk '{print $2 $3'} | tr '0' ' ' | awk '{print $2 $3}'`
+source "config${era}X.sh"
+
 gtag=`sed -n '1p' $1`
 tag=`sed -n '2p' $1`
-CMSSW_VER=CMSSW_7_4_14
-# CMSSW_VER=CMSSW_7_4_1_patch1
 export PATH=$PATH:`pwd`
 source /cvmfs/cms.cern.ch/crab3/crab.sh
-export SCRAM_ARCH=slc6_amd64_gcc491
 scramv1 p -n ${CMSSW_VER} CMSSW $CMSSW_VER
+export SCRAM_ARCH=$SCRAMARCHAG
 pushd ${CMSSW_VER}
 cmsenv
 popd
@@ -53,21 +54,21 @@ then
   cp ${CMSSW_BASE}/src/CMS3/NtupleMaker/test/MCProduction2015_FastSim_NoFilter_cfg.py skeleton_fsim_cfg.py
   sed -i s/process.GlobalTag.globaltag\ =\ .*/process.GlobalTag.globaltag\ =\ \"$gtag\"/ skeleton_fsim_cfg.py
 fi
-cp ../../submitMergeJobs.sh .
-cp ../../submit_crab_jobs.py  .
+ln -s ../../submitMergeJobs.sh .
+ln -s ../../submit_crab_jobs.py  .
 cp ../../$1 .
 ln -s ../../monitor.sh . 
 ln -s ../../process.py .
 cp ../../pirate.txt .
 cp ../../theDir.txt .
-cp ../../FindLumisPerJob.sh . 
+ln -s ../../FindLumisPerJob.sh . 
 cp ../../maxAG.sh . 
 chmod a+x maxAG.sh
 cp ../../FindLumisPerJobNoDAS.sh . 
 cp ../../FindLumisPerJob.py . 
 cp ../../das_client.py . 
 cp ../../crabPic.png .
-cp ../../copy.sh .
+ln -s ../../copy.sh .
 cp ../../numEventsROOT.C .
 cp ../../../checkCMS3/checkCMS3.C . 
 cp ../../../checkCMS3/das_client.py .
