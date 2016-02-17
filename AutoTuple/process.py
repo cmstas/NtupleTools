@@ -30,7 +30,7 @@ tag = lines[1]
 parts = lines[lineno].split()[0:5]
 parts.append(tag)
 parts.append(gtag)
-sparms = lines[lineno].split()[5:] or "_"
+sparms = ",".join(lines[lineno].split()[5:]) or "_"
 tempstr = parts[0].split('/')[1]+'_'+parts[0].split('/')[2]
 #now have some stupid additional requestname for SMSes
 requestname = tempstr[:100]
