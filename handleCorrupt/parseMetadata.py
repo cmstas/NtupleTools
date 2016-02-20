@@ -7,6 +7,8 @@ def find_corrupt():
     log_daym2 = "%s/corrupt-%s.txt" % (basedir, (datetime.datetime.now()-datetime.timedelta(days=2)).strftime("%a")) # day minus 2
     log_daym1 = "%s/corrupt-%s.txt" % (basedir, (datetime.datetime.now()-datetime.timedelta(days=1)).strftime("%a")) # day minus 1
     log_today = "%s/corrupt-%s.txt" % (basedir, datetime.datetime.now().strftime("%a"))
+    files_done = "files_done.txt"
+    if not os.path.exists(files_done): os.system("touch %s" % files_done)
 
     with open(log_daym2, "r") as fhin1:
         fileset_daym2 = set(["/hadoop"+line.split(":")[0].strip() for line in fhin1.readlines() if ".root" in line and "CORRUPT" in line])
@@ -14,9 +16,13 @@ def find_corrupt():
         fileset_daym1 = set(["/hadoop"+line.split(":")[0].strip() for line in fhin2.readlines() if ".root" in line and "CORRUPT" in line])
     with open(log_today, "r") as fhin3:
         fileset_today = set(["/hadoop"+line.split(":")[0].strip() for line in fhin3.readlines() if ".root" in line and "CORRUPT" in line])
+    with open(files_done, "r") as fhdone:
+        files = set(map(lambda x: x.strip(), fhdone.readlines()))
 
     # take triple coincidence of corrupted files over 3 days
-    corrupt_files = list(fileset_daym2 & fileset_daym1 & fileset_today)
+    corrupt_files = fileset_daym2 & fileset_daym1 & fileset_today
+    corrupt_files -= files # disregard files we already processed in case they are still in corrupt list
+    corrupt_files = list(corrupt_files)
 
     # prune files we don't care about
     corrupt_files_new = []
@@ -59,7 +65,7 @@ def parse_metadata(fname, merged_file_num):
     d_merged_nevents = {}
     d_unmerged_indices = {}
     d_indices_to_miniaod = {}
-    pattern = re.compile(r'^[0-9]+ /')
+    pattern = re.compile(r'^unmerged[ ]+[0-9]+ /')
     for line in lines:
         if line.startswith("sampleName"): sample_name = line.split(":")[1].strip()
         elif line.startswith("xsec"): xsec = float(line.split(":")[1].strip())
@@ -80,7 +86,7 @@ def parse_metadata(fname, merged_file_num):
             ifile, nevents = map(int,line.replace("merged file nevents","").split(":"))
             d_merged_nevents[ifile] = nevents
         elif pattern.search(line) is not None:
-            idx, miniaod = line.strip().split(" ")
+            idx, miniaod = line.strip().split(" ")[-2:]
             d_indices_to_miniaod[int(idx)] = miniaod
 
     merged_nevents = d_merged_nevents[merged_file_num]
@@ -123,6 +129,11 @@ def all_unmerged_exists(unmerged_indices, output_dir):
 
     return have_unmerged, where
 
+def have_made_merged(merged_file_num, output_dir):
+    remade_merged_filename = "%s/merged/merged_ntuple_%i.root" % (output_dir, merged_file_num)
+    print remade_merged_filename
+    return os.path.exists(remade_merged_filename)
+
 def make_mergelist(shortname, output_dir, mergemetadata_fname):
     with open("%s/cfg.sh" % (shortname),"w") as f_cfg:
         f_cfg.write("export inputListDirectory=%s/mergeLists/\n" %(shortname))
@@ -130,7 +141,7 @@ def make_mergelist(shortname, output_dir, mergemetadata_fname):
         f_cfg.write("export outputDir=%s/merged/\n" %(output_dir))
         f_cfg.write("export dataSet=%s\n" %(shortname))
         f_cfg.write("export workingDirectory=%s\n" %(os.getcwd()))
-        if (os.environ["SCRAM_ARCH"]=='slc6_amd64_gcc491'): 
+        if (os.environ["SCRAM_ARCH"].startswith('slc6_amd64_gcc49')):
             f_cfg.write("export executableScript=%s/libsh/mergeScriptRoot6.sh\n" %(os.getcwd()))
         else:    
             f_cfg.write("export executableScript=%s/libsh/mergeScript.sh\n" %(os.getcwd()))
@@ -163,18 +174,23 @@ def submit_condor_jobs(d_parsed, merged_file_num, output_dir):
 
             os.system(cmd)
 
-def submit_mergejobs(shortname):
+def submit_mergejobs(shortname, merged_file_num):
+    status, condorq = commands.getstatusoutput("condor_q %s -l | grep Args" % os.getenv("USER"))
+    if shortname in condorq and "merged_list_%i.txt" % merged_file_num in condorq: return 0
     os.system("./submitMergeJobs.sh {0}/cfg.sh >& {0}/submit.log".format(shortname))
+    return 1
 
 
 if __name__ == '__main__':
-    # corrupt_files = find_corrupt() # FIXME uncomment when finished testing
-    corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/V07-04-12/merged_ntuple_2.root"]
+    corrupt_files = find_corrupt() # FIXME uncomment when finished testing
+    # corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/V07-04-12/merged_ntuple_2.root"]
     for cf in corrupt_files:
         pfx = "[%s]" % (cf.split("/")[7].split("-")[0])
         metadata_fname = cf.split("/merged_")[0] + "/metadata.txt"
-        metadata_fname = "tempMetaData.txt" # FIXME want to use actual file, not testing, so delete this
+        # metadata_fname = "tempMetaData.txt" # FIXME want to use actual file, not testing, so delete this
         if not os.path.exists(metadata_fname): continue # no metadata, so useless to try to figure out stuff
+
+        print pfx, "found corrupt and metadata for", cf
 
         merged_file_num = int(cf.split("merged_ntuple_")[1].split(".root")[0])
         d_parsed = parse_metadata(metadata_fname, merged_file_num)
@@ -184,18 +200,28 @@ if __name__ == '__main__':
 
         have_unmerged, unmerged_location = all_unmerged_exists(d_parsed["unmerged_indices"], output_dir)
 
-        # if not have_unmerged:
-        #     print pfx, "submitting condor jobs to remake unmerged"
-        #     submit_condor_jobs(d_parsed, merged_file_num, output_dir) # FIXME uncomment so we submit condor jobs if unmerged don't exist
-        #     continue
+        if not have_unmerged:
+            print pfx, "submitting condor jobs to remake unmerged"
+            submit_condor_jobs(d_parsed, merged_file_num, output_dir) # FIXME uncomment so we submit condor jobs if unmerged don't exist
+            continue
 
         print pfx, "found all unmerged files in %s dir" % unmerged_location
+
+        have_new_unmerged = have_made_merged(merged_file_num, output_dir)
+        if have_new_unmerged:
+            # copy over the merged to "cf"
+            print pfx, "copying over new merged file to", cf # FIXME do it
+
+            with open("files_done.txt", "a") as fhdone:
+                fhdone.write(cf + "\n")
+
+            continue
 
         os.system("mkdir -p %s/mergeLists/" % shortname)
 
         print pfx, "getting event counts"
-        # tot_events, tot_effevents = get_events(d_parsed["unmerged_indices"], d_parsed["unmerged_dir"]) # FIXME uncomment when finished testing
-        tot_events, tot_effevents = 999, 999
+        tot_events, tot_effevents = get_events(d_parsed["unmerged_indices"], d_parsed["unmerged_dir"]) # FIXME uncomment when finished testing
+        # tot_events, tot_effevents = 999, 999
 
         if unmerged_location == "original":
             files_to_merge = ["%s/ntuple_%i.root" % (d_parsed["unmerged_dir"],ifile) for ifile in d_parsed["unmerged_indices"]]
@@ -213,6 +239,8 @@ if __name__ == '__main__':
         make_mergelist(shortname, output_dir, mergemetadata_fname)
         print pfx,"made mergelist"
 
-        # submit_mergejobs(shortname) # FIXME uncomment when finished testing
-        print pfx,"submitted merge jobs"
+        did_submit = submit_mergejobs(shortname, merged_file_num) # FIXME uncomment when finished testing
+        if did_submit:
+            print pfx,"submitted merge jobs"
+
 
