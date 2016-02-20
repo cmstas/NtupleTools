@@ -114,8 +114,8 @@ void doSinglePlots(vector <std::string> branches, bool isNew, TTree* tree){
 void test(){
 
   //Put in the files you want to compare here
-  string filename_new = "/home/users/sicheng/play/comparison/merged_ntuple_143.root";
-  string filename_old = "/home/users/sicheng/play/comparison/merged_ntuple_9.root";
+  string filename_new = "/home/users/namin/2016/80x/test/CMSSW_8_0_0_pre6/src/CMS3/NtupleMaker/test/ntuple_MC.root";
+  string filename_old = "/home/users/namin/2015/76x/test/CMSSW_7_6_1/src/CMS3/NtupleMaker/test/ntuple_MC.root";
 
   //Load files
   file_old = new TFile(filename_old.c_str());
@@ -263,7 +263,7 @@ void test(){
 
     //Figure out chi2, decide if you want to suppress
     float chi2test = hist_new->Chi2Test(hist_old, "CHI2/NDFWWOFUF");
-    if (chi2test*100 < 0.1) suppress = true;
+    if (chi2test*100 < 0.4) suppress = true;
 
     //Print histogram, update LaTeX stuff if not suppressed
     if (suppress) cout << " --> Suppressed!" << endl;
