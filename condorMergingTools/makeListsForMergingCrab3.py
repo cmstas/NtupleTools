@@ -286,7 +286,7 @@ f_cfg.write("export mData=%s/mergeFiles/metaData.txt\n" %(crabpath))
 f_cfg.write("export outputDir=%s\n" %(outpath))
 f_cfg.write("export dataSet=%s\n" %(samplename))
 f_cfg.write("export workingDirectory=%s\n" %(localdirectory))
-if (os.environ["SCRAM_ARCH"]=='slc6_amd64_gcc491'): 
+if (os.environ["SCRAM_ARCH"].startswith('slc6_amd64_gcc49')): 
     f_cfg.write("export executableScript=%s/libsh/mergeScriptRoot6.sh\n" %(localdirectory))
 else:    
     f_cfg.write("export executableScript=%s/libsh/mergeScript.sh\n" %(localdirectory))
