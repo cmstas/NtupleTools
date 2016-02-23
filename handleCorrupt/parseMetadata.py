@@ -101,9 +101,9 @@ def parse_metadata(fname, merged_file_num):
 def get_events(unmerged_indices, unmerged_dir):
     tot_events, tot_effevents = 0, 0
     for ifile in unmerged_indices:
-        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%sntuple_%i.root\",false,true)' | grep nevents" % (unmerged_dir, ifile))
+        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",false)' | grep nevents" % (unmerged_dir, ifile))
         events = int(macroData.split("=")[-1])
-        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%sntuple_%i.root\",true,true)' | grep nevents" % (unmerged_dir, ifile))
+        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",true)' | grep nevents" % (unmerged_dir, ifile))
         effevents = int(macroData.split("=")[-1])
         tot_events += events
         tot_effevents += effevents
@@ -230,7 +230,7 @@ if __name__ == '__main__':
         mergelist_fname = shortname+"/mergeLists/merged_list_%i.txt" % merged_file_num
         mergemetadata_fname = shortname+"/merge_metaData.txt"
         with open(mergelist_fname, "w") as fh:
-            fh.write("nEntries: %i\n%s" % (tot_events, "\n".join(files_to_merge)))
+            fh.write("%s" % "\n".join(files_to_merge))
 
         with open(mergemetadata_fname, "w") as fh:
             fh.write("n: %i\neffN: %i\nk: %f\nf: %f\nx: %f\nfile: merged_list_%i.txt" \
