@@ -54,7 +54,7 @@ then
   cp ${CMSSW_BASE}/src/CMS3/NtupleMaker/test/MCProduction2015_FastSim_NoFilter_cfg.py skeleton_fsim_cfg.py
   sed -i s/process.GlobalTag.globaltag\ =\ .*/process.GlobalTag.globaltag\ =\ \"$gtag\"/ skeleton_fsim_cfg.py
 fi
-ln -s ../../submitMergeJobs.sh .
+cp ../../submitMergeJobs.sh .
 ln -s ../../submit_crab_jobs.py  .
 cp ../../$1 .
 ln -s ../../monitor.sh . 
