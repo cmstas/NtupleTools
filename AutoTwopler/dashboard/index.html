@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Monitoring</title>
+        <link rel="icon" type="image/png" sizes="96x96" href="images/favicon.png">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script src="main.js"></script>
+
+    </head>
+
+    <body>
+
+        <audio class="duckAudio" controls preload="none" style='display:none;'>
+            <source src="images/ducktales.mp3" type="audio/mpeg">
+        </audio>
+
+        <div id="topBar">
+            <img class="mainlogo" src="images/crab.png" />
+            <span id="firstTitle" class="thin">auto</span>Tupler
+            <span class="thin">
+                &emsp;
+                <a href="#" id="toggle_all" onClick="expandAll()">show details</a>&ensp;|&ensp;
+                <a href="#" onClick="$('#twiki').slideToggle(100)">twiki</a>
+                <span id="admin" style="color:#33B333; display:none;">&emsp;&emsp;admin mode</span>
+            </span>
+        </div>
+        <div id="colorstrip"></div>
+
+        <div id="container">
+
+            <span id="last_updated" class="lastUpdated"></span>
+            <div id="twiki" class="section" style='display:none;'>
+            <!-- <div id="twiki" class="section"> -->
+                <b>Only</b> need to specify username if Twiki username is different from UAF username.
+                <br>
+
+                <form id="fetchTwikiForm" action="javascript:void(0)">
+                    <input type="text" class="inputbar" name="name" placeholder="Assigned name (e.g., Donald)" />
+                    <input type="text" class="inputbar" name="username" placeholder="Twiki username (e.g., dduck)" />
+                    <select id="selectPage" class="inputbar" name="page">
+                        <option value="Autotupletest">Autotupletest</option>
+                        <option value="Phys14Samples">Phys14Samples</option>
+                        <option value="Run2Samples_25ns">Run2Samples_25ns</option>
+                        <option value="Run2Samples_50ns">Run2Samples_50ns</option>
+                        <option value="Run2SamplesReMINIAOD_25ns">Run2SamplesReMINIAOD_25ns</option>
+                        <option value="Run2SamplesSMSFastSim_25ns">Run2SamplesSMSFastSim_25ns</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input id="otherPage" type="text" class="inputbar" name="otherPage" placeholder="Twiki page" style='display:none;'/>
+                    <input type="checkbox" name="unmade" value="unmade">Only get unmade &ensp;
+                    <br>
+                    <button class="submitButton" value="fetch">Fetch from Twiki</button>
+                    <button class="submitButton" value="update">Update Twiki with done samples</button>
+                    <button class="submitButton" value="addinstructions">Add to instructions.txt</button>
+                </form>
+                <div id="message"> </div>
+                <textarea id="twikiTextarea" width='400px' height='200px'></textarea>
+
+            </div>
+            <div id="section_1" class="section"></div>
+
+        </div>
+
+    </body>
+</html>

@@ -185,7 +185,7 @@ if __name__ == '__main__':
     corrupt_files = find_corrupt() # FIXME uncomment when finished testing
     # corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/V07-04-12/merged_ntuple_2.root"]
     for cf in corrupt_files:
-        pfx = "[%s]" % (cf.split("/")[7].split("-")[0])
+        pfx = "[%s...]" % (cf.split("/")[7][:25])
         metadata_fname = cf.split("/merged_")[0] + "/metadata.txt"
         # metadata_fname = "tempMetaData.txt" # FIXME want to use actual file, not testing, so delete this
         if not os.path.exists(metadata_fname): continue # no metadata, so useless to try to figure out stuff

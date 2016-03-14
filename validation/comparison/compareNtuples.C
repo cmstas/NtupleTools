@@ -114,8 +114,8 @@ void doSinglePlots(vector <std::string> branches, bool isNew, TTree* tree){
 void test(){
 
   //Put in the files you want to compare here
-  string filename_new = "/home/users/namin/2016/80x/test/CMSSW_8_0_0_pre6/src/CMS3/NtupleMaker/test/ntuple_MC.root";
-  string filename_old = "/home/users/namin/2015/76x/test/CMSSW_7_6_1/src/CMS3/NtupleMaker/test/ntuple_MC.root";
+  string filename_new = "/home/users/namin/2016/80x/test/CMSSW_8_0_0_pre6/src/CMS3/NtupleMaker/test/ntuple_80X.root";
+  string filename_old = "/home/users/namin/2015/76x/test/CMSSW_7_6_1/src/CMS3/NtupleMaker/test/ntuple_76X.root";
 
   //Load files
   file_old = new TFile(filename_old.c_str());
@@ -191,7 +191,7 @@ void test(){
 
     //Determine if it's a LorentzVector
     TBranch *branch = tree_new->GetBranch(tree_new->GetAlias(commonBranches[i].c_str()));
-    TString branchname(branch->GetName());
+    TString branchname(branch->GetName()); 
     bool isLorentz = branchname.Contains("p4") || branchname.Contains("MathLorentzVectors"); 
 
     //Make plot
@@ -263,7 +263,7 @@ void test(){
 
     //Figure out chi2, decide if you want to suppress
     float chi2test = hist_new->Chi2Test(hist_old, "CHI2/NDFWWOFUF");
-    if (chi2test*100 < 0.4) suppress = true;
+    if (chi2test*100 < 0.2) suppress = true;
 
     //Print histogram, update LaTeX stuff if not suppressed
     if (suppress) cout << " --> Suppressed!" << endl;
