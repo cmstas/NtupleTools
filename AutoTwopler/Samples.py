@@ -44,6 +44,8 @@ class Sample:
             self.fake_check = False
             self.fake_copy = False
 
+        self.specialdir_test = specialdir_test
+        self.do_skip_tail = do_skip_tail
 
         # dirs are wrt the base directory where this script is located
 
@@ -104,9 +106,6 @@ class Sample:
 
         self.load() # load backup of this sample when we instantiate it
 
-        # after we load, so we can overwrite these variables if needed
-        self.specialdir_test = specialdir_test
-        self.do_skip_tail = do_skip_tail
 
 
     def __getitem__(self, i):
