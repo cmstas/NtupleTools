@@ -20,7 +20,7 @@ class Sample:
 
     def __init__(self, dataset=None, gtag=None, kfact=None, efact=None, 
                  xsec=None, sparms=[], debug=False, specialdir_test=False,
-                 do_skip_tail=True,logger_callback=None):
+                 do_skip_tail=False,logger_callback=None):
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
@@ -44,8 +44,6 @@ class Sample:
             self.fake_check = False
             self.fake_copy = False
 
-        self.specialdir_test = specialdir_test
-        self.do_skip_tail = do_skip_tail
 
         # dirs are wrt the base directory where this script is located
 
@@ -106,6 +104,9 @@ class Sample:
 
         self.load() # load backup of this sample when we instantiate it
 
+        # after we load, so we can overwrite these variables if needed
+        self.specialdir_test = specialdir_test
+        self.do_skip_tail = do_skip_tail
 
 
     def __getitem__(self, i):
@@ -374,7 +375,11 @@ class Sample:
     def crab_status(self):
 
         if self.sample["nevents_DAS"] == 0:
-            self.sample["nevents_DAS"] = u.dataset_event_count(self.sample["dataset"])["nevents"]
+            try: 
+                print self.sample["dataset"]
+                self.sample["nevents_DAS"] = u.dataset_event_count(self.sample["dataset"])["nevents"]
+                self.do_log("sample has %i events according to DAS/DBS" % self.sample["nevents_DAS"])
+            except: pass
 
         try:
             if self.fake_status:
@@ -474,8 +479,11 @@ class Sample:
                     # 12158, 14706, 7816, 8965, 1014.0], 'SiteHistory': ['T2_US_Purdue', 'T2_US_Vanderbilt', 'T2_US_Florida',
                     # 'T2_US_Vanderbilt', 'T2_US_Vanderbilt', 'T2_US_Nebraska'], 'TotalSysCpuTimeHistory': [73, 168, 286, 104, 144, 23.0]}
                     job_info = stat["jobs"][str(ijob)]
-                    avg_walltime = 1.0*sum(job_info['WallDurations'])/len(job_info['WallDurations'])
-                    state, nretries = job_info['State'], job_info['Retries']
+                    # avg_walltime = 1.0*sum(job_info['WallDurations'])/len(job_info['WallDurations'])
+                    
+                    nretries = 0
+                    if 'State' in job_info and 'Retries' in job_info:
+                        state, nretries = job_info['State'], job_info['Retries']
                     # print ">>>> job %i (%s) has been retried %i times with an average walltime of %.1f" \
                     #         % (ijob, state, nretries, avg_walltime)
                     # print "done frac: %.1f" % done_frac

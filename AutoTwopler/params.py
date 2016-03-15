@@ -14,6 +14,6 @@ if campaign == "74X":
 
 elif campaign == "76X":
     scram_arch="slc6_amd64_gcc493"
-    cms3tag="CMS3_V07-06-03"
+    cms3tag="CMS3_V07-06-03_MC"
     cmssw_ver="CMSSW_7_6_3"
 
