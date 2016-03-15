@@ -206,6 +206,8 @@ class Sample:
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
 
+        if "76X_mcRun2_" in ds: self.sample["specialdir"] = "run2_25ns_76MiniAODv2"
+
         if self.specialdir_test:
             self.sample["specialdir"] = "test"
 

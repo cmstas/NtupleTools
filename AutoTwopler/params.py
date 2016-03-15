@@ -5,7 +5,7 @@ pset_mc = "MCProduction2015_NoFilter_cfg.py"
 
 jecs = ['Summer15_25nsV5_MC.db']
 
-campaign = "74X"
+campaign = "76X"
 
 if campaign == "74X":
     scram_arch="slc6_amd64_gcc491"
@@ -14,6 +14,6 @@ if campaign == "74X":
 
 elif campaign == "76X":
     scram_arch="slc6_amd64_gcc493"
-    cms3tag="CMS3_V07-06-00"
-    cmssw_ver="CMSSW_7_6_1"
+    cms3tag="CMS3_V07-06-03"
+    cmssw_ver="CMSSW_7_6_3"
 

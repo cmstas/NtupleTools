@@ -259,7 +259,7 @@ function fillDOM(data) {
         $("#pbartextleft_"+i).html(""); 
 
         if(adminMode) {
-            $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;</a>"); 
+            $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;  &#128035; </a>"); 
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));
