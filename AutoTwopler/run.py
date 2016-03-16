@@ -8,6 +8,7 @@ import os
 
 DO_TEST = False # if True, put the final samples in a  /snt/test/ dir so we don't screw anything
 
+data_json = "data.json"
 instructions = "instructions.txt"
 if len(sys.argv) > 1:
     instructions = sys.argv[1]
@@ -22,10 +23,14 @@ if u.proxy_hours_left() < 60:
 u.copy_jecs()
 
 
+with open(data_json, "r") as fhin:
+    data = json.load(fhin)
+    if "time_stats" in data: time_stats = data["time_stats"]
+
 all_samples = []
 for i in range(5000):
 
-    data = { "samples": [], "last_updated": None }
+    data = { "samples": [], "last_updated": None, "time_stats": time_stats }
 
     # read instructions file. if new sample found, add it to list
     # for existing samples, try to update params (xsec, kfact, etc.)
@@ -69,10 +74,12 @@ for i in range(5000):
         s.save()
         data["samples"].append( s.get_slimmed_dict() )
 
+    tot_crab_breakdown = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
     data["last_updated"] = u.get_timestamp()
-    with open("data.json", "w") as fhout:
+    data["time_stats"].append( (u.get_timestamp(), tot_crab_breakdown) )
+    with open(data_json, "w") as fhout:
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
-    time.sleep(5 if i < 3 else 600)
+    time.sleep(5 if i < 2 else 600)
 

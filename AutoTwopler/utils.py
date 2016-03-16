@@ -6,6 +6,7 @@ import StringIO
 import ast
 import datetime
 import params
+from collections import defaultdict
 
 def get(cmd, returnStatus=False):
     status, out = commands.getstatusoutput(cmd)
@@ -119,6 +120,15 @@ def get_hadoop_name():
     elif user == "mderdzinski": user = "mderdzin"
     elif user == "rclsa": user = "rcoelhol"
     return user
+
+
+def sum_dicts(dicts):
+    # takes a list of dicts and sums the values
+    ret = defaultdict(int)
+    for d in dicts:
+        for k, v in d.items():
+            ret[k] += v
+    return dict(ret)
 
 if __name__=='__main__':
 
