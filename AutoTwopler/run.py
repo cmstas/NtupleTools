@@ -23,9 +23,11 @@ if u.proxy_hours_left() < 60:
 u.copy_jecs()
 
 
-with open(data_json, "r") as fhin:
-    data = json.load(fhin)
-    if "time_stats" in data: time_stats = data["time_stats"]
+time_stats = []
+if os.path.isfile(data_json):
+    with open(data_json, "r") as fhin:
+        data = json.load(fhin)
+        if "time_stats" in data: time_stats = data["time_stats"]
 
 all_samples = []
 for i in range(5000):
