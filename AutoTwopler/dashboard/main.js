@@ -6,7 +6,13 @@ var detailsVisible = false;
 var duckMode = false;
 var adminMode = false;
 
+google.charts.load('current', {'packages':['corechart']});
+// google.charts.setOnLoadCallback(function() {console.log("google loaded!");});
+google.charts.setOnLoadCallback(drawChart);
+
 $(function() {
+
+
     loadJSON();
     setInterval(loadJSON, refreshSecs*1000);
 
@@ -14,6 +20,7 @@ $(function() {
     handleOtherTwiki();
     handleSubmitButton();
     handleAdminMode();
+
 
 });
 
@@ -76,6 +83,47 @@ function handleDuckMode() {
         }
         fillDOM(alldata);
     });
+}
+
+
+function drawChart() {
+
+    var data_table = [ [
+        'Time',
+        'Finished',
+        'Transfer',
+        'Running',
+        'Failed',
+        'Idle',
+    ] ];
+    // console.log(alldata["time_stats"]);
+    
+    // data_table.push( [ new Date(1458116239), 100, 100, 100, 100, 100, ] );
+        
+    for (var itd = 0; itd < alldata["time_stats"].length; itd++) {
+        var td = alldata["time_stats"][itd];
+        data_table.push( [
+                new Date(td[0]*1000), // to ms
+                td[1]["finished"] ,
+                td[1]["transferred"]+td[1]["transferring"],
+                td[1]["running"],
+                td[1]["cooloff"]+td[1]["failed"],
+                td[1]["unsubmitted"]+td[1]["idle"],
+        ] );
+    }
+
+    console.log(data_table);
+    var data = google.visualization.arrayToDataTable(data_table);
+    var options_stacked = {
+        isStacked: true,
+        height: 350,
+        width: 850,
+        legend: {position: 'right'},
+        vAxis: {minValue: 0}
+    };
+    var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+    console.log(chart);
+    chart.draw(data, options_stacked);
 }
 
 function loadJSON() {
@@ -315,6 +363,7 @@ function fillDOM(data) {
     $("#summary").append("<li> total jobs: " + totJobs);
     $("#summary").append("</ul>");
 
+    // drawChart();
 }
 
 function expandAll() {
