@@ -74,6 +74,7 @@ function handleDuckMode() {
             $(".duckAudio").prop("currentTime",0);
             $(".duckAudio").trigger('play');
         }
+        fillDOM(alldata);
     });
 }
 
@@ -248,6 +249,9 @@ function fillDOM(data) {
 
         var pct = Math.round(getProgress(sample));
         var color = 'hsl(' + pct*0.8 + ', 70%, 50%)';
+        if(duckMode) {
+            color = 'hsl(' + (pct*0.8+50) + ', 70%, 50%)';
+        }
         if(pct == 100) {
             // different color if completely done
             color = 'hsl(' + pct*1.2 + ', 70%, 50%)';
