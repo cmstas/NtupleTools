@@ -26,4 +26,5 @@
 - [x] Add example instructions.txt
 - [ ] Grep condor logfiles to get timing statistics for merging/branchadding/copying
 - [x] Handle odd hadoop mappings
-- [ ] Use time_stats key in data to make plot of crab jobs over time
+- [x] Use time_stats key in data to make plot of crab jobs over time
+- [ ] Deal with CRAB HTTP exceptions elegantly

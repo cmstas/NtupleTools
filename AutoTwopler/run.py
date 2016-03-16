@@ -83,5 +83,8 @@ for i in range(5000):
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
-    time.sleep(5 if i < 2 else 600)
+    sleep_time = 5 if i < 2 else 600
+    print "sleeping for %i seconds..." % sleep_time,
+    time.sleep(sleep_time)
+    print "done sleeping"
 

@@ -437,7 +437,7 @@ class Sample:
             }
         except Exception as e:
             # must be the case that not all this info exists because it was recently submitted
-            self.do_log("can't get status right now (is probably too new): "+str(e))
+            self.do_log("can't get status right now (is probably too new or crab sucks): "+str(e))
             return
 
         if self.sample["crab"]["status"] == "FAILED":
@@ -536,7 +536,7 @@ class Sample:
             u.cmd("mv {0}/{1}/*.root {0}/{2}/".format(without_zeros, kilobatch, "0000"))
             u.cmd("mv {0}/{1}/log/* {0}/{2}/log/".format(without_zeros, kilobatch, "0000"))
 
-        self.do_log("copied files from .../*/ to .../0000/")
+        self.do_log("moved files from .../*/ to .../0000/")
         self.misc["handled_more_than_1k"] = True
 
 
