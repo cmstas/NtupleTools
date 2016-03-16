@@ -282,7 +282,34 @@ function fillDOM(data) {
         // turn dataset into a link to DAS
         jsStr = jsStr.replace("\"dataset\":", " <a href='https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input="+sample["dataset"]+"' style='text-decoration: underline'>dataset</a>: ");
         $("#details_"+i).html("<pre>" + jsStr + "</pre>");
+
     }
+
+    var totJobs = 0;
+    var finishedJobs = 0;
+    var idleJobs = 0;
+    var transferringJobs = 0;
+    var runningJobs = 0;
+    var finishedJobs = 0;
+    for(var i = 0; i < data["samples"].length; i++) {
+        var samp = data["samples"][i];
+        if(("crab" in samp) && ("breakdown" in samp["crab"])) {
+            totJobs += samp["crab"]["njobs"];
+            finishedJobs += samp["crab"]["breakdown"]["finished"];
+            runningJobs += samp["crab"]["breakdown"]["running"];
+            idleJobs += samp["crab"]["breakdown"]["idle"];
+            transferringJobs += samp["crab"]["breakdown"]["transferring"];
+        }
+
+    }
+    $("#summary").html("");
+    $("#summary").append("<ul>");
+    $("#summary").append("<li> running jobs: " + runningJobs);
+    $("#summary").append("<li> idle jobs: " + idleJobs);
+    $("#summary").append("<li> transferring jobs: " + transferringJobs);
+    $("#summary").append("<li> finished jobs: " + finishedJobs);
+    $("#summary").append("<li> total jobs: " + totJobs);
+    $("#summary").append("</ul>");
 
 }
 
