@@ -24,8 +24,8 @@
 - [x] If crab status hasn't run yet, we'll have 0 running / 0 total, so monitor page shows NaN%. Force this to 0%.
 - [ ] Make tester class
 - [x] Add example instructions.txt
-- [ ] Grep condor logfiles to get timing statistics for merging/branchadding/copying
+- [x] Grep condor logfiles to get timing statistics for merging/branchadding/copying
 - [x] Handle odd hadoop mappings
 - [x] Use time_stats key in data to make plot of crab jobs over time
 - [ ] Deal with CRAB HTTP exceptions elegantly
-- [ ] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.
+- [x] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.
