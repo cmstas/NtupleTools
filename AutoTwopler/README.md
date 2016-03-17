@@ -28,3 +28,4 @@
 - [x] Handle odd hadoop mappings
 - [x] Use time_stats key in data to make plot of crab jobs over time
 - [ ] Deal with CRAB HTTP exceptions elegantly
+- [ ] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.

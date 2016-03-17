@@ -395,11 +395,13 @@ class Sample:
                      'jobsPerStatus': {'finished': 8}, 'outdatasets': None, 'publication': {}, 'publicationFailures': {}, 'schedd': 'crab3-1@submit-5.t2.ucsd.edu',
                      'status': 'COMPLETED', 'statusFailureMsg': '', 'taskFailureMsg': '', 'taskWarningMsg': [], 'totalJobdefs': 0} 
             else:
-                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), json=True)
+                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             self.crab_status_res = out
             return 1 # succeeded
         except Exception as e:
             self.do_log("ERROR getting status: "+str(e))
+            # self.do_log("try executing: crab status %s --proxy=%s --json" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
+            self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
             return 0 # failed
 
     def crab_resubmit(self):
@@ -440,6 +442,20 @@ class Sample:
             self.do_log("can't get status right now (is probably too new or crab sucks): "+str(e))
             return
 
+        # population of each status (running, failed, etc.)
+        if "jobsPerStatus" in stat:
+            for status,jobs in stat["jobsPerStatus"].items():
+                self.sample["crab"]["breakdown"][status] = jobs
+
+            # override crab status by figuring it out ourselves (don't underestimate crab's stupidity)
+            if self.sample["crab"]["status"] == "FAILED" and ("running" in self.sample["crab"]["breakdown"]) and (self.sample["crab"]["breakdown"]["running"] > 0):
+                # if "FAILED" but stuff still running, not really failed, eh?
+                self.sample["crab"]["status"] = "SUBMITTED"
+            if "finished" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["finished"] == self.sample["crab"]["njobs"]):
+                # if all finished, then complete, right?
+                self.sample["crab"]["status"] = "COMPLETED"
+
+
         if self.sample["crab"]["status"] == "FAILED":
             if self.crab_resubmit():
                 self.sample["crab"]["resubmissions"] += 1
@@ -453,10 +469,6 @@ class Sample:
                     self.do_log("been more than 5 hours, so trying to resubmit")
                     self.crab_resubmit()
 
-        # population of each status (running, failed, etc.)
-        if "jobsPerStatus" in stat:
-            for status,jobs in stat["jobsPerStatus"].items():
-                self.sample["crab"]["breakdown"][status] = jobs
 
         if self.sample["crab"]["breakdown"]["finished"] > 0:
             done_frac = 1.0*self.sample["crab"]["njobs"]/self.sample["crab"]["breakdown"]["finished"]
