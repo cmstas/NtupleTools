@@ -28,7 +28,7 @@ GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIIFall15MiniAODv2-PU
  # 10 [merge wrapper] t after lcg-cp: 1458141082
  # 11 [merge wrapper] cleaning up.
 
-echo "# user sample t_before_merge t_before_addbranch t_after_addbranch t_after_lcgcp nevents"
+echo "# user,sample,t_before_merge,t_before_addbranch,t_after_addbranch,t_after_lcgcp,nevents"
 for sample in $samples; do
     # echo $sample
 

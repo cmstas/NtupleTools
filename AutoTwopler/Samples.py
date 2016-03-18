@@ -618,7 +618,8 @@ class Sample:
         # print "ijob_to_miniaod", self.sample["ijob_to_miniaod"]
         if not self.sample["ijob_to_miniaod"]:
             self.do_log("making map from unmerged number to miniaod name")
-            for logfile in self.misc["logfiles"]:
+            nlogfiles = len(self.misc["logfiles"])
+            for ilogfile,logfile in enumerate(self.misc["logfiles"]):
                 # print logfile
                 if ".tar.gz" in logfile:
                     with  tarfile.open(logfile, "r:gz") as tar:
@@ -629,6 +630,7 @@ class Sample:
                             lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
                             miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1], lines)))
                             self.sample["ijob_to_miniaod"][jobnum] = miniaod
+                            self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
                             fh.close()
                             break
                 elif ".txt" in logfile:
@@ -684,10 +686,12 @@ class Sample:
             self.do_log("making map from merged index to unmerged indicies")
             group, groups = [], []
             tot_size = 0.0
-            for rfile in self.misc["rootfiles"]:
+            nrfiles = len(self.misc["rootfiles"])
+            for irfile, rfile in enumerate(self.misc["rootfiles"]):
                 is_bad, nevents, nevents_eff, file_size = self.get_rootfile_info(rfile)
                 # print is_bad, nevents, nevents_eff, file_size, rfile
                 ijob = int(rfile.split("_")[-1].replace(".root",""))
+                self.do_log("checked ntuple_%i.root. nevents, nevents_eff: %i, %i [checked %i of %i]" % (ijob, nevents, nevents_eff, irfile+1, nrfiles))
                 self.sample["ijob_to_nevents"][ijob] = [nevents, nevents_eff]
                 if is_bad: continue
                 tot_size += file_size
