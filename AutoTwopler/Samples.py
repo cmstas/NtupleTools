@@ -464,8 +464,8 @@ class Sample:
         # if some jobs are in 'failed' status maybe they won't get automatically resubmitted by crab, so do it manually
         if self.sample["crab"]["status"] == "SUBMITTED":
             if "failed" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["failed"] > 0):
-            if self.crab_resubmit():
-                self.do_log("found %i jobs in 'failed' status, so resubmitted those" % (self.sample["crab"]["breakdown"]["failed"]))
+                if self.crab_resubmit():
+                    self.do_log("found %i jobs in 'failed' status, so resubmitted those" % (self.sample["crab"]["breakdown"]["failed"]))
 
 
         if self.sample["crab"]["status"] == "SUBMITTED" and "taskWarningMsg" in stat:
