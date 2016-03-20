@@ -250,7 +250,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
 
       isHigh = false;
       isLow = false;
-      if( nEvts_file < (0.5*nEvtsPerFile) ) isLow = true;
+      if( nEvts_file < (0.1*nEvtsPerFile) ) isLow = true;
       else if( nEvts_file > (1.7*nEvtsPerFile) ) isHigh = true;
 
       if( isHigh ) printf( "ERROR! Wrong event count for %28s:  %8lld  <-- count is high\n", filename(shortname).Data(), nEvts_file );
