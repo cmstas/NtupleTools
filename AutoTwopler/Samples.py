@@ -636,7 +636,7 @@ class Sample:
                             jobnum = int(member.name.split("-")[1].split(".xml")[0])
                             fh = tar.extractfile(member)
                             lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
-                            miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1], lines)))
+                            miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
                             self.sample["ijob_to_miniaod"][jobnum] = miniaod
                             self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
                             fh.close()
