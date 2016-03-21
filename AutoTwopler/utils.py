@@ -6,7 +6,10 @@ import StringIO
 import ast
 import datetime
 import params
+import urllib2
+import json
 from collections import defaultdict
+
 
 def get(cmd, returnStatus=False):
     status, out = commands.getstatusoutput(cmd)
@@ -30,8 +33,11 @@ def copy_jecs():
         if not os.path.isfile(jec):
             os.system("cp /nfs-7/userdata/JECs/%s ." % jec)
 
-web_dir = "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
+def get_web_dir():
+    return "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
+
 def make_dashboard():
+    web_dir = get_web_dir()
     if not os.path.isdir(web_dir): os.makedirs(web_dir)
     cmd("chmod 755 -R %s" % web_dir)
     cmd("chmod 755 %s/*.py" % web_dir)
@@ -40,8 +46,7 @@ def make_dashboard():
     print "http://uaf-6.t2.ucsd.edu/~%s/%s" % (os.getenv("USER"), web_dir.split("public_html/")[1])
 
 def copy_json():
-    # cmd("cp data.json ~/public_html/autotupletest/")
-    cmd("cp data.json %s/" % web_dir)
+    cmd("cp data.json %s/" % get_web_dir())
 
 def read_samples(filename="instructions.txt"):
     samples = []
@@ -65,7 +70,6 @@ def proxy_renew():
     else: cmd("voms-proxy-init -hours 9876543:0 -out=%s" % cert_file)
 
 def get_proxy_file():
-    # cert_file = "/home/users/{0}/.globus/proxy_for_{0}.file".format(os.getenv("USER"))
     cert_file = '/tmp/x509up_u%s' % str(os.getuid()) # TODO: check that this is the same as `voms-proxy-info -path`
     return cert_file
 
@@ -73,28 +77,36 @@ def get_timestamp():
     # return current time as a unix timestamp
     return int(datetime.datetime.now().strftime("%s"))
 
-def dataset_event_count(dataset):
+def get_dbs_url(url):
+    # get json from a dbs url (API ref is at https://cmsweb.cern.ch/dbs/prod/global/DBSReader/)
+    #
     # 3 hours of work to figure out how the crab dbs api works and get this to work with only `cmsenv`....
     # can't use urllib2 since x509 got supported after 2.7.6
     # can't use requests because that doesn't come with cmsenv
-    # btw. api is at https://cmsweb.cern.ch/dbs/prod/global/DBSReader/
     b = StringIO.StringIO() 
     c = pycurl.Curl() 
-    url = "https://cmsweb.cern.ch/dbs/prod/global/DBSReader/filesummaries?dataset=%s&validFileOnly=1" % dataset
     cert = get_proxy_file()
-    c.setopt(pycurl.URL, url) 
     c.setopt(pycurl.WRITEFUNCTION, b.write) 
     c.setopt(pycurl.CAPATH, '/etc/grid-security/certificates') 
     c.unsetopt(pycurl.CAINFO)
     c.setopt(pycurl.SSLCERT, cert)
+
+    c.setopt(pycurl.URL, url) 
     c.perform() 
-    ret = ast.literal_eval(b.getvalue())
+    s = b.getvalue().replace("null","None")
+    ret = ast.literal_eval(s)
+    return ret
+
+def dataset_event_count(dataset):
+    # get event count and other information from dataset
+    url = "https://cmsweb.cern.ch/dbs/prod/global/DBSReader/filesummaries?dataset=%s&validFileOnly=1" % dataset
+    ret = get_dbs_url(url)
     if len(ret) > 0:
         return { "nevents": ret[0]['num_event'], "filesize": ret[0]['file_size'], "nfiles": ret[0]['num_file'], "nlumis": ret[0]['num_lumi'] }
-
     return None
 
 def dataset_event_count_2(dataset):
+    # alternative to dataset_event_count() (this uses dbs client as opposed to rolling our own)
     # cmd(". /cvmfs/cms.cern.ch/crab3/crab-env-bootstrap.sh >& /dev/null")
     from dbs.apis.dbsClient import DbsApi
     url="https://cmsweb.cern.ch/dbs/prod/global/DBSReader"
@@ -111,6 +123,52 @@ def dataset_event_count_2(dataset):
         return {"nevents": nevents, "filesize": filesize, "nfiles": len(files), "nlumis": nlumis}
 
     return {}
+
+def get_dataset_files(dataset):
+    # return list of 3-tuples (LFN, nevents, size_in_GB) of files in a given dataset
+    url = "https://cmsweb.cern.ch/dbs/prod/global/DBSReader/files?dataset=%s&validFileOnly=1&detail=1" % dataset
+    ret = get_dbs_url(url)
+    files = []
+    for f in ret:
+        files.append( [f['logical_file_name'], f['event_count'], f['file_size']/1.0e9] )
+    return files
+
+def get_dataset_parent(dataset):
+    # get parent of a given dataset
+    ret = get_dbs_url("https://cmsweb.cern.ch/dbs/prod/global/DBSReader/datasetparents?dataset=%s" % dataset)
+    if len(ret) < 1: return None
+    return ret[0].get('parent_dataset', None)
+
+def get_gen_sim(dataset):
+    # recurses up the tree of parent datasets until it finds the gen_sim dataset
+    while "GEN-SIM" not in dataset:
+        dataset = get_dataset_parent(dataset)
+        if not dataset: break
+    return dataset if "GEN-SIM" in dataset else None
+
+def get_mcm_json(dataset):
+    # get McM json for given dataset
+    url = "https://cms-pdmv.cern.ch/mcm/public/restapi/requests/produces/"+dataset
+    mcm_json = json.load(urllib2.urlopen(url))
+    return mcm_json
+
+def get_slim_mcm_json(dataset):
+    out = {}
+    mcm_json = get_mcm_json(dataset)
+    
+    try: out['cross_section'] = mcm_json['results']['generator_parameters'][-1]['cross_section']
+    except: pass
+
+    try: out['filter_efficiency'] = mcm_json['results']['generator_parameters'][-1]['filter_efficiency']
+    except: pass
+
+    try: out['cmssw_release'] = mcm_json['results']['cmssw_release']
+    except: pass
+
+    try: out['mcdb_id'] = mcm_json['results']['mcdb_id']
+    except: pass
+
+    return out
 
 def get_hadoop_name():
     # handle non-standard hadoop name mapping
@@ -132,30 +190,10 @@ def sum_dicts(dicts):
 
 if __name__=='__main__':
 
-    # if proxy_hours_left() < 5:
-    #     print "Proxy near end of lifetime, renewing."
-    #     proxy_renew()
-    # else:
-    #     print "Proxy looks good"
+    if proxy_hours_left() < 5:
+        print "Proxy near end of lifetime, renewing."
+        proxy_renew()
+    else:
+        print "Proxy looks good"
 
     print get_proxy_file()
-
-    # print dataset_event_count('/SMS-T5ttcc_mGl-1025to1200_mLSP-0to1025_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM')
-    # print dataset_event_count('/DYJetsToLL_M-50_Zpt-150toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
-    # print dataset_event_count_2('/DYJetsToLL_M-50_Zpt-150toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')
-    ds = [
-
-            ]
-
-    for d in ds:
-        print d,
-        try:
-            print dataset_event_count(d)
-        except:
-            print "error"
-
-    # for samp in read_samples():
-    #     print samp
-    
-    # make_dashboard()
-
