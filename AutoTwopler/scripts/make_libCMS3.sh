@@ -3,7 +3,7 @@
 if (( $# != 2 )); then
   echo "Illegal number of arguments."
   echo "Must provide CMS3 tag then CMSSW tag"
-  exit 1
+  return 1
 else
   THE_CMS3_TAG=$1
   CMSSW_RELEASE=$2

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+source /code/osgcode/cmssoft/cms/cmsset_default.sh
 
 export SCRAM_ARCH=$(python -c "import params; print params.scram_arch")
 export CMS3TAG=$(python -c "import params; print params.cms3tag")
