@@ -665,12 +665,12 @@ class Sample:
         n_entries = tree.GetEntriesFast()
         if n_entries == 0: return (True, 0, 0, 0)
 
-        pos_weight = tree.Draw("1", "genps_weight>0")
+        pos_weight = tree.Draw("1", "genps_weight>0", "goff")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 
         h_pfmet = TH1F("h_pfmet", "h_pfmet", 100, 0, 1000);
-        tree.Draw("evt_pfmet >> h_pfmet")
+        tree.Draw("evt_pfmet >> h_pfmet", "", "goff")
         avg_pfmet = h_pfmet.GetMean()
         if avg_pfmet < 0.01 or avg_pfmet > 10000: return (True, 0, 0, 0)
 
@@ -989,6 +989,10 @@ class Sample:
                     # until crab has finished? but that defeats purpose of do_skip_tail
                     pass
             elif "events with zeros in" in problem:
+                # delete all merged and remerge
+                u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
+                self.submit_merge_jobs()
+            elif "Counts mismatch!" in problem:
                 # delete all merged and remerge
                 u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
                 self.submit_merge_jobs()
