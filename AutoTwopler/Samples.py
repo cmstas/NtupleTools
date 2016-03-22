@@ -566,7 +566,8 @@ class Sample:
                 % (self.sample["user"], self.sample["dataset"].split("/")[1], self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
 
         if self.fake_crab_done: return True
-        if "status" not in self.sample["crab"] or self.sample["crab"]["status"] != "COMPLETED": return False
+        if "status" not in self.sample["crab"]: return False
+        if self.sample["crab"]["status"] != "COMPLETED": return False
 
         # print "here"
 
