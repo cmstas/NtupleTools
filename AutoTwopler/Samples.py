@@ -163,11 +163,13 @@ class Sample:
 
     def save(self):
         backup_file = self.sample["crab"]["taskdir"]+"/backup.pkl"
-        if not os.path.isfile(backup_file): return
-        self.misc["last_saved"] = u.get_timestamp()
-        d_tot = {"sample": self.sample, "misc": self.misc}
-        with open(backup_file,"w") as fhout:
-            pickle.dump(d_tot, fhout)
+        try:
+            self.misc["last_saved"] = u.get_timestamp()
+            d_tot = {"sample": self.sample, "misc": self.misc}
+            with open(backup_file,"w") as fhout:
+                pickle.dump(d_tot, fhout)
+        except:
+            self.do_log("couldn't save %s" % backup_file)
         # self.do_log("successfully backed up to %s" % backup_file)
         # self.do_log("successfully backed up")
 
@@ -378,7 +380,6 @@ class Sample:
 
         if self.sample["nevents_DAS"] == 0:
             try: 
-                print self.sample["dataset"]
                 self.sample["nevents_DAS"] = u.dataset_event_count(self.sample["dataset"])["nevents"]
                 self.do_log("sample has %i events according to DAS/DBS" % self.sample["nevents_DAS"])
             except: pass
