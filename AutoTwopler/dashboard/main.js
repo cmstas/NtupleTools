@@ -5,6 +5,7 @@ var refreshSecs = 10*60;
 var detailsVisible = false;
 var duckMode = false;
 var adminMode = false;
+var numLogLines = 0;
 
 google.charts.load('current', {'packages':['corechart']});
 // google.charts.setOnLoadCallback(function() {console.log("google loaded!");});
@@ -374,9 +375,17 @@ function fillDOM(data) {
             
             buff += line + "\n";
         }
+        $("#log_div").html("<br><pre class='logPane'>"+buff+"</pre>");
+        console.log(lines.length);
+        console.log(numLogLines);
+        if(lines.length != numLogLines) {
+            $(".logPane").animate({ scrollTop: $('.logPane').height()}, 1000);
+            numLogLines = lines.length;
+        } else {
+            $(".logPane").scrollTop($('.logPane').height());
+        }
     }
-    $("#log_div").html("<br><pre class='logPane'>"+buff+"</pre>");
-    $(".logPane").animate({ scrollTop: $('.logPane').height()}, 1000);
+
 
     // drawChart();
 }
