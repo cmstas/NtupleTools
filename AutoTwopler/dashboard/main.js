@@ -103,6 +103,7 @@ function drawChart() {
         
     for (var itd = 0; itd < alldata["time_stats"].length; itd++) {
         var td = alldata["time_stats"][itd];
+        if($.isEmptyObject(td[1])) continue;
         data_table.push( [
                 new Date(td[0]*1000), // to ms
                 td[1]["finished"] ,
