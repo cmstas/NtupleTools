@@ -1,12 +1,13 @@
-import Samples, time
+import Samples, params
 import utils as u
+import time
 import pprint
 import datetime
 import json
 import sys
+import traceback
 import os
-
-DO_TEST = False # if True, put the final samples in a  /snt/test/ dir so we don't screw anything
+import logging
 
 data_json = "data.json"
 instructions = "instructions.txt"
@@ -21,6 +22,8 @@ if u.proxy_hours_left() < 60:
     u.proxy_renew()
 
 u.copy_jecs()
+u.setup_logger()
+logger = logging.getLogger('duck_log')
 
 
 time_stats = []
@@ -38,7 +41,7 @@ for i in range(5000):
     # for existing samples, try to update params (xsec, kfact, etc.)
     for samp in u.read_samples(instructions):
         if samp not in all_samples:
-            if DO_TEST: 
+            if params.DO_TEST: 
                 samp["specialdir_test"] = True
                 print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
             s = Samples.Sample(**samp) 
@@ -51,40 +54,46 @@ for i in range(5000):
     # sys.exit()
 
     for isample, s in enumerate(all_samples):
-        stat = s.get_status()
 
-        if not s.pass_tsa_prechecks(): continue
+        try:
+            stat = s.get_status()
 
-        if stat == "new":
-            s.crab_submit()
-        elif stat == "crab":
-            s.crab_parse_status()
-            if s.is_crab_done():
-                s.make_miniaod_map()
-                s.make_merging_chunks()
-                s.submit_merge_jobs()
-        elif stat == "postprocessing":
-            if s.is_merging_done():
-                s.make_metadata()
-                if s.check_output():
-                    s.copy_files()
-            else:
-                s.submit_merge_jobs()
-        elif stat == "done":
-            pass
+            if not s.pass_tsa_prechecks(): continue
 
-        s.save()
-        data["samples"].append( s.get_slimmed_dict() )
+            if stat == "new":
+                s.crab_submit()
+            elif stat == "crab":
+                s.crab_parse_status()
+                if s.is_crab_done():
+                    s.make_miniaod_map()
+                    s.make_merging_chunks()
+                    s.submit_merge_jobs()
+            elif stat == "postprocessing":
+                if s.is_merging_done():
+                    s.make_metadata()
+                    if s.check_output():
+                        s.copy_files()
+                else:
+                    s.submit_merge_jobs()
+            elif stat == "done":
+                pass
+
+            s.save()
+            data["samples"].append( s.get_slimmed_dict() )
+
+        except Exception, err:
+            logger.info( "send an (angry?) email to Nick with the Traceback below!!")
+            logger.info( traceback.format_exc() )
 
     tot_crab_breakdown = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
     data["last_updated"] = u.get_timestamp()
     data["time_stats"].append( (u.get_timestamp(), tot_crab_breakdown) )
+    data["log"] = u.get_last_n_lines(fname=params.log_file, N=50)
     with open(data_json, "w") as fhout:
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
     sleep_time = 5 if i < 2 else 600
-    print "sleeping for %i seconds..." % sleep_time,
+    logger.debug("sleeping for %i seconds..." % sleep_time)
     time.sleep(sleep_time)
-    print "done sleeping"
 

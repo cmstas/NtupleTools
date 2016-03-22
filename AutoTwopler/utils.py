@@ -8,6 +8,7 @@ import datetime
 import params
 import urllib2
 import json
+import logging
 from collections import defaultdict
 
 
@@ -187,6 +188,29 @@ def sum_dicts(dicts):
         for k, v in d.items():
             ret[k] += v
     return dict(ret)
+
+def get_last_n_lines(fname, N=50):
+    # get last n lines of a text file
+    if os.path.isfile(fname):
+        return get('tail -n %i %s' % (N, fname))
+    else:
+        return ""
+
+def setup_logger():
+    # set up the logger to use it within run.py and Samples.py
+    logger = logging.getLogger(params.log_file.replace(".","_"))
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(params.log_file)
+    fh.setLevel(logging.INFO) # INFO level to logfile
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG) # DEBUG level to console
+    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('[%(asctime)s] %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
 
 if __name__=='__main__':
 

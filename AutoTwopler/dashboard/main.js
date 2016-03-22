@@ -363,6 +363,15 @@ function fillDOM(data) {
     $("#summary").append("<li> total jobs: " + totJobs);
     $("#summary").append("</ul>");
 
+
+    $("#log_div").html("");
+    if("log" in data) {
+        var lines = data["log"].split("\n");
+        for(var iline = 0; iline < lines.length; iline++) {
+        $("#summary").append(lines[iline] + "<br>");
+        }
+    }
+
     // drawChart();
 }
 

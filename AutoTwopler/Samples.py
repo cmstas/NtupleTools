@@ -1,6 +1,6 @@
 import os, sys, glob, select
 import datetime, ast, tarfile, pprint
-import pickle, json
+import pickle, json, logging
 
 try:
     from WMCore.Configuration import Configuration
@@ -20,7 +20,7 @@ class Sample:
 
     def __init__(self, dataset=None, gtag=None, kfact=None, efact=None, 
                  xsec=None, sparms=[], debug=False, specialdir_test=False,
-                 do_skip_tail=False,logger_callback=None):
+                 do_skip_tail=False):
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
@@ -97,7 +97,7 @@ class Sample:
         self.sample["crab"]["jobs_left"] = [] # keep track of job ids that are not done
         self.sample["crab"]["jobs_left_tail"] = [] # keep track of job ids that are taking forever (in the tail)
 
-        self.logger_callback = None
+        self.logger = logging.getLogger(params.log_file.replace(".","_"))
 
         self.crab_status_res = { }
 
@@ -105,7 +105,6 @@ class Sample:
         self.set_sample_specifics()
 
         self.load() # load backup of this sample when we instantiate it
-
 
 
     def __getitem__(self, i):
@@ -151,16 +150,20 @@ class Sample:
     def get_status(self):
         return self.sample["status"]
 
-    def add_logger_callback(self, logger_callback):
-        self.logger_callback = logger_callback
 
-    def do_log(self, text):
-        print "[%s] [%s] %s" % (datetime.datetime.now().strftime("%H:%M:%S"), self.pfx, text)
-        if self.logger_callback is not None:
-            self.logger_callback(datetime.datetime.now().strftime("%H:%M:%S"), self.pfx, text)
+    def do_log(self, text, typ='info'):
+        # toprint = "[%s] [%s] %s" % (datetime.datetime.now().strftime("%H:%M:%S"), self.pfx, text)
+        toprint = "[%s] %s" % (self.pfx, text)
+        # print toprint
+        if typ == 'info':
+            self.logger.info(toprint)
+        elif typ == 'debug':
+            self.logger.debug(toprint)
+
 
     def save(self):
         backup_file = self.sample["crab"]["taskdir"]+"/backup.pkl"
+        if not os.path.isfile(backup_file): return
         self.misc["last_saved"] = u.get_timestamp()
         d_tot = {"sample": self.sample, "misc": self.misc}
         with open(backup_file,"w") as fhout:
@@ -180,7 +183,7 @@ class Sample:
             if last_saved:
                 min_ago = round((u.get_timestamp() - last_saved) / 60.0)
                 # self.do_log("successfully loaded %s which was last saved %i minutes ago" % (backup_file, min_ago))
-                self.do_log("successfully loaded backup (last saved %i minutes ago)" % min_ago)
+                self.do_log("successfully loaded pickle backup (last saved %i minutes ago)" % min_ago)
             else:
                 self.do_log("successfully loaded %s" % (backup_file))
         else:
@@ -214,7 +217,7 @@ class Sample:
         self.sample["basedir"] = os.getcwd()+"/"
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
-        self.pfx = self.sample["shortname"][:20] + "..."
+        self.pfx = self.sample["shortname"][:25] + "..."
 
 
     def update_params(self, d):
