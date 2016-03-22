@@ -456,8 +456,8 @@ class Sample:
                 self.sample["crab"]["status"] = "COMPLETED"
 
 
-        # if sample has outright failed, resubmit it the whole damn thing
-        if self.sample["crab"]["status"] == "FAILED":
+        # if sample has outright failed, resubmit it the whole damn thing. also "RESUBMITFAILED" because crab is stupid
+        if (self.sample["crab"]["status"] == "FAILED") or (self.sample["crab"]["status"] == "RESUBMITFAILED"):
             if self.crab_resubmit():
                 self.sample["crab"]["resubmissions"] += 1
 
