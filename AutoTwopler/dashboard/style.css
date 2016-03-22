@@ -71,6 +71,8 @@ body {
 .good { color: #159515; }
 .bad { color: #FF3333; }
 .string { color: green; }
+.sample_pfx { color: green; }
+.date_pfx { color: purple; }
 .bold { font-weight: bold; }
 .number { color: darkorange; }
 .boolean { color: blue; }

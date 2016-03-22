@@ -364,13 +364,19 @@ function fillDOM(data) {
     $("#summary").append("</ul>");
 
 
-    $("#log_div").html("");
+    var buff = "";
     if("log" in data) {
         var lines = data["log"].split("\n");
         for(var iline = 0; iline < lines.length; iline++) {
-        $("#summary").append(lines[iline] + "<br>");
+            var line = lines[iline];
+
+            line = line.replace(/(\[[0-9\-\ \:\,]+\])/, '<span class="date_pfx">$1</span>');
+            line = line.replace(/(\[[0-9A-Za-z\_\.\-\:\,]+\])/, '<span class="sample_pfx">$1</span>');
+            
+            buff += line + "\n";
         }
     }
+    $("#log_div").html("<br><pre>"+buff+"</pre>");
 
     // drawChart();
 }
