@@ -454,7 +454,7 @@ class Sample:
             if self.sample["crab"]["status"] == "FAILED" and ("running" in self.sample["crab"]["breakdown"]) and (self.sample["crab"]["breakdown"]["running"] > 0):
                 # if "FAILED" but stuff still running, not really failed, eh?
                 self.sample["crab"]["status"] = "SUBMITTED"
-            if "finished" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["finished"] == self.sample["crab"]["njobs"]):
+            if "finished" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["finished"] == self.sample["crab"]["njobs"]) and (self.sample["crab"]["njobs"] > 0):
                 # if all finished, then complete, right?
                 self.sample["crab"]["status"] = "COMPLETED"
 
