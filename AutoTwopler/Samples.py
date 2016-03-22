@@ -813,7 +813,10 @@ class Sample:
         nevents = sum([x[0] for x in nevents_both])
         nevents_effective = sum([x[1] for x in nevents_both])
 
-        if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
+        try:
+            if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
+        except:
+            self.do_log("ERROR (but it probably doesn't matter) making log file directory: %s" % std_log_files)
 
         condor_params = {
                 "exe": executable_script,
