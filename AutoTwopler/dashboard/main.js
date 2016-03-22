@@ -363,7 +363,6 @@ function fillDOM(data) {
     $("#summary").append("<li> total jobs: " + totJobs);
     $("#summary").append("</ul>");
 
-
     var buff = "";
     if("log" in data) {
         var lines = data["log"].split("\n");
@@ -376,7 +375,8 @@ function fillDOM(data) {
             buff += line + "\n";
         }
     }
-    $("#log_div").html("<br><pre>"+buff+"</pre>");
+    $("#log_div").html("<br><pre class='logPane'>"+buff+"</pre>");
+    $(".logPane").animate({ scrollTop: $('.logPane').height()}, 1000);
 
     // drawChart();
 }
