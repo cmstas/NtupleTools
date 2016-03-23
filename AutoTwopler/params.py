@@ -1,6 +1,5 @@
-# DO_TEST = True # if True, put the final samples in a  /snt/test/ dir so we don't screw anything up
-# dashboard_name = "AutoTwopler_debug"
 DO_TEST = False # if True, put the final samples in a  /snt/test/ dir so we don't screw anything up
+DO_SKIP_TAIL = False # if True, skip crab jobs that are taking too long
 dashboard_name = "AutoTwopler"
 log_file = "duck.log"
 pset_data = "DataProduction2015_NoFilter_PAT_cfg.py"

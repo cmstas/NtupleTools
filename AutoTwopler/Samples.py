@@ -44,8 +44,11 @@ class Sample:
             self.fake_check = False
             self.fake_copy = False
 
+        if params.DO_SKIP_TAIL: do_skip_tail = True
+
         self.specialdir_test = specialdir_test
         self.do_skip_tail = do_skip_tail
+
 
         # dirs are wrt the base directory where this script is located
 
@@ -399,13 +402,18 @@ class Sample:
                      'jobsPerStatus': {'finished': 8}, 'outdatasets': None, 'publication': {}, 'publicationFailures': {}, 'schedd': 'crab3-1@submit-5.t2.ucsd.edu',
                      'status': 'COMPLETED', 'statusFailureMsg': '', 'taskFailureMsg': '', 'taskWarningMsg': [], 'totalJobdefs': 0} 
             else:
-                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+                if self.do_skip_tail:
+                    out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), json=True)
+                else:
+                    out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             self.crab_status_res = out
             return 1 # succeeded
         except Exception as e:
             self.do_log("ERROR getting status: "+str(e))
-            # self.do_log("try executing: crab status %s --proxy=%s --json" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
-            self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
+            if self.do_skip_tail:
+                self.do_log("try executing: crab status %s --proxy=%s --json" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
+            else:
+                self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
             return 0 # failed
 
     def crab_resubmit(self):
@@ -513,7 +521,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if nretries > 3 and done_frac > 0.97:
+                    if nretries > 3 and done_frac > 0.95:
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]
