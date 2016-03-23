@@ -22,8 +22,8 @@ if __name__=='__main__':
 
     # dataset = '/DYJetsToLL_M-50_Zpt-150toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
     # files = u.get_dataset_files(dataset)
-    # for f in files:
-    #     print f
+    # for rootfile, nevents, sizeGB in files[:10]:
+    #     print rootfile, nevents, sizeGB
 
     """ Get the GEN_SIM dataset name associated with a dataset """
 
@@ -39,15 +39,20 @@ if __name__=='__main__':
     # print "GEN_SIM sample %s: %s" % (gen_sim, str(info))
 
 
+    """ Get all MCM information from a given dataset name """
+
+    # dataset = "/DYJetsToLL_M-50_Zpt-150toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM"
+    # info = u.get_mcm_json(dataset)
+    # print info
+
     """ Get LHE files for dataset """
 
     # dataset = '/DYJetsToLL_M-50_Zpt-150toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
     # gen_sim = u.get_gen_sim(dataset)
     # lhe = u.get_dataset_parent(gen_sim) # LHE is usually parent to GEN_SIM. if not, can use get_slim_mcm_json() to get mcdb_id
     # files = u.get_dataset_files(lhe)
-    # for f in files:
-    #     print f
-
+    # for rootfile, nevents, sizeGB in files[:10]:
+    #     print rootfile, nevents, sizeGB
 
 
 
