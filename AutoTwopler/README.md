@@ -5,7 +5,7 @@
 2. Modify/add JECs, CMSSW release, pset names, etc. inside `params.py`
 3. Start a `screen`
 4. `source setup.sh` and go to the dashboard URL printed out
-5. Use the dashboard to create an `instructions.txt` file
+5. Use the dashboard to create an `instructions.txt` file (or you can skip this and make your own, following the `instructions_test.txt` template)
   1. Click "twiki" at the top
   2. Fill in your assigned name (type "all" for everyone's samples), Twiki username, and select the appropriate Twiki (if not there, select "Other" and paste in the twiki link)
   3. You also have the option to only fetch the unmade samples (i.e., those without a filled-in final directory on the Twiki)
