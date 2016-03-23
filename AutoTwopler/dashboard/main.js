@@ -101,9 +101,22 @@ function drawChart() {
     
     // data_table.push( [ new Date(1458116239), 100, 100, 100, 100, 100, ] );
         
+    prevNjobs = 0;
     for (var itd = 0; itd < alldata["time_stats"].length; itd++) {
         var td = alldata["time_stats"][itd];
         if($.isEmptyObject(td[1])) continue;
+
+        var njobs = 0;
+        for(var key in td[1]) njobs += td[1][key];
+        // console.log(njobs);
+
+        if(njobs < prevNjobs) {
+            prevNjobs = njobs;
+            continue;
+        } else {
+            prevNjobs = njobs;
+        }
+
         data_table.push( [
                 new Date(td[0]*1000), // to ms
                 td[1]["finished"] ,
