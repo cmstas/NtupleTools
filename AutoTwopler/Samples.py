@@ -810,8 +810,10 @@ class Sample:
         merge_script = working_dir+"/scripts/mergeScript.C"
         addbranches_script = working_dir+"/scripts/addBranches.C"
         proxy_file = u.get("find /tmp/x509up_u* -user $USER").strip()
-        condor_log_files = "/data/tmp/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
-        std_log_files = "/data/tmp/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
+        condor_log_files = "/nfs-7/userdata/tupler/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
+        std_log_files = "/nfs-7/userdata/tupler/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
+        # condor_log_files = "/data/tmp/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
+        # std_log_files = "/data/tmp/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
         input_files = ",".join([executable_script, merge_script, addbranches_script])
         nevents_both = self.sample['ijob_to_nevents'].values()
         nevents = sum([x[0] for x in nevents_both])
@@ -820,7 +822,9 @@ class Sample:
         try:
             if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
         except:
-            self.do_log("ERROR (but it probably doesn't matter) making log file directory: %s" % std_log_files)
+            self.do_log("ERROR making log file directory: %s" % std_log_files)
+            self.do_log("see if you can make it manually. if not, switch to another uaf.")
+            raise Exception("can't make log file directory: %s" % std_log_files)
 
         condor_params = {
                 "exe": executable_script,
