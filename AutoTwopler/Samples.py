@@ -521,7 +521,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if nretries > 3 and done_frac > 0.95:
+                    if nretries > 4 and done_frac > 0.95:
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]
