@@ -416,9 +416,12 @@ class Sample:
                 self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
             return 0 # failed
 
-    def crab_resubmit(self):
+    def crab_resubmit(self, more_ram=False):
         try:
-            out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+            if more_ram:
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), maxmemory=4000)
+            else:
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             return out["status"] == "SUCCESS"
         except Exception as e:
             self.do_log("ERROR resubmitting "+str(e))
@@ -473,11 +476,6 @@ class Sample:
             if self.crab_resubmit():
                 self.sample["crab"]["resubmissions"] += 1
 
-        # if some jobs are in 'failed' status maybe they won't get automatically resubmitted by crab, so do it manually
-        if self.sample["crab"]["status"] == "SUBMITTED":
-            if "failed" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["failed"] > 0):
-                if self.crab_resubmit():
-                    self.do_log("found %i jobs in 'failed' status, so resubmitted those" % (self.sample["crab"]["breakdown"]["failed"]))
 
 
         if self.sample["crab"]["status"] == "SUBMITTED" and "taskWarningMsg" in stat:
@@ -555,6 +553,17 @@ class Sample:
 
             self.sample["crab"]["commonerror"] = "%i jobs (%.1f%%) failed with error code %s: %s" \
                     % (count, 100.0*count/self.sample["crab"]["njobs"], most_common_error_code, most_common_detail)
+
+        do_get_more_ram = False
+        if self.sample["crab"]["commonerror"] and ("excessive memory" in self.sample["crab"]["commonerror"]):
+            # flip a switch to force resubmission to request more ram
+            do_get_more_ram = True
+
+        # if some jobs are in 'failed' status maybe they won't get automatically resubmitted by crab, so do it manually
+        if self.sample["crab"]["status"] == "SUBMITTED":
+            if "failed" in self.sample["crab"]["breakdown"] and (self.sample["crab"]["breakdown"]["failed"] > 0):
+                if self.crab_resubmit(more_ram=do_get_more_ram):
+                    self.do_log("found %i jobs in 'failed' status, so resubmitted those" % (self.sample["crab"]["breakdown"]["failed"]))
 
 
     def handle_more_than_1k(self):
