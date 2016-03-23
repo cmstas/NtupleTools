@@ -283,7 +283,7 @@ function setUpDOM(data) {
         var sample = data["samples"][i];
         var toappend = "";
         toappend += "<br>";
-        toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">"+sample["dataset"]+"</a>";
+        toappend += "<a class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">"+sample["dataset"]+"</a>";
         toappend += "<div class='pbar' id='pbar_"+i+"'>";
         toappend +=      "<span id='pbartextleft_"+i+"' class='pbartextleft'></span>";
         toappend +=      "<span id='pbartextright_"+i+"' class='pbartextright'></span>";
@@ -326,7 +326,8 @@ function fillDOM(data) {
         $("#pbartextleft_"+i).html(""); 
 
         if(adminMode) {
-            $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;  &#128035; </a>"); 
+            // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;  &#128035; </a>"); 
+            $("#pbartextleft_"+i).html("<a  onClick='console.log("+i+");'>&#9762;</a> <a> &#128035; </a>"); 
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));
