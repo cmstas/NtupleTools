@@ -864,6 +864,7 @@ class Sample:
             self.sample["status"] = "postprocessing"
             self.do_log("submitting %i merge jobs" % len(imerged_list))
 
+        error = ""
         for imerged in imerged_list:
             input_indices=",".join(map(str,self.sample['imerged_to_ijob'][imerged]))
 
@@ -878,6 +879,14 @@ class Sample:
 
             if " submitted " in submit_output: 
                 self.do_log("job for merged_ntuple_%i.root submitted successfully" % imerged)
+            else:
+                self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
+                error = submit_output
+
+        if len(error) > 0:
+            self.do_log("submit error: %s" % error)
+
+
 
     
     def make_metadata(self):
