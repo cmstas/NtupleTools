@@ -827,8 +827,8 @@ class Sample:
         merge_script = working_dir+"/scripts/mergeScript.C"
         addbranches_script = working_dir+"/scripts/addBranches.C"
         proxy_file = u.get("find /tmp/x509up_u* -user $USER").strip()
-        condor_log_files = "/nfs-7/userdata/tupler/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
-        std_log_files = "/nfs-7/userdata/tupler/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
+        condor_log_files = "/nfs-7/userdata/%s/tupler/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
+        std_log_files = "/nfs-7/userdata/%s/tupler/%s/std_logs/" % (os.getenv("USER"),shortname)
         # condor_log_files = "/data/tmp/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
         # std_log_files = "/data/tmp/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
         input_files = ",".join([executable_script, merge_script, addbranches_script])

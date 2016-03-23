@@ -70,14 +70,14 @@ body {
 .alert { font-weight: 900; color: #FF3333; }
 .good { color: #159515; }
 .bad { color: #FF3333; }
-.string { color: green; }
+.string { color: #339; }
 .sample_pfx { color: green; }
 .date_pfx { color: purple; }
 .bold { font-weight: bold; }
-.number { color: darkorange; }
+.number { color: #393; }
 .boolean { color: blue; }
 .null { color: magenta; }
-.key { color: red; }
+.key { color: #333; }
 
 pre {
     font-size: 100%;
