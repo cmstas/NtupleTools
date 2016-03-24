@@ -419,7 +419,7 @@ class Sample:
     def crab_resubmit(self, more_ram=False):
         try:
             if more_ram:
-                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), maxmemory=4000)
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), maxmemory="4000")
             else:
                 out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             return out["status"] == "SUCCESS"
