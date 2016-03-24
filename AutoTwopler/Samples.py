@@ -975,7 +975,24 @@ class Sample:
             tot_problems = 0
         else:
             output_dir = self.sample["crab"]["outputdir"]
-            cmd = """( cd scripts; root -n -b -q -l "checkCMS3.C(\\"{0}/merged\\", \\"{0}\\", 0,0)"; )""".format(output_dir)
+
+            # some samples are still in production, so check to see if the das counts are the same
+            ignoreDAS = "0"
+            nevents = self.sample["nevents_DAS"]
+            for iattempt in range(5):
+                try:
+                    nevents = u.dataset_event_count(self.sample["dataset"])["nevents"]
+                    break
+                except: pass
+            if self.sample["nevents_DAS"] != nevents:
+                self.do_log("sample originally had %i events according to DAS/DBS, but now it's %i" % (self.sample["nevents_DAS"],nevents))
+                self.do_log("because of this, checkCMS3 will ignore the DAS check")
+                ignoreDAS = "1"
+            else:
+                self.do_log("sample originally had %i events according to DAS/DBS, and it's still %i, so proceeding as usual" % (self.sample["nevents_DAS"],nevents))
+
+
+            cmd = """( cd scripts; root -n -b -q -l "checkCMS3.C(\\"{0}/merged\\", \\"{0}\\", 0,0,{1})"; )""".format(output_dir, ignoreDAS)
             # print cmd
             self.do_log("started running checkCMS3")
             out = u.get(cmd)
