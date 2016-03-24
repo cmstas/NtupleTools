@@ -17,7 +17,7 @@ void printColor(const char* message, const int color, bool human) {
 }
 
 
-int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilter = false, bool humanUser = true, string sampleName = "") {
+int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilter = false, bool humanUser = true, bool ignoreDAS = false, string sampleName = "") {
 
   if( samplePath == "" ) {
     cout << "Please provide a path to a CMS3 sample!" << endl;
@@ -165,7 +165,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   int loop_count = 0;
   Long64_t nEvts_das = -9999;
 
-  while( loop_count<5 && das_failed ) {
+  while( loop_count<5 && das_failed && !ignoreDAS) {
       std::cout << "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" " << std::endl;
     TString Evts_das = gSystem->GetFromPipe( "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" | tail -1" );
     nEvts_das = Evts_das.Atoll();
@@ -173,7 +173,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
     loop_count++;
   }
 
-  if( das_failed ) {
+  if( das_failed && !ignoreDAS) {
     printColor("ERROR! DAS query failed!", 91, humanUser);
     nProblems++;
   }
@@ -189,7 +189,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   if( isMerged ) {
 
     //(a) Check das vs. branch. A problem here normally indicates a problem with the unmerged files
-    if( nEvts_das == nEvts_branch ) countsMatch = true;
+    if( (nEvts_das == nEvts_branch) || ignoreDAS) countsMatch = true;
 
     //(b) Check unmerged vs. merged. A problem here normally indicates a problem with merging
     int nEvts_unmerged = 0;
@@ -214,7 +214,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   }
 
   //2. Unmerged files
-  else if(!isMerged && nEvts_chain==nEvts_das) countsMatch = true;
+  else if(!isMerged && (nEvts_chain==nEvts_das || ignoreDAS)) countsMatch = true;
 
   ////////////////////////////////////////////////
   //    REPORT EVENT COUNTS                     //
@@ -228,7 +228,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
 
   // Breakdown by filename
   if( nFilesHere > 1 && !countsMatch
-      && ((nEvts_chain!=nEvts_das && !das_failed) || nEvts_chain!=nEvts_branch) ) {
+      && ((nEvts_chain!=nEvts_das && !das_failed && !ignoreDAS) || nEvts_chain!=nEvts_branch) ) {
 
     float nEvtsPerFile = nEvts_chain / float(nFilesHere);
     bool isHigh = false;
