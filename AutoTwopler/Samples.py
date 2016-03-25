@@ -211,6 +211,7 @@ class Sample:
         if "50ns" in ds: self.sample["specialdir"] = "run2_50ns"
         elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds: self.sample["specialdir"] = "run2_fastsim"
         elif "RunIISpring15FSPremix" in ds: self.sample["specialdir"] = "run2_fastsim"
+        elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
 
