@@ -165,7 +165,7 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   int loop_count = 0;
   Long64_t nEvts_das = -9999;
 
-  while( loop_count<5 && das_failed && !ignoreDAS) {
+  while( loop_count<10 && das_failed && !ignoreDAS) {
       std::cout << "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" " << std::endl;
     TString Evts_das = gSystem->GetFromPipe( "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" | tail -1" );
     nEvts_das = Evts_das.Atoll();
