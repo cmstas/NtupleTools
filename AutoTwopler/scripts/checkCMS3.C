@@ -166,10 +166,20 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
   Long64_t nEvts_das = -9999;
 
   while( loop_count<10 && das_failed && !ignoreDAS) {
-      std::cout << "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" " << std::endl;
-    TString Evts_das = gSystem->GetFromPipe( "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" | tail -1" );
+    // first try DBS via utils.py
+    std::cout << "(cd ../; python -c 'import utils as u; print u.dataset_event_count(\"" + dataset_name + "\")[\"nevents\"]')" << std::endl;
+    TString Evts_das = gSystem->GetFromPipe( "(cd ../; python -c 'import utils as u; print u.dataset_event_count(\"" + dataset_name + "\")[\"nevents\"]')" );
+    nEvts_das = Evts_das.Atoll();
+    if( nEvts_das > 0 ) {
+        das_failed = false;
+        break;
+    }
+
+    std::cout << "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" " << std::endl;
+    Evts_das = gSystem->GetFromPipe( "python das_client.py --query=\"dataset= "+dataset_name+" | grep dataset.nevents\" | tail -1" );
     nEvts_das = Evts_das.Atoll();
     if( nEvts_das > 0 ) das_failed = false;
+
     loop_count++;
   }
 
