@@ -991,6 +991,9 @@ class Sample:
             else:
                 self.do_log("sample originally had %i events according to DAS/DBS, and it's still %i, so proceeding as usual" % (self.sample["nevents_DAS"],nevents))
 
+            if self.do_skip_tail:
+                # STUPID DAS
+                ignoreDAS = "1"
 
             cmd = """( cd scripts; root -n -b -q -l "checkCMS3.C(\\"{0}/merged\\", \\"{0}\\", 0,0,{1})"; )""".format(output_dir, ignoreDAS)
             # print cmd
