@@ -214,6 +214,10 @@ class Sample:
         elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
+        else:
+            self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
+            self.sample["specialdir"] = "run2"
+
 
         if "76X_mcRun2_" in ds: self.sample["specialdir"] = "run2_25ns_76MiniAODv2"
 
@@ -490,7 +494,7 @@ class Sample:
 
 
         if self.sample["crab"]["breakdown"]["finished"] > 0:
-            done_frac = 1.0*self.sample["crab"]["njobs"]/self.sample["crab"]["breakdown"]["finished"]
+            done_frac = 1.0*self.sample["crab"]["breakdown"]["finished"]/self.sample["crab"]["njobs"]
         else: 
             done_frac = 0.0
 
@@ -520,7 +524,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if nretries > 4 and done_frac > 0.95:
+                    if nretries >= 5 and done_frac > 0.95:
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]
@@ -607,7 +611,7 @@ class Sample:
             self.misc["logfiles"] = [fname for fname in self.misc["logfiles"] if get_num(fname) not in self.sample["crab"]["jobs_left_tail"]]
             njobs -= len(self.sample["crab"]["jobs_left_tail"])
 
-        if njobs == len(self.misc["rootfiles"]) and not(njobs == len(self.misc["logfiles"])):
+        if njobs == len(self.misc["rootfiles"]) and not(njobs <= len(self.misc["logfiles"])):
             # we have all the root files, but evidently some log files got lost. try to recover them
             # format: ntuple_1.root and cmsRun_1.log.tar.gz
             root_file_numbers = set([get_num(rfile) for rfile in self.misc["rootfiles"]])
@@ -624,8 +628,9 @@ class Sample:
                     self.do_log("got %i of 'em" % len(textlogs))
                     self.misc["logfiles"].extend(textlogs)
 
-        if njobs == len(self.misc["rootfiles"]) and njobs == len(self.misc["logfiles"]):
+        if njobs == len(self.misc["rootfiles"]) and njobs <= len(self.misc["logfiles"]):
             return True
+
 
         self.do_log("ERROR: crab says COMPLETED but not all files are there, even after getlog")
         self.do_log("# jobs, # root files, # log files = %i, %i, %i" % (njobs, len(self.misc["rootfiles"]), len(self.misc["logfiles"])))
@@ -1015,6 +1020,7 @@ class Sample:
                 if "ERROR!" in line: problems.append(line.replace("ERROR!","").strip())
                 elif "Total problems found:" in line: tot_problems = int(line.split(":")[1].strip())
 
+
         self.do_log("found %i total problems:" % tot_problems)
         for prob in problems:
             self.do_log("-- %s" % prob)
@@ -1022,6 +1028,9 @@ class Sample:
         # if skipping tail, of course we will have problem with event mismatch, so subtract it out
         if self.do_skip_tail and tot_problems > 0:
             tot_problems -= 1
+
+        if len(problems) > 0:
+            self.do_log(out)
 
         self.sample["checks"]["nproblems"] = tot_problems
         self.sample["checks"]["problems"] = problems
