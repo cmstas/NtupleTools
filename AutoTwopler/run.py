@@ -88,7 +88,7 @@ for i in range(5000):
     tot_crab_breakdown = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
     data["last_updated"] = u.get_timestamp()
     data["time_stats"].append( (u.get_timestamp(), tot_crab_breakdown) )
-    data["log"] = u.get_last_n_lines(fname=params.log_file, N=75)
+    data["log"] = u.get_last_n_lines(fname=params.log_file, N=100)
     with open(data_json, "w") as fhout:
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
