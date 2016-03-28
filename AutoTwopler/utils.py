@@ -100,7 +100,10 @@ def get_dbs_url(url):
 
 def dataset_event_count(dataset):
     # get event count and other information from dataset
-    url = "https://cmsweb.cern.ch/dbs/prod/global/DBSReader/filesummaries?dataset=%s&validFileOnly=1" % dataset
+
+    instance = "global"
+    if dataset.endswith("/USER"): instance = "phys03"
+    url = "https://cmsweb.cern.ch/dbs/prod/%s/DBSReader/filesummaries?dataset=%s&validFileOnly=1" % (instance,dataset)
     ret = get_dbs_url(url)
     if len(ret) > 0:
         return { "nevents": ret[0]['num_event'], "filesize": ret[0]['file_size'], "nfiles": ret[0]['num_file'], "nlumis": ret[0]['num_lumi'] }
