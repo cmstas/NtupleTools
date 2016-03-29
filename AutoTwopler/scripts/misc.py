@@ -55,5 +55,14 @@ if __name__=='__main__':
     #     print rootfile, nevents, sizeGB
 
 
+    """ Purge crab cache with magic """
+
+    # d = u.get_crabcache_info()
+    # print "you are using %.1f GB of memory on the crab cache server with %i files" % (d["used_space_GB"], len(d["file_hashes"]))
+    # print "purging now"
+    # u.purge_crabcache()
+    # d = u.get_crabcache_info()
+    # print "now you are using %.1f GB of memory on the crab cache server with %i files" % (d["used_space_GB"], len(d["file_hashes"]))
+
 
 

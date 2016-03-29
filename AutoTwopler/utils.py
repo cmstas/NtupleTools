@@ -9,6 +9,7 @@ import params
 import urllib2
 import json
 import logging
+import re
 from collections import defaultdict
 
 
@@ -94,9 +95,12 @@ def get_dbs_url(url):
 
     c.setopt(pycurl.URL, url) 
     c.perform() 
-    s = b.getvalue().replace("null","None")
-    ret = ast.literal_eval(s)
-    return ret
+    try:
+        s = b.getvalue().replace("null","None")
+        ret = ast.literal_eval(s)
+        return ret
+    except:
+        return {}
 
 def dataset_event_count(dataset):
     # get event count and other information from dataset
@@ -214,6 +218,29 @@ def setup_logger():
     logger.addHandler(fh)
     logger.addHandler(ch)
 
+def get_crabcache_info():
+    used_space = round(float(get_dbs_url("https://cmsweb.cern.ch/crabcache/info?subresource=userinfo")['result'][0]['used_space'][0]/1.0e9),2)
+    file_list = get_dbs_url("https://cmsweb.cern.ch/crabcache/info?subresource=userinfo")['result'][0]['file_list']
+    patt = re.compile("^[a-z0-9]*$")
+
+    file_hashes = []
+    for f in file_list:
+        if not patt.match(f): continue
+        file_hashes.append(f)
+
+    return {"file_hashes": file_hashes, "used_space_GB": used_space}
+
+def purge_crabcache(verbose=False):
+    d = get_crabcache_info()
+    hashkeys = d["file_hashes"]
+    for hkey in hashkeys:
+        url = "https://cmsweb.cern.ch/crabcache/info?subresource=fileremove&hashkey=%s" % hkey
+        success = bool(get_dbs_url(url))
+        if success and verbose: 
+             "successfully purged file %s" % hkey
+
+
+
 
 if __name__=='__main__':
 
@@ -224,3 +251,9 @@ if __name__=='__main__':
         print "Proxy looks good"
 
     print get_proxy_file()
+
+
+    # print get_crabcache_info()
+    # purge_crabcache()
+    # # print bool(get_dbs_url("https://cmsweb.cern.ch/crabcache/info?subresource=fileremove&hashkey=09798d25dc94880700200d9c8e9608a85d8c8a953277e997528e6a87dd2e420d"))
+
