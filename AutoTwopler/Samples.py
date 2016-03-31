@@ -212,6 +212,7 @@ class Sample:
         elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds: self.sample["specialdir"] = "run2_fastsim"
         elif "RunIISpring15FSPremix" in ds: self.sample["specialdir"] = "run2_fastsim"
         elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
+        elif "TChi" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
@@ -482,7 +483,6 @@ class Sample:
                 self.sample["crab"]["resubmissions"] += 1
 
 
-
         if self.sample["crab"]["status"] == "SUBMITTED" and "taskWarningMsg" in stat:
             warning = stat["taskWarningMsg"]
             if len(warning) > 0 and "not yet bootstrapped" in warning[0]:
@@ -491,6 +491,14 @@ class Sample:
                 if mins > 300: # resubmit if been more than 5 hours
                     self.do_log("been more than 5 hours, so trying to resubmit")
                     self.crab_resubmit()
+
+        # if self.sample["crab"]["status"] == "QUEUED":
+        #     mins = self.minutes_since_crab_submit()
+        #     self.do_log("task is QUEUED, and it's been %i minutes" % mins)
+        #     if mins > 300: # resubmit if been more than 5 hours
+        #         self.do_log("been more than 5 hours, so trying to kill and resubmit")
+        #         self.crab_kill()
+        #         self.crab_resubmit()
 
 
         if self.sample["crab"]["breakdown"]["finished"] > 0:
