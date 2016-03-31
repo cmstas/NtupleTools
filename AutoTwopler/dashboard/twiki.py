@@ -67,7 +67,11 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
 
         if get_unmade and not(location == ""): continue
 
-        samples.append( {"dataset": dataset, "gtag": gtag, "xsec": xsec, "kfact": kfact, "efact": efact, "sparms": sparms} )
+        samples.append( {
+                    "dataset": dataset, "gtag": gtag, "xsec": xsec, "kfact": kfact, "efact": efact, "sparms": sparms, 
+                    "filter_type": filter_type, "nevents_in": nevents_in, "nevents_out": nevents_out, "location": location, 
+                    "cms3tag": cms3tag, "assigned": assigned, "comments": comments, 
+                    } )
 
     return samples
 
