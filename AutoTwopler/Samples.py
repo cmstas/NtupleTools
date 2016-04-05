@@ -1037,7 +1037,8 @@ class Sample:
         if self.do_skip_tail and tot_problems > 0:
             tot_problems -= 1
 
-        if len(problems) != 0:
+        if len(problems) != 0 or tot_problems != 0:
+            if cmd: self.do_log("executed the command: %s" % cmd)
             self.do_log(out)
 
         self.sample["checks"]["nproblems"] = tot_problems
