@@ -140,6 +140,19 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
 	}
   }
 
+  // Before we start scanning the chain, loop through files and print out the ones that are sick
+  TObjArray *fileElements=chain->GetListOfFiles();
+  TIter nextIter(fileElements);
+  TChainElement *chEl=0;
+  while (( chEl=(TChainElement*)nextIter() )) {
+    TFile *file = new TFile( chEl->GetTitle() );
+    TString filename = file->GetName();
+    if(!file || file->IsZombie()) {
+          printf( "ERROR! Could not open file: %28s\n", filename.Data() );
+    }
+  }
+
+
   
   /////////////////////////////////////////////////////////////////////////////////
   // Event counting

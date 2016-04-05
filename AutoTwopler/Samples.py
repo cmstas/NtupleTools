@@ -1028,6 +1028,9 @@ class Sample:
                 if "ERROR!" in line: problems.append(line.replace("ERROR!","").strip())
                 elif "Total problems found:" in line: tot_problems = int(line.split(":")[1].strip())
 
+        # if the program segfaulted somehow, then we might have picked up on an ERROR, but not the Total problems found: <int> part, so take the max
+        if len(problems) > 0:
+            tot_problems = max(tot_problems, len(problems))
 
         self.do_log("found %i total problems:" % tot_problems)
         for prob in problems:
@@ -1054,7 +1057,7 @@ class Sample:
         merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
 
         for problem in problems:
-            if "Wrong event count" in problem:
+            if "Wrong event count" in problem or "Could not open file" in problem:
                 # delete this imerged
                 if not self.do_skip_tail:
                     imerged = int(problem.split(".root")[0].split("_")[-1])
