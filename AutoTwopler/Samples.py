@@ -583,7 +583,7 @@ class Sample:
         if self.misc["handled_more_than_1k"]: return
 
         output_dir = self.sample["crab"]["outputdir"]
-        without_zeros = self.sample["crab"]["outputdir"].replace("0000","")
+        without_zeros = self.sample["crab"]["outputdir"].replace("/0000","/")
 
         for kilobatch in os.listdir(without_zeros):
             if kilobatch == "0000": continue
@@ -1056,6 +1056,11 @@ class Sample:
         problems = self.sample["checks"]["problems"]
         merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
 
+
+        # sometimes we will get "Could not open file: ____"
+        # and we will resubmit it, but then if we also have "Counts mismatch!" in the problems array, 
+        # this will try to delete all of the files! BAD! Ignore Counts mismatch if we find a corrupt file and deal with that first
+        resubmitted_bad_file = False
         for problem in problems:
             if "Wrong event count" in problem or "Could not open file" in problem:
                 # delete this imerged
@@ -1063,6 +1068,7 @@ class Sample:
                     imerged = int(problem.split(".root")[0].split("_")[-1])
                     u.cmd("rm %s/merged_ntuple_%i.root" % (merged_dir, imerged))
                     self.submit_merge_jobs()
+                    resubmitted_bad_file = True
                 else:
                     # FIXME be smart about event counts? or is there no way to get event counts
                     # until crab has finished? but that defeats purpose of do_skip_tail
@@ -1071,7 +1077,7 @@ class Sample:
                 # delete all merged and remerge
                 u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
                 self.submit_merge_jobs()
-            elif "Counts mismatch!" in problem:
+            elif "Counts mismatch!" in problem and not resubmitted_bad_file:
                 # delete all merged and remerge
                 u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
                 self.submit_merge_jobs()
