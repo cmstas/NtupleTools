@@ -50,7 +50,7 @@ class Sample:
         self.do_skip_tail = do_skip_tail
 
 
-        # dirs are wrt the base directory where this script is located
+        # dirs are either absolute or wrt the base directory where this script is located
 
         self.misc = {}
         self.misc["pfx_pset"] = 'pset' # where to hold the psets
@@ -752,24 +752,34 @@ class Sample:
             self.sample['nevents_unmerged'] = sum([x[0] for x in self.sample['ijob_to_nevents'].values()])
 
 
-    def get_condor_running(self):
+    def get_condor_submitted(self, running_at_least_hours=0.0):
         # return set of merged indices
-        output = u.get("condor_q $USER -autoformat CMD ARGS")
+        output = u.get("condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS")
         # output = """
         # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 1 25000 21000 0.0123 1.1 1.0
         # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 2 25000 21000 0.0123 1.1 1.0
         # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 4 25000 21000 0.0123 1.1 1.0
         # """
-        running_condor_set = set()
+
+        merged_id_set = set()
+        clusterID_set = set()
         for line in output.split("\n"):
             if "mergeWrapper" not in line: continue
-            _, unmerged_dir, _, merged_index = line.split(" ")[:4]
+
+            clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.split(" ")[:7]
             requestname = unmerged_dir.split("crab_")[1].split("/")[0]
 
-            if self.sample["crab"]["requestname"] == requestname:
-                running_condor_set.add(int(merged_index))
+            # if we've specified to look only at jobs which have been running for at least x hours
+            if running_at_least_hours > 0.01 and status == "RUNNING":
+                hours = 1.0*(datetime.datetime.now()-datetime.datetime.fromtimestamp(int(entered_current_status))).seconds / 3600.0
+                if hours < running_at_least_hours: continue
 
-        return running_condor_set
+
+            if self.sample["crab"]["requestname"] == requestname:
+                merged_id_set.add(int(merged_index))
+                clusterID_set.add(int(clusterID))
+
+        return merged_id_set, clusterID_set
 
 
     def get_merged_done(self):
@@ -819,7 +829,7 @@ class Sample:
 
     def is_merging_done(self):
         # want 0 running condor jobs and all merged files in output area
-        done = len(self.get_condor_running()) == 0 and len(self.get_merged_done()) == len(self.sample["imerged_to_ijob"].keys())
+        done = len(self.get_condor_submitted()) == 0 and len(self.get_merged_done()) == len(self.sample["imerged_to_ijob"].keys())
         if done:
             self.sample["postprocessing"]["running"] = 0
             self.sample["postprocessing"]["done"] = self.sample["postprocessing"]["total"]
@@ -884,7 +894,18 @@ class Sample:
 
         # don't resubmit the ones that are already running or done
         imerged_set = set(self.sample['imerged_to_ijob'].keys())
-        processing_set = self.get_condor_running()
+        processing_set, processing_ID_set = self.get_condor_submitted()
+
+        do_kill_long_running_condor = True
+        if do_kill_long_running_condor:
+            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=5.0)
+            if len(longrunning_set) > 0:
+                self.do_log("The following merged file indices have been merging for more than 5 hours: %s" % ", ".join(map(str,longrunning_set)))
+                self.do_log("Killing and resubmitting condor IDs: %s" % ", ".join(map(str,longrunning_ID_set)))
+                u.cmd( "condor_rm %s" % " ".join(map(str,longrunning_ID_set)) )
+                processing_set = processing_set - longrunning_set
+                processing_ID_set = processing_ID_set - longrunning_ID_set
+
         # subtract running jobs from done. we might think they're done if they begin
         # to stageout, but they're not yet done staging out
         done_set = self.get_merged_done() - processing_set
@@ -972,6 +993,7 @@ class Sample:
             print "Will do: mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"])
         else:
             u.cmd("mkdir -p %s/" % self.sample["finaldir"])
+            # TODO: hadoop move command is faster
             u.cmd( "mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
         self.do_log("finished copying files")
 
@@ -1061,6 +1083,8 @@ class Sample:
         # and we will resubmit it, but then if we also have "Counts mismatch!" in the problems array, 
         # this will try to delete all of the files! BAD! Ignore Counts mismatch if we find a corrupt file and deal with that first
         resubmitted_bad_file = False
+        print "before: ", problems
+        print resubmitted_bad_file
         for problem in problems:
             if "Wrong event count" in problem or "Could not open file" in problem:
                 # delete this imerged
@@ -1084,6 +1108,8 @@ class Sample:
             elif "DAS query failed" in problem:
                 # probably transient, ignore and let check() try again later
                 pass
+        print "after: ", problems
+        print resubmitted_bad_file
 
 
 if __name__=='__main__':
