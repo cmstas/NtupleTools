@@ -150,6 +150,8 @@ int checkCMS3( TString samplePath = "", TString unmerged_path = "", bool useFilt
     if(!file || file->IsZombie()) {
           printf( "ERROR! Could not open file: %28s\n", filename.Data() );
     }
+    file->Close();
+    delete file;
   }
 
 
