@@ -772,6 +772,7 @@ class Sample:
             # if we've specified to look only at jobs which have been running for at least x hours
             if running_at_least_hours > 0.01 and status == "RUNNING":
                 hours = 1.0*(datetime.datetime.now()-datetime.datetime.fromtimestamp(int(entered_current_status))).seconds / 3600.0
+                # print hours
                 if hours < running_at_least_hours: continue
 
 
@@ -829,7 +830,7 @@ class Sample:
 
     def is_merging_done(self):
         # want 0 running condor jobs and all merged files in output area
-        done = len(self.get_condor_submitted()) == 0 and len(self.get_merged_done()) == len(self.sample["imerged_to_ijob"].keys())
+        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == len(self.sample["imerged_to_ijob"].keys())
         if done:
             self.sample["postprocessing"]["running"] = 0
             self.sample["postprocessing"]["done"] = self.sample["postprocessing"]["total"]
@@ -898,10 +899,11 @@ class Sample:
 
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
-            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=5.0)
+            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=6.0)
             if len(longrunning_set) > 0:
-                self.do_log("The following merged file indices have been merging for more than 5 hours: %s" % ", ".join(map(str,longrunning_set)))
+                self.do_log("The following merged file indices have been merging for more than 6 hours: %s" % ", ".join(map(str,longrunning_set)))
                 self.do_log("Killing and resubmitting condor IDs: %s" % ", ".join(map(str,longrunning_ID_set)))
+
                 u.cmd( "condor_rm %s" % " ".join(map(str,longrunning_ID_set)) )
                 processing_set = processing_set - longrunning_set
                 processing_ID_set = processing_ID_set - longrunning_ID_set
@@ -1083,8 +1085,8 @@ class Sample:
         # and we will resubmit it, but then if we also have "Counts mismatch!" in the problems array, 
         # this will try to delete all of the files! BAD! Ignore Counts mismatch if we find a corrupt file and deal with that first
         resubmitted_bad_file = False
-        print "before: ", problems
-        print resubmitted_bad_file
+        # print "before: ", problems
+        # print resubmitted_bad_file
         for problem in problems:
             if "Wrong event count" in problem or "Could not open file" in problem:
                 # delete this imerged
@@ -1108,8 +1110,8 @@ class Sample:
             elif "DAS query failed" in problem:
                 # probably transient, ignore and let check() try again later
                 pass
-        print "after: ", problems
-        print resubmitted_bad_file
+        # print "after: ", problems
+        # print resubmitted_bad_file
 
 
 if __name__=='__main__':
