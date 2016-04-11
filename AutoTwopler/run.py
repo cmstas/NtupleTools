@@ -10,20 +10,25 @@ import os
 import logging
 
 data_json = "data.json"
-instructions = "instructions.txt"
+instructions = ""
+
 if len(sys.argv) > 1:
     instructions = sys.argv[1]
-    if not os.path.isfile(instructions):
-        print ">>> %s does not exist" % instructions
-        sys.exit()
+else:
+    print ">>> python %s INSTRUCTIONS_FILE" % __file__
+    sys.exit()
+
+if not os.path.isfile(instructions):
+    print ">>> %s does not exist" % instructions
+    sys.exit()
 
 if u.proxy_hours_left() < 60:
     print ">>> Proxy near end of lifetime, renewing."
     u.proxy_renew()
 
 u.copy_jecs()
-u.setup_logger()
-logger = logging.getLogger('duck_log')
+logger_name = u.setup_logger()
+logger = logging.getLogger(logger_name)
 
 
 time_stats = []
@@ -41,9 +46,6 @@ for i in range(5000):
     # for existing samples, try to update params (xsec, kfact, etc.)
     for samp in u.read_samples(instructions):
         if samp not in all_samples:
-            if params.DO_TEST: 
-                samp["specialdir_test"] = True
-                print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
             s = Samples.Sample(**samp) 
             all_samples.append(s)
         else:

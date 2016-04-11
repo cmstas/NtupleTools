@@ -31,9 +31,8 @@ def proxy_hours_left():
     return hours
 
 def copy_jecs():
-    for jec in params.jecs:
-        if not os.path.isfile(jec):
-            os.system("cp /nfs-7/userdata/JECs/%s ." % jec)
+    if not os.path.isfile(params.jecs):
+        os.system("cp /nfs-7/userdata/JECs/%s ." % jec)
 
 def get_web_dir():
     return "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
@@ -205,7 +204,8 @@ def get_last_n_lines(fname, N=50):
 
 def setup_logger():
     # set up the logger to use it within run.py and Samples.py
-    logger = logging.getLogger(params.log_file.replace(".","_"))
+    logger_name = params.log_file.replace(".","_")
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(params.log_file)
     fh.setLevel(logging.INFO) # INFO level to logfile
@@ -217,6 +217,7 @@ def setup_logger():
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
+    return logger_name
 
 def get_crabcache_info():
     used_space = round(float(get_dbs_url("https://cmsweb.cern.ch/crabcache/info?subresource=userinfo")['result'][0]['used_space'][0]/1.0e9),2)

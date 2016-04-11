@@ -18,16 +18,14 @@ import utils as u
 
 class Sample:
 
-    def __init__(self, dataset=None, gtag=None, kfact=None, efact=None, 
-                 xsec=None, sparms=[], debug=False, specialdir_test=False,
-                 do_skip_tail=False):
+    def __init__(self, dataset=None, gtag=None, kfact=None, efact=None,xsec=None, sparms=[]):
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
-        if params.DO_SKIP_TAIL: do_skip_tail = True
+        self.specialdir_test = params.DO_TEST
+        self.do_skip_tail = params.DO_SKIP_TAIL
 
-        self.specialdir_test = specialdir_test
-        self.do_skip_tail = do_skip_tail
+        if params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
 
         self.misc = {}
         self.misc["pfx_pset"] = 'pset' # where to hold the psets
@@ -189,6 +187,7 @@ class Sample:
         elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "TChi" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
+        elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
             self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
@@ -225,7 +224,7 @@ class Sample:
         config.General.transferLogs = True
         config.General.requestName = self.sample["crab"]["requestname"]
         config.section_('JobType')
-        config.JobType.inputFiles = params.jecs
+        config.JobType.inputFiles = [params.jecs]
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
         config.section_('Data')
@@ -267,6 +266,9 @@ class Sample:
                 elif ".GlobalTag." in line: line = line.split("=")[0]+" = '"+self.sample["gtag"]+"'\n"
                 elif ".reportEvery" in line: line = line.split("=")[0]+" = 1000\n"
                 elif ".eventMaker.datasetName." in line: line = line.split("(")[0]+"('%s')\n" % self.sample["dataset"]
+                elif "era=" in line: line = line.split("=")[0]+" = '"+params.jecs+"'\n"
+                elif "runOnData=" in line: line = '%s = "%s"\n' % (line.split("=")[0], self.sample["isdata"])
+                elif ".eventMaker.isData" in line: line = "%s = cms.bool(%s)\n" % (line.split("=")[0], self.sample["isdata"])
                 elif "cms.Path" in line:
                     newlines.append( "process.eventMaker.datasetName = cms.string(\"%s\")\n" % self.sample["dataset"] )
                     newlines.append( "process.eventMaker.CMS3tag = cms.string(\"%s\")\n\n" % self.sample["cms3tag"] )
@@ -366,9 +368,10 @@ class Sample:
             except: pass
 
         try:
-            if self.do_skip_tail:
-                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), json=True)
-            else:
+            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), long=True)
+            if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
+                self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
+                self.do_log("falling back to regular old crab status, but I thought you'd like to know at least")
                 out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             self.crab_status_res = out
             return 1 # succeeded
