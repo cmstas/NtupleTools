@@ -70,8 +70,8 @@ for i in range(5000):
                     s.submit_merge_jobs()
             elif stat == "postprocessing":
                 if s.is_merging_done():
-                    s.make_metadata()
                     if s.check_output():
+                        s.make_metadata()
                         s.copy_files()
                 else:
                     s.submit_merge_jobs()
