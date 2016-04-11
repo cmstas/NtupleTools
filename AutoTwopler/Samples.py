@@ -24,33 +24,10 @@ class Sample:
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
-        # debug bools
-        if debug:
-            self.fake_submission = False
-            self.fake_status = True
-            self.fake_crab_done = True
-            self.fake_legit_sweeproot = True
-            self.fake_miniaod_map = True
-            self.fake_merge_lists = True
-            self.fake_check = True
-            self.fake_copy = True
-        else:
-            self.fake_submission = False
-            self.fake_status = False
-            self.fake_crab_done = False
-            self.fake_legit_sweeproot = False
-            self.fake_miniaod_map = False
-            self.fake_merge_lists = False
-            self.fake_check = False
-            self.fake_copy = False
-
         if params.DO_SKIP_TAIL: do_skip_tail = True
 
         self.specialdir_test = specialdir_test
         self.do_skip_tail = do_skip_tail
-
-
-        # dirs are either absolute or wrt the base directory where this script is located
 
         self.misc = {}
         self.misc["pfx_pset"] = 'pset' # where to hold the psets
@@ -61,8 +38,6 @@ class Sample:
         self.misc["logfiles"] = []
         self.misc["last_saved"] = None # when was the last time we backed up this sample data
         self.misc["can_skip_tail"] = False
-        # self.misc["handled_prechecks"] = False
-        # self.misc["passed_prechecks"] = True
 
         self.sample = {
                 "basedir" : "",
@@ -131,8 +106,8 @@ class Sample:
         buff += "[%s]   pset = %s\n" % (self.pfx, self.sample["pset"])
 
         if "status" in self.sample["crab"]:
-            buff += "[%s]   CRAB status %s for %i jobs using schedd %s\n" \
-                    % (self.pfx, self.sample["crab"]["status"], self.sample["crab"]["njobs"], self.sample["crab"]["schedd"])
+            buff += "[%s]   CRAB status %s for %i jobs\n" \
+                    % (self.pfx, self.sample["crab"]["status"], self.sample["crab"]["njobs"])
             buff += "[%s]   Output dir: %s\n" % (self.pfx, self.sample["crab"]["outputdir"])
             for cstat, num in self.sample["crab"]["breakdown"].items():
                 if num == 0: continue
@@ -355,23 +330,20 @@ class Sample:
         except: pass
 
         try:
-            if self.fake_submission:
-                out = {'uniquerequestname': '160222_073351:namin_crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1', 'requestname': 'crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1'}
-            else:
-                if not self.misc["crab_config"]: self.make_crab_config()
-                self.make_pset()
-                # # out = crabCommand('submit', config = self.misc["crab_config"], proxy=u.get_proxy_file())
-                # gotta do this BS instead of the above because stupid crab didn't fix their issue
-                # https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1191/1/1/1.html
-                from multiprocessing import Queue, Process
-                q = Queue()
-                def submit(q,config,proxy):
-                    out = crabCommand('submit', config=config, proxy=proxy)
-                    q.put(out)
-                p = Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
-                p.start()
-                p.join()
-                out = q.get()
+            if not self.misc["crab_config"]: self.make_crab_config()
+            self.make_pset()
+            # # out = crabCommand('submit', config = self.misc["crab_config"], proxy=u.get_proxy_file())
+            # gotta do this BS instead of the above because stupid crab didn't fix their issue
+            # https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1191/1/1/1.html
+            from multiprocessing import Queue, Process
+            q = Queue()
+            def submit(q,config,proxy):
+                out = crabCommand('submit', config=config, proxy=proxy)
+                q.put(out)
+            p = Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
+            p.start()
+            p.join()
+            out = q.get()
 
 
             dtstr = out["uniquerequestname"].split(":")[0]
@@ -394,24 +366,10 @@ class Sample:
             except: pass
 
         try:
-            if self.fake_status:
-                # out = {'ASOURL': 'https://cmsweb.cern.ch/couchdb2', 'collector': 'cmssrv221.fnal.gov,vocms099.cern.ch', 'failedJobdefs': 0,
-                #      'jobList': [['running', 1], ['running', 3], ['running', 2], ['running', 5], ['running', 4], ['running', 7], ['idle', 6], ['running', 8]], 'jobdefErrors': [],
-                #      'jobs': {'1': {'State': 'running'}, '2': {'State': 'running'}, '3': {'State': 'running'}, '4': {'State': 'running'},
-                #               '5': {'State': 'running'}, '6': {'State': 'idle'}, '7': {'State': 'running'}, '8': {'State': 'running'}},
-                #      'jobsPerStatus': {'idle': 1, 'running': 7}, 'outdatasets': None, 'publication': {}, 'publicationFailures': {}, 'schedd': 'crab3-1@submit-5.t2.ucsd.edu',
-                #      'status': 'SUBMITTED', 'statusFailureMsg': '', 'taskFailureMsg': '', 'taskWarningMsg': [], 'totalJobdefs': 0} 
-                out = {'ASOURL': 'https://cmsweb.cern.ch/couchdb2', 'collector': 'cmssrv221.fnal.gov,vocms099.cern.ch', 'failedJobdefs': 0,
-                     'jobList': [['finished', 1], ['finished', 3], ['finished', 2], ['finished', 5], ['finished', 4], ['finished', 7], ['finished', 6], ['finished', 8]], 'jobdefErrors': [],
-                     'jobs': {'1': {'State': 'finished'}, '2': {'State': 'finished'}, '3': {'State': 'finished'}, '4': {'State': 'finished'},
-                              '5': {'State': 'finished'}, '6': {'State': 'finished'}, '7': {'State': 'finished'}, '8': {'State': 'finished'}},
-                     'jobsPerStatus': {'finished': 8}, 'outdatasets': None, 'publication': {}, 'publicationFailures': {}, 'schedd': 'crab3-1@submit-5.t2.ucsd.edu',
-                     'status': 'COMPLETED', 'statusFailureMsg': '', 'taskFailureMsg': '', 'taskWarningMsg': [], 'totalJobdefs': 0} 
+            if self.do_skip_tail:
+                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), json=True)
             else:
-                if self.do_skip_tail:
-                    out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), json=True)
-                else:
-                    out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
             self.crab_status_res = out
             return 1 # succeeded
         except Exception as e:
@@ -453,7 +411,6 @@ class Sample:
             self.sample["crab"]["status_failure"] = stat.get("statusFailureMsg")
             self.sample["crab"]["commonerror"] = None
             self.sample["crab"]["time"] = u.get_timestamp()
-            self.sample["crab"]["schedd"] = stat.get("schedd")
             self.sample["crab"]["njobs"] = len(stat["jobList"])
             self.sample["crab"]["breakdown"] = {
                 "unsubmitted": 0, "idle": 0, "running": 0, "failed": 0,
@@ -492,15 +449,6 @@ class Sample:
                 if mins > 300: # resubmit if been more than 5 hours
                     self.do_log("been more than 5 hours, so trying to resubmit")
                     self.crab_resubmit()
-
-        # if self.sample["crab"]["status"] == "QUEUED":
-        #     mins = self.minutes_since_crab_submit()
-        #     self.do_log("task is QUEUED, and it's been %i minutes" % mins)
-        #     if mins > 300: # resubmit if been more than 5 hours
-        #         self.do_log("been more than 5 hours, so trying to kill and resubmit")
-        #         self.crab_kill()
-        #         self.crab_resubmit()
-
 
         if self.sample["crab"]["breakdown"]["finished"] > 0:
             done_frac = 1.0*self.sample["crab"]["breakdown"]["finished"]/self.sample["crab"]["njobs"]
@@ -600,7 +548,6 @@ class Sample:
         self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
                 % (self.sample["user"], self.sample["dataset"].split("/")[1], self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
 
-        if self.fake_crab_done: return True
         if "status" not in self.sample["crab"]: return False
         if self.sample["crab"]["status"] != "COMPLETED": return False
 
@@ -645,20 +592,6 @@ class Sample:
 
 
     def make_miniaod_map(self):
-        if self.fake_miniaod_map:
-            self.sample["ijob_to_miniaod"] = {
-                1: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/065D3D09-CA6D-E511-A59C-D4AE526A0461.root'],
-                2: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/20FF3B81-C96D-E511-AAB8-441EA17344AC.root'],
-                3: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/2EF6C807-CA6D-E511-A9EE-842B2B758AD8.root'],
-                4: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/30FDAF08-CA6D-E511-828C-D4AE526A0C7A.root'],
-                5: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/4A1B071A-CA6D-E511-8D8E-441EA1733FD6.root'],
-                6: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/90D98A05-CA6D-E511-B721-00266CFFBDB4.root'],
-                7: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/A8935398-C96D-E511-86FA-1CC1DE18CFF0.root'],
-                8: ['/store/mc/RunIISpring15MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/E80D9307-CA6D-E511-A3A7-003048FFCB96.root'],
-            }
-            return
-
-        # print "ijob_to_miniaod", self.sample["ijob_to_miniaod"]
         if not self.sample["ijob_to_miniaod"]:
             self.do_log("making map from unmerged number to miniaod name")
             nlogfiles = len(self.misc["logfiles"])
@@ -688,8 +621,6 @@ class Sample:
 
     def get_rootfile_info(self, fname):
         # returns: is bad, nevents, nevents effective, file size in GB
-        if self.fake_legit_sweeproot: return (False, 1000, 900, 2.0)
-
         f = TFile.Open(fname,"READ")
         treename = "Events"
 
@@ -764,50 +695,36 @@ class Sample:
 
 
     def make_merging_chunks(self):
-        if self.fake_merge_lists:
-            self.sample['ijob_to_nevents'] = { 1: [43079L, 36953L], 2: [14400L, 12304L],
-                                              3: [43400L, 37116L], 4: [29642L, 25430L],
-                                              5: [48479L, 41261L], 6: [18800L, 16156L],
-                                              7: [42000L, 35928L], 8: [10200L, 8702L] }
-            self.sample['imerged_to_ijob'] = {1: [1, 2, 3, 4], 2: [5, 6, 7, 8]}
-            return
+        if self.sample["imerged_to_ijob"]: return
 
-        # print "imerged_to_ijob", self.sample["imerged_to_ijob"]
-        if not self.sample["imerged_to_ijob"]: 
-            self.do_log("making map from merged index to unmerged indicies")
-            group, groups = [], []
-            tot_size = 0.0
-            nrfiles = len(self.misc["rootfiles"])
-            for irfile, rfile in enumerate(self.misc["rootfiles"]):
-                is_bad, nevents, nevents_eff, file_size = self.get_rootfile_info(rfile)
-                # print is_bad, nevents, nevents_eff, file_size, rfile
-                ijob = int(rfile.split("_")[-1].replace(".root",""))
-                self.do_log("checked ntuple_%i.root. nevents, nevents_eff: %i, %i [checked %i of %i]" % (ijob, nevents, nevents_eff, irfile+1, nrfiles))
-                self.sample["ijob_to_nevents"][ijob] = [nevents, nevents_eff]
-                if is_bad:
-                    self.do_log("WARNING: ntuple_%i.root is bad, will skip" % (ijob))
-                    continue
-                tot_size += file_size
-                group.append(ijob)
-                if tot_size >= 4.7: # in GB!
-                    groups.append(group)
-                    group = []
-                    tot_size = 0.0
-            if len(group) > 0: groups.append(group) # finish up last group
-            for igp,gp in enumerate(groups):
-                self.sample["imerged_to_ijob"][igp+1] = gp
+        self.do_log("making map from merged index to unmerged indicies")
+        group, groups = [], []
+        tot_size = 0.0
+        nrfiles = len(self.misc["rootfiles"])
+        for irfile, rfile in enumerate(self.misc["rootfiles"]):
+            is_bad, nevents, nevents_eff, file_size = self.get_rootfile_info(rfile)
+            ijob = int(rfile.split("_")[-1].replace(".root",""))
+            self.do_log("checked ntuple_%i.root. nevents, nevents_eff: %i, %i [checked %i of %i]" % (ijob, nevents, nevents_eff, irfile+1, nrfiles))
+            self.sample["ijob_to_nevents"][ijob] = [nevents, nevents_eff]
+            if is_bad:
+                self.do_log("WARNING: ntuple_%i.root is bad, will skip" % (ijob))
+                continue
+            tot_size += file_size
+            group.append(ijob)
+            if tot_size >= 4.7: # in GB!
+                groups.append(group)
+                group = []
+                tot_size = 0.0
+        if len(group) > 0: groups.append(group) # finish up last group
+        for igp,gp in enumerate(groups):
+            self.sample["imerged_to_ijob"][igp+1] = gp
 
-            self.sample['nevents_unmerged'] = sum([x[0] for x in self.sample['ijob_to_nevents'].values()])
+        self.sample['nevents_unmerged'] = sum([x[0] for x in self.sample['ijob_to_nevents'].values()])
 
 
     def get_condor_submitted(self, running_at_least_hours=0.0):
-        # return set of merged indices
+        # return set of merged indices and set of condor clusterID
         output = u.get("condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS")
-        # output = """
-        # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 1 25000 21000 0.0123 1.1 1.0
-        # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 2 25000 21000 0.0123 1.1 1.0
-        # /home/users/namin/sandbox/duck/scripts/mergeWrapper.sh /hadoop/cms/store/user/namin/TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/crab_ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/160220_235603/0000 2,8 4 25000 21000 0.0123 1.1 1.0
-        # """
 
         merged_id_set = set()
         clusterID_set = set()
@@ -826,7 +743,6 @@ class Sample:
                 else:
                     # if the job is not running, then don't consider it regardless of time
                     continue
-
 
             if self.sample["crab"]["requestname"] == requestname:
                 merged_id_set.add(int(merged_index))
@@ -849,13 +765,9 @@ class Sample:
         if self.sample["status"] == "done":
             return True
 
-        # if self.misc["handled_prechecks"]:
-        #     return self.misc["passed_prechecks"]
-
         # check is sample has already been done
-        final_dir = self.sample["finaldir"]
-        # print final_dir
         is_done = False
+        final_dir = self.sample["finaldir"]
         if os.path.isdir(final_dir):
             files = [f for f in os.listdir(final_dir) if f.endswith(".root")]
             if len(files) > 0: is_done = True
@@ -866,19 +778,6 @@ class Sample:
 
 
         return True
-
-        # self.do_log("hey! it looks like this sample already exists in the final hadoop directory.")
-        # self.do_log("do you want to remake? [y/n] if you don't answer in 10 seconds, will assume no.")
-        # i, o, e = select.select( [sys.stdin], [], [], 10 )
-        # if i:
-        #     inp = sys.stdin.readline().strip()
-        #     if "y" in inp.lower():
-        #         self.do_log("ok, will continue and remake it")
-        # else:
-        #     self.do_log("you ignored me. will not remake. sample will be put in 'done' status now")
-        #     self.sample["status"] = "done"
-
-        # self.misc["handled_prechecks"] = True
 
     def is_merging_done(self):
         # want 0 running condor jobs and all merged files in output area
@@ -906,8 +805,6 @@ class Sample:
         proxy_file = u.get("find /tmp/x509up_u* -user $USER").strip()
         condor_log_files = "/nfs-7/userdata/%s/tupler/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
         std_log_files = "/nfs-7/userdata/%s/tupler/%s/std_logs/" % (os.getenv("USER"),shortname)
-        # condor_log_files = "/data/tmp/%s/%s/%s.log" % (os.getenv("USER"),shortname,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
-        # std_log_files = "/data/tmp/%s/%s/std_logs/" % (os.getenv("USER"),shortname)
         input_files = ",".join([executable_script, merge_script, addbranches_script])
         nevents_both = self.sample['ijob_to_nevents'].values()
         nevents = sum([x[0] for x in nevents_both])
@@ -951,6 +848,7 @@ class Sample:
 
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
+            # only 1% of jobs take more than 6 hours
             longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=6.0)
             if len(longrunning_set) > 0:
                 self.do_log("The following merged file indices have been merging for more than 6 hours: %s" % ", ".join(map(str,longrunning_set)))
@@ -996,61 +894,30 @@ class Sample:
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
 
-
-
     
     def make_metadata(self):
-        metadata_file = self.sample["crab"]["taskdir"]+"/metadata.txt"
-        metadata_file_json = metadata_file.replace(".txt",".json")
-        with open(metadata_file, "w") as fhout:
-            print >>fhout,"sampleName: %s" % self.sample["dataset"]
-            print >>fhout,"xsec: %s" % self.sample["xsec"]
-            print >>fhout,"k-fact: %s" % self.sample["kfact"]
-            print >>fhout,"e-fact: %s" % self.sample["efact"]
-            print >>fhout,"cms3tag: %s" % self.sample["cms3tag"]
-            print >>fhout,"gtag: %s" % self.sample["gtag"]
-            print >>fhout,"sparms: %s" % (",".join(self.sample["sparms"]) if self.sample["sparms"] else "_")
-            print >>fhout, ""
-            print >>fhout,"unmerged files are in: %s" % self.sample["crab"]["outputdir"]
-            print >>fhout, ""
-            for ijob in sorted(self.sample["ijob_to_miniaod"]):
-                print >>fhout, "unmerged %i %s" % (ijob, ",".join(self.sample["ijob_to_miniaod"][ijob]))
-            print >>fhout, ""
-            for imerged in sorted(self.sample["imerged_to_ijob"]):
-                print >>fhout, "merged file constituents %i: %s" % (imerged, " ".join(map(str,self.sample["imerged_to_ijob"][imerged])))
-            print >>fhout, ""
-            for imerged in sorted(self.sample["imerged_to_ijob"]):
-                nevents_both = [self.sample["ijob_to_nevents"][ijob] for ijob in self.sample["imerged_to_ijob"][imerged]]
-                nevents = sum([x[0] for x in nevents_both])
-                nevents_effective = sum([x[1] for x in nevents_both])
-                print >>fhout, "merged file nevents %i: %i %i" % (imerged, nevents, nevents_effective)
-
+        metadata_file = self.sample["crab"]["taskdir"]+"/metadata.json"
         d_tot = self.sample.copy()
-        with open(metadata_file_json, "w") as fhout:
+        with open(metadata_file, "w") as fhout:
             json.dump(d_tot, fhout, sort_keys = True, indent = 4)
 
         # mirror the central snt directory structure for metadata files
         metadatabank_dir = "/nfs-7/userdata/metadataBank/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
 
-        # copy txt to merged and backup. copy json to backup only
-        u.cmd('chmod a+w %s %s' % (metadata_file, metadata_file_json))
+        # copy to merged and backup
+        u.cmd('chmod a+rw %s' % (metadata_file))
         u.cmd("cp %s %s/" % (metadata_file, self.sample["crab"]["outputdir"]+"/merged/"))
-        u.cmd('mkdir -p {0} ; chmod a+w {0}'.format(metadatabank_dir))
-        u.cmd('cp %s %s %s/' % (metadata_file, metadata_file_json, metadatabank_dir))
+        u.cmd('mkdir -p {0} ; chmod a+rw {0}'.format(metadatabank_dir))
+        u.cmd('cp %s %s/' % (metadata_file, metadatabank_dir))
 
         self.do_log("made metadata and copied it to merged and backup areas")
 
     def copy_files(self):
         self.do_log("started copying files to %s" % self.sample["finaldir"])
-        if self.fake_copy:
-            print "Will do: mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"])
-            self.sample["status"] = "done"
-            return
-        else:
-            u.cmd("mkdir -p %s/" % self.sample["finaldir"])
-            # TODO: hadoop move command is faster
-            u.cmd( "mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
+        u.cmd("mkdir -p %s/" % self.sample["finaldir"])
+        # TODO: hadoop move command is faster
+        u.cmd( "mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
         self.do_log("finished copying files")
 
         if self.get_events_in_chain(self.sample["finaldir"]+"/*.root") == self.sample['nevents_merged']:
@@ -1059,119 +926,6 @@ class Sample:
         else:
             self.do_log("lost some events after moving into final directory. re-merging now.")
             self.submit_merge_jobs()
-
-
-    def check_output_OLD(self):
-        # FIXME TODO
-        """
-        REMOVE ONCE IT'S CLEAR THAT THE OTHER FUNCTION WORKS FLAWLESSLY
-        """
-        if self.fake_check:
-            problems = []
-            tot_problems = 0
-        else:
-            output_dir = self.sample["crab"]["outputdir"]
-
-            # some samples are still in production, so check to see if the das counts are the same
-            ignoreDAS = "0"
-            nevents = self.sample["nevents_DAS"]
-            for iattempt in range(5):
-                try:
-                    nevents = u.dataset_event_count(self.sample["dataset"])["nevents"]
-                    break
-                except: pass
-            if self.sample["nevents_DAS"] != nevents:
-                self.do_log("sample originally had %i events according to DAS/DBS, but now it's %i" % (self.sample["nevents_DAS"],nevents))
-                self.do_log("because of this, checkCMS3 will ignore the DAS check")
-                ignoreDAS = "1"
-            elif self.sample["nevents_DAS"] != self.sample["nevents_unmerged"]:
-                self.do_log("sample originally had %i events according to DAS/DBS, but unmerged has %i" % (self.sample["nevents_DAS"],self.sample["nevents_unmerged"]))
-                self.do_log("because of this, checkCMS3 will ignore the DAS check")
-                ignoreDAS = "1"
-            elif self.do_skip_tail:
-                ignoreDAS = "1"
-            else:
-                self.do_log("sample originally had %i events according to DAS/DBS, and it's still %i, so proceeding as usual" % (self.sample["nevents_DAS"],nevents))
-
-            cmd = """( cd scripts; root -n -b -q -l "checkCMS3.C(\\"{0}/merged\\", \\"{0}\\", 0,0,{1})"; )""".format(output_dir, ignoreDAS)
-            # print cmd
-            self.do_log("started running checkCMS3")
-            out = u.get(cmd)
-            self.do_log("finished running checkCMS3")
-
-            # out = """
-            # ERROR!                Inconsistent scale1fb!
-            # =============== RESULTS =========================
-            # Total problems found: 1
-            # """
-
-            lines = out.split("\n")
-            problems = []
-            tot_problems = -1
-            for line in lines:
-                if "ERROR!" in line: problems.append(line.replace("ERROR!","").strip())
-                elif "Total problems found:" in line: tot_problems = int(line.split(":")[1].strip())
-
-        # if the program segfaulted somehow, then we might have picked up on an ERROR, but not the Total problems found: <int> part, so take the max
-        if len(problems) > 0:
-            tot_problems = max(tot_problems, len(problems))
-
-        self.do_log("found %i total problems:" % tot_problems)
-        for prob in problems:
-            self.do_log("-- %s" % prob)
-
-        # if skipping tail, of course we will have problem with event mismatch, so subtract it out
-        if self.do_skip_tail and tot_problems > 0:
-            tot_problems -= 1
-
-        if len(problems) != 0 or tot_problems != 0:
-            if cmd: self.do_log("executed the command: %s" % cmd)
-            self.do_log(out)
-
-        self.sample["checks"]["nproblems"] = tot_problems
-        self.sample["checks"]["problems"] = problems
-        self.sample['nevents_merged'] = self.sample['nevents_unmerged'] if tot_problems == 0 else 0
-
-        self.handle_sample_problems()
-
-        return tot_problems == 0
-
-    def handle_sample_problems(self):
-        # FIXME TODO
-        """
-        REMOVE ONCE IT'S CLEAR THAT THE OTHER FUNCTION WORKS FLAWLESSLY
-        """
-        problems = self.sample["checks"]["problems"]
-        merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
-
-
-        # sometimes we will get "Could not open file: ____"
-        # and we will resubmit it, but then if we also have "Counts mismatch!" in the problems array, 
-        # this will try to delete all of the files! BAD! Ignore Counts mismatch if we find a corrupt file and deal with that first
-        resubmitted_bad_file = False
-        for problem in problems:
-            if "Wrong event count" in problem or "Could not open file" in problem:
-                # delete this imerged
-                if not self.do_skip_tail:
-                    imerged = int(problem.split(".root")[0].split("_")[-1])
-                    u.cmd("rm %s/merged_ntuple_%i.root" % (merged_dir, imerged))
-                    self.submit_merge_jobs()
-                    resubmitted_bad_file = True
-                else:
-                    # FIXME be smart about event counts? or is there no way to get event counts
-                    # until crab has finished? but that defeats purpose of do_skip_tail
-                    pass
-            elif "events with zeros in" in problem:
-                # delete all merged and remerge
-                u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
-                self.submit_merge_jobs()
-            elif "Counts mismatch!" in problem and not resubmitted_bad_file:
-                # delete all merged and remerge
-                u.cmd("rm %s/merged_ntuple_*.root" % (merged_dir))
-                self.submit_merge_jobs()
-            elif "DAS query failed" in problem:
-                # probably transient, ignore and let check() try again later
-                pass
 
     def check_output(self):
         merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
@@ -1201,64 +955,4 @@ class Sample:
 
 
 if __name__=='__main__':
-
-
-    # flowchart:
-    # === status: created
-    # 0) renew proxy
-    # 1) copy jecs, make crab config, make pset
-    #
-    # === status: crab
-    # 2) submit crab jobs and get status
-    # 3) keep getting status until is_crab_done
-    #
-    # === status: postprocessing
-    # 4) make miniaod map, make merging chunks
-    # 5) submit merging jobs
-    # 6) check merge output and re-submit outstanding jobs until all done
-    # 7) checkCMS3
-    # 8) make meta data
-    # 9) copy to final resting place
-    #
-    # === status: done
-
-    s = Sample( **{
-              "dataset": "/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM",
-              "gtag": "74X_mcRun2_asymptotic_v2",
-              "kfact": 1.0,
-              "efact": 1.0,
-              "xsec": 0.0234,
-              "debug": True,
-              "specialdir_test": False,
-              } )
-
-    if u.proxy_hours_left() < 5:
-        print "Proxy near end of lifetime, renewing."
-        u.proxy_renew()
-    else:
-        print "Proxy looks good"
-
-    u.copy_jecs()
-
-    # s.handle_tsa_prechecks()
-
-    s.crab_submit()
-
-    s.crab_parse_status()
-
-    if s.is_crab_done():
-
-        s.make_miniaod_map()
-        s.make_merging_chunks()
-        s.submit_merge_jobs()
-
-    if s.is_merging_done():
-        s.make_metadata()
-        if s.check_output():
-            s.copy_files()
-
-    s.save()
-
-    pprint.pprint(s.get_slimmed_dict())
-
-    # pprint.pprint( s.sample )
+    pass
