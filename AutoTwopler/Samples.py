@@ -1,5 +1,5 @@
 import os, sys, glob, select
-import datetime, ast, tarfile, pprint
+import datetime, tarfile, pprint
 import pickle, json, logging
 
 try:
@@ -443,10 +443,11 @@ class Sample:
     def crab_parse_status(self):
         self.crab_status()
         stat = self.crab_status_res
-        # print stat
 
         try:
-            self.sample["crab"]["status"] = stat.get("status")
+            # if the status from crab exists, then set the old status to it
+            if stat.get("status",None):
+                self.sample["crab"]["status"] = stat.get("status")
             self.sample["crab"]["task_failure"] = stat.get("taskFailureMsg")
             self.sample["crab"]["task_warning"] = stat.get("taskWarningMsg")
             self.sample["crab"]["status_failure"] = stat.get("statusFailureMsg")
@@ -603,8 +604,6 @@ class Sample:
         if "status" not in self.sample["crab"]: return False
         if self.sample["crab"]["status"] != "COMPLETED": return False
 
-        # print "here"
-
         self.handle_more_than_1k()
 
         def get_num(fname): return int(fname.split("_")[-1].split(".")[0])
@@ -694,11 +693,15 @@ class Sample:
         f = TFile.Open(fname,"READ")
         treename = "Events"
 
-        if not f or f.IsZombie(): return (True, 0, 0, 0)
+        if not f or f.IsZombie():
+            print "WARNING: %s is unopenable or zombified" % fname
+            return (True, 0, 0, 0)
 
         tree = f.Get(treename)
         n_entries = tree.GetEntriesFast()
-        if n_entries == 0: return (True, 0, 0, 0)
+        if n_entries == 0:
+            print "WARNING: %s has 0 entries" % fname
+            return (True, 0, 0, 0)
 
         pos_weight = tree.Draw("1", "genps_weight>0", "goff")
         neg_weight = n_entries - pos_weight
@@ -707,9 +710,52 @@ class Sample:
         h_pfmet = TH1F("h_pfmet", "h_pfmet", 100, 0, 1000);
         tree.Draw("evt_pfmet >> h_pfmet", "", "goff")
         avg_pfmet = h_pfmet.GetMean()
-        if avg_pfmet < 0.01 or avg_pfmet > 10000: return (True, 0, 0, 0)
+        if avg_pfmet < 0.01 or avg_pfmet > 10000:
+            print "WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet)
+            return (True, 0, 0, 0)
 
+        f.Close()
         return (False, n_entries, n_entries_eff, f.GetSize()/1.0e9)
+
+    def check_merged_rootfile(self, fname, total_events):
+        f = TFile.Open(fname,"READ")
+        treename = "Events"
+        imerged = int(fname.split(".root")[0].split("_")[-1])
+
+        if not f or f.IsZombie():
+            try: f.Close()
+            except: pass
+            return 1, "Could not open file"
+
+        tree = f.Get(treename)
+        n_entries = tree.GetEntries()
+        if n_entries == 0: 
+            f.Close()
+            return 1, "No events in file"
+
+        scale1fb_max = abs(tree.GetMaximum("evt_scale1fb"))
+        scale1fb_min = abs(tree.GetMinimum("evt_scale1fb"))
+
+        if (scale1fb_max - scale1fb_min)/scale1fb_max > 1e-6:
+            f.Close()
+            return 1, "Inconsistent scale1fb"
+
+        kfactor = tree.GetMaximum("evt_kfactor")
+        filteff = tree.GetMaximum("evt_filt_eff")
+        xsec = tree.GetMaximum("evt_xsec_incl")
+        nevents_branch = int(tree.GetMaximum("evt_nEvts"))
+        recalc_scale1fb = 1000.*xsec*filteff*kfactor / nevents_branch
+
+        if nevents_branch != total_events:
+            f.Close()
+            return 1, "evt_nEvts differs from total merged event count"
+
+        if (recalc_scale1fb - scale1fb_min)/scale1fb_min > 1e-6:
+            f.Close()
+            return 1, "Inconsistent scale1fb"
+
+        f.Close()
+        return 0, ""
 
     def get_events_in_chain(self, fname_wildcard):
         ch = TChain("Events")
@@ -738,7 +784,9 @@ class Sample:
                 ijob = int(rfile.split("_")[-1].replace(".root",""))
                 self.do_log("checked ntuple_%i.root. nevents, nevents_eff: %i, %i [checked %i of %i]" % (ijob, nevents, nevents_eff, irfile+1, nrfiles))
                 self.sample["ijob_to_nevents"][ijob] = [nevents, nevents_eff]
-                if is_bad: continue
+                if is_bad:
+                    self.do_log("WARNING: ntuple_%i.root is bad, will skip" % (ijob))
+                    continue
                 tot_size += file_size
                 group.append(ijob)
                 if tot_size >= 4.7: # in GB!
@@ -770,10 +818,14 @@ class Sample:
             requestname = unmerged_dir.split("crab_")[1].split("/")[0]
 
             # if we've specified to look only at jobs which have been running for at least x hours
-            if running_at_least_hours > 0.01 and status == "RUNNING":
+            if running_at_least_hours > 0.01:
                 hours = 1.0*(datetime.datetime.now()-datetime.datetime.fromtimestamp(int(entered_current_status))).seconds / 3600.0
                 # print hours
-                if hours < running_at_least_hours: continue
+                if status == "RUNNING":
+                    if hours < running_at_least_hours: continue
+                else:
+                    # if the job is not running, then don't consider it regardless of time
+                    continue
 
 
             if self.sample["crab"]["requestname"] == requestname:
@@ -993,6 +1045,8 @@ class Sample:
         self.do_log("started copying files to %s" % self.sample["finaldir"])
         if self.fake_copy:
             print "Will do: mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"])
+            self.sample["status"] = "done"
+            return
         else:
             u.cmd("mkdir -p %s/" % self.sample["finaldir"])
             # TODO: hadoop move command is faster
@@ -1007,7 +1061,11 @@ class Sample:
             self.submit_merge_jobs()
 
 
-    def check_output(self):
+    def check_output_OLD(self):
+        # FIXME TODO
+        """
+        REMOVE ONCE IT'S CLEAR THAT THE OTHER FUNCTION WORKS FLAWLESSLY
+        """
         if self.fake_check:
             problems = []
             tot_problems = 0
@@ -1026,12 +1084,14 @@ class Sample:
                 self.do_log("sample originally had %i events according to DAS/DBS, but now it's %i" % (self.sample["nevents_DAS"],nevents))
                 self.do_log("because of this, checkCMS3 will ignore the DAS check")
                 ignoreDAS = "1"
+            elif self.sample["nevents_DAS"] != self.sample["nevents_unmerged"]:
+                self.do_log("sample originally had %i events according to DAS/DBS, but unmerged has %i" % (self.sample["nevents_DAS"],self.sample["nevents_unmerged"]))
+                self.do_log("because of this, checkCMS3 will ignore the DAS check")
+                ignoreDAS = "1"
+            elif self.do_skip_tail:
+                ignoreDAS = "1"
             else:
                 self.do_log("sample originally had %i events according to DAS/DBS, and it's still %i, so proceeding as usual" % (self.sample["nevents_DAS"],nevents))
-
-            if self.do_skip_tail:
-                # STUPID DAS
-                ignoreDAS = "1"
 
             cmd = """( cd scripts; root -n -b -q -l "checkCMS3.C(\\"{0}/merged\\", \\"{0}\\", 0,0,{1})"; )""".format(output_dir, ignoreDAS)
             # print cmd
@@ -1077,6 +1137,10 @@ class Sample:
         return tot_problems == 0
 
     def handle_sample_problems(self):
+        # FIXME TODO
+        """
+        REMOVE ONCE IT'S CLEAR THAT THE OTHER FUNCTION WORKS FLAWLESSLY
+        """
         problems = self.sample["checks"]["problems"]
         merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
 
@@ -1085,8 +1149,6 @@ class Sample:
         # and we will resubmit it, but then if we also have "Counts mismatch!" in the problems array, 
         # this will try to delete all of the files! BAD! Ignore Counts mismatch if we find a corrupt file and deal with that first
         resubmitted_bad_file = False
-        # print "before: ", problems
-        # print resubmitted_bad_file
         for problem in problems:
             if "Wrong event count" in problem or "Could not open file" in problem:
                 # delete this imerged
@@ -1110,8 +1172,32 @@ class Sample:
             elif "DAS query failed" in problem:
                 # probably transient, ignore and let check() try again later
                 pass
-        # print "after: ", problems
-        # print resubmitted_bad_file
+
+    def check_output(self):
+        merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
+
+        tot_events = self.get_events_in_chain(merged_wildcard)
+
+        fnames = glob.glob(merged_wildcard)
+
+        num_failed = 0
+        problems = []
+        for fname in fnames:
+            failed, problem = self.check_merged_rootfile(fname, tot_events)
+            if failed:
+                problems.append("%s: %s" % (problem, fname))
+                u.cmd("rm %s" % fname)
+                num_failed += 1
+
+        if num_failed > 0:
+            self.do_log("%i merged ntuples are bad" % num_failed)
+            self.submit_merge_jobs()
+
+        self.sample["checks"]["nproblems"] = num_failed
+        self.sample["checks"]["problems"] = problems
+        self.sample['nevents_merged'] = self.sample['nevents_unmerged'] if num_failed == 0 else 0
+
+        return num_failed == 0
 
 
 if __name__=='__main__':
