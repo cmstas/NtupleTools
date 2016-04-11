@@ -227,6 +227,7 @@ class Sample:
         config.JobType.inputFiles = [params.jecs]
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
+        config.JobType.allowUndistributedCMSSW = True
         config.section_('Data')
         config.Data.allowNonValidInputDataset = True
         config.Data.publication = False
@@ -267,7 +268,7 @@ class Sample:
                 elif ".reportEvery" in line: line = line.split("=")[0]+" = 1000\n"
                 elif ".eventMaker.datasetName." in line: line = line.split("(")[0]+"('%s')\n" % self.sample["dataset"]
                 elif "era=" in line: line = line.split("=")[0]+" = '"+params.jecs+"'\n"
-                elif "runOnData=" in line: line = '%s = "%s"\n' % (line.split("=")[0], self.sample["isdata"])
+                elif "runOnData=" in line: line = '%s = %s\n' % (line.split("=")[0], self.sample["isdata"])
                 elif ".eventMaker.isData" in line: line = "%s = cms.bool(%s)\n" % (line.split("=")[0], self.sample["isdata"])
                 elif "cms.Path" in line:
                     newlines.append( "process.eventMaker.datasetName = cms.string(\"%s\")\n" % self.sample["dataset"] )

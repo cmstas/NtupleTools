@@ -32,7 +32,7 @@ def proxy_hours_left():
 
 def copy_jecs():
     if not os.path.isfile(params.jecs):
-        os.system("cp /nfs-7/userdata/JECs/%s ." % jec)
+        os.system("cp /nfs-7/userdata/JECs/%s ." % params.jecs)
 
 def get_web_dir():
     return "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
