@@ -61,8 +61,35 @@ def read_samples(filename="instructions.txt"):
             dataset, gtag, xsec, kfact, efact = parts[:5]
             sample = { "dataset": dataset, "gtag": gtag, "kfact": float(kfact), "efact": float(efact), "xsec": float(xsec) }
             if len(parts) == 6: sample["sparms"] = parts[5].split(",")
+
+            if dataset.endswith(".txt"):
+                d_parsed = parse_filelist(dataset)
+                if not d_parsed: continue
+
+                for key in d_parsed: sample[key] = d_parsed[key]
+
             samples.append(sample)
     return samples
+
+def parse_filelist(filename):
+    dataset = None
+    files_per_job = 1
+    filelist = []
+    with open(filename, "r") as fhin:
+        for line in fhin.readlines():
+            line = line.strip()
+            if len(line) < 1: continue
+            if line[0] == "#": continue
+
+            if line.startswith("dataset:"): dataset = line.split(":")[-1].strip()
+            elif line.startswith("files_per_job:"): files_per_job = int(line.split(":")[-1].strip())
+            elif line.endswith(".root"): filelist.append(line)
+
+    if not dataset or not filelist:
+        return { }
+    else:
+        return {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist}}
+
 
 def proxy_renew():
     # http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/LongLivedProxy

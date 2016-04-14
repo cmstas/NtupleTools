@@ -18,12 +18,15 @@ import utils as u
 
 class Sample:
 
-    def __init__(self, dataset=None, gtag=None, kfact=None, efact=None,xsec=None, sparms=[]):
+    def __init__(self, dataset=None, gtag=None, kfact=None, efact=None,xsec=None, sparms=[], extra={}):
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
         self.specialdir_test = params.DO_TEST
         self.do_skip_tail = params.DO_SKIP_TAIL
+
+        self.do_filelist = "filelist" in extra
+        self.extra = extra
 
         if params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
 
@@ -186,6 +189,7 @@ class Sample:
         elif "RunIISpring15FSPremix" in ds: self.sample["specialdir"] = "run2_fastsim"
         elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
         elif "TChi" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
+        elif "Private74X" in ds: self.sample["specialdir"] = "run2_fastsim_private"
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
@@ -240,6 +244,21 @@ class Sample:
         config.section_('Site')
         config.Site.storageSite = 'T2_US_UCSD'
         config.Site.whitelist = ['T2_US_*']
+
+        if self.do_filelist:
+            files = self.extra["filelist"]
+            files_per_job = self.extra["files_per_job"]
+
+            config.JobType.generator = 'lhe'
+            del config.Data.inputDataset
+            config.Data.outputPrimaryDataset = self.sample["shortname"]
+            config.Data.splitting = 'FileBased'
+            config.Data.unitsPerJob = self.extra["files_per_job"]
+            config.Data.userInputFiles = files
+            config.Data.totalUnits = len(files)
+
+
+
         self.misc["crab_config"] = config
     
     def make_pset(self):
@@ -362,7 +381,7 @@ class Sample:
 
     def crab_status(self):
 
-        if self.sample["nevents_DAS"] == 0:
+        if self.sample["nevents_DAS"] == 0 and not self.do_filelist:
             try: 
                 self.sample["nevents_DAS"] = u.dataset_event_count(self.sample["dataset"])["nevents"]
                 self.do_log("sample has %i events according to DAS/DBS" % self.sample["nevents_DAS"])
@@ -485,7 +504,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if nretries >= 5 and done_frac > 0.95:
+                    if nretries >= 1 and done_frac > 0.95:
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]

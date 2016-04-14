@@ -16,7 +16,24 @@
 8. Sit quack and relax
 9. When you see done samples on the dashboard, you can enter your username in the Twiki section, select the appropriate Twiki, and hit "Update Twiki with done samples" to automagically fill in the Twiki entries
 
+## Misc
+### Ntupling private samples (assuming they are accessible via xrootd)
+- Prepare a text file (must end with `.txt`) with the list of files. There are two required parts: a "fake dataset" name which will follow the same parsing of regular datasets, and (of course) the list of files. An optional third piece of information lets you control the file splitting in case there are many files with few events. Structure the file as follows
+```bash
+$ cat filelist.txt
+dataset: /SMS-T2tt_TEST/SMS_T2tt_mStop-170_mLSP-1_Private74X-TEST-v2/USER
+files_per_job: 4
+/store/user/namin/ana_MC/SMST2tt/SMS-T2tt_mStop-170/SMS-T2tt_mStop-170_mLSP-1_madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_MINIAODSIM_b0.root
+/store/user/namin/ana_MC/SMST2tt/SMS-T2tt_mStop-170/SMS-T2tt_mStop-170_mLSP-1_madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_MINIAODSIM_b100.root
+/store/user/namin/ana_MC/SMST2tt/SMS-T2tt_mStop-170/SMS-T2tt_mStop-170_mLSP-1_madgraphMLM-pythia8_RunIISpring15MiniAODv2-FastAsympt25ns_74X_MINIAODSIM_b101.root
+```
+- Next, get the full path to this filelist and put it in your instructions.txt in place of the dataset name, i.e., `/home/users/namin/forFrank/NtupleTools/AutoTwopler/filelist.txt 74X_mcRun2_asymptotic_v2 1 1 1 mStop,mLSP`
+- Now everything else follows as usual.
+
+
 ## TODO:
+- [ ] Support for CMS3 to babies
+- [ ] Integrate DIS querying
 - [x] Check that nothing happened to the files after copying (don't need to do full blown checkCMS3, just check event counts or something)
 - [x] Parse checkCMS3 output and remake stuff appropriately
 - [x] Be able to change xsec, kfact, efact before post-processing (through an updated instructions.txt)
