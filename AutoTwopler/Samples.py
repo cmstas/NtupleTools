@@ -418,7 +418,7 @@ class Sample:
         # minutes since the crab task was created
         dtstr = self.sample["crab"]["datetime"]
         then = datetime.datetime.strptime(dtstr, "%y%m%d_%H%M%S")
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow() # crab datestr uses GMT, so must use utcnow()
         return (then-now).seconds / 60.0
 
     def crab_parse_status(self):
