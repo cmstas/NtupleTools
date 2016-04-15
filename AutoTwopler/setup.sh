@@ -23,7 +23,7 @@ if [ ! -d $CMSSW_VER ] || [ ! -e $CMSSW_VER/lib_${CMS3TAG}.tar.gz ]; then
       cd $CMSSW_BASE
     else
       scramv1 p -n ${CMSSW_VER} CMSSW $CMSSW_VER
-      cd $CMSSW_BASE
+      cd $CMSSW_VER
       cmsenv
       cp /nfs-7/userdata/libCMS3/lib_${CMS3TAG}.tar.gz . 
       echo "[setup] Extracting tar"
