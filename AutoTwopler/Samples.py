@@ -568,8 +568,12 @@ class Sample:
 
     def is_crab_done(self):
 
-        self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
-                % (self.sample["user"], self.sample["dataset"].split("/")[1], self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
+        if not self.do_filelist:
+            self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
+                    % (self.sample["user"], self.sample["dataset"].split("/")[1], self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
+        else:
+            self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
+                    % (self.sample["user"], "_".join(self.sample["dataset"].split("/")[1:3]), self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
 
         if "status" not in self.sample["crab"]: return False
         if self.sample["crab"]["status"] != "COMPLETED": return False
