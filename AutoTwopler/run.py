@@ -60,6 +60,12 @@ for i in range(5000):
         try:
             stat = s.get_status()
 
+            # grab actions from a text file and act on them, consuming (removing) them if successful
+            actions = u.get_actions(dataset_name=s["dataset"])
+            if actions:
+                for dataset_name, action in actions:
+                    if s.handle_action(action): u.consume_actions(dataset_name=s["dataset"])
+
             if not s.pass_tsa_prechecks(): continue
 
             if stat == "new":
@@ -67,8 +73,8 @@ for i in range(5000):
             elif stat == "crab":
                 s.crab_parse_status()
                 if s.is_crab_done():
-                    s.make_miniaod_map()
-                    s.make_merging_chunks()
+                    s.make_miniaod_map(force=True)
+                    s.make_merging_chunks(force=True)
                     s.submit_merge_jobs()
             elif stat == "postprocessing":
                 if s.is_merging_done():
