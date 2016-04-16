@@ -673,7 +673,7 @@ class Sample:
             print "WARNING: %s has 0 entries" % fname
             return (True, 0, 0, 0)
 
-        pos_weight = tree.Draw("1", "genps_weight>0", "goff")
+        pos_weight = tree.Draw("1", "genps_weight>=0", "goff")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 
