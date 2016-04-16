@@ -216,6 +216,17 @@ class Sample:
                         % (param, d[param], self.sample[param]) )
 
 
+    def handle_action(self, action):
+        if "set status" in action:
+            new_status = action.split("set status")[1].strip()
+            old_status = self.sample["status"]
+            self.sample["status"] = new_status
+            self.do_log("found and performed an action to change status from %s to %s" % (old_status, new_status))
+            return True
+
+        return False
+
+
     def make_crab_config(self):
         if self.misc["crab_config"] is not None: 
             self.do_log("crab config already made, not remaking")
@@ -618,32 +629,33 @@ class Sample:
         return False
 
 
-    def make_miniaod_map(self):
-        if not self.sample["ijob_to_miniaod"]:
-            self.do_log("making map from unmerged number to miniaod name")
-            nlogfiles = len(self.misc["logfiles"])
-            for ilogfile,logfile in enumerate(self.misc["logfiles"]):
-                # print logfile
-                if ".tar.gz" in logfile:
-                    with  tarfile.open(logfile, "r:gz") as tar:
-                        for member in tar:
-                            if "FrameworkJobReport" not in member.name: continue
-                            jobnum = int(member.name.split("-")[1].split(".xml")[0])
-                            fh = tar.extractfile(member)
-                            lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
-                            miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
-                            self.sample["ijob_to_miniaod"][jobnum] = miniaod
-                            self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
-                            fh.close()
-                            break
-                elif ".txt" in logfile:
-                    # parse the recovered txt files if .tar.gz didn't stageout
-                    with open(logfile, "r") as fh:
-                        # job_out.7.0.txt
-                        jobnum = int(logfile.split("job_out.")[1].split(".")[0])
-                        lines = [line for line in fh.readlines() if "Initiating request to open file" in line]
-                        miniaod = list(set(map(lambda x: "/store/"+x.split("/store/")[1].split(".root")[0]+".root", lines)))
+    def make_miniaod_map(self, force=False):
+        if self.sample["ijob_to_miniaod"] and not force: return
+
+        self.do_log("making map from unmerged number to miniaod name")
+        nlogfiles = len(self.misc["logfiles"])
+        for ilogfile,logfile in enumerate(self.misc["logfiles"]):
+            # print logfile
+            if ".tar.gz" in logfile:
+                with  tarfile.open(logfile, "r:gz") as tar:
+                    for member in tar:
+                        if "FrameworkJobReport" not in member.name: continue
+                        jobnum = int(member.name.split("-")[1].split(".xml")[0])
+                        fh = tar.extractfile(member)
+                        lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
+                        miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
                         self.sample["ijob_to_miniaod"][jobnum] = miniaod
+                        self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
+                        fh.close()
+                        break
+            elif ".txt" in logfile:
+                # parse the recovered txt files if .tar.gz didn't stageout
+                with open(logfile, "r") as fh:
+                    # job_out.7.0.txt
+                    jobnum = int(logfile.split("job_out.")[1].split(".")[0])
+                    lines = [line for line in fh.readlines() if "Initiating request to open file" in line]
+                    miniaod = list(set(map(lambda x: "/store/"+x.split("/store/")[1].split(".root")[0]+".root", lines)))
+                    self.sample["ijob_to_miniaod"][jobnum] = miniaod
 
 
     def get_rootfile_info(self, fname):
@@ -675,9 +687,8 @@ class Sample:
         f.Close()
         return (False, n_entries, n_entries_eff, f.GetSize()/1.0e9)
 
-    def check_merged_rootfile(self, fname, total_events):
+    def check_merged_rootfile(self, fname, total_events, treename="Events"):
         f = TFile.Open(fname,"READ")
-        treename = "Events"
         imerged = int(fname.split(".root")[0].split("_")[-1])
 
         if not f or f.IsZombie():
@@ -696,13 +707,14 @@ class Sample:
 
         if (scale1fb_max - scale1fb_min)/scale1fb_max > 1e-6:
             f.Close()
-            return 1, "Inconsistent scale1fb"
+            return 1, "Inconsistent scale1fb. abs(min): %f, abs(max): %f" % (scale1fb_min, scale1fb_max)
 
         kfactor = tree.GetMaximum("evt_kfactor")
         filteff = tree.GetMaximum("evt_filt_eff")
         xsec = tree.GetMaximum("evt_xsec_incl")
         nevents_branch = int(tree.GetMaximum("evt_nEvts"))
-        recalc_scale1fb = 1000.*xsec*filteff*kfactor / nevents_branch
+        nevents_eff_branch = int(tree.GetMaximum("evt_nEvts_effective"))
+        recalc_scale1fb = 1000.*xsec*filteff*kfactor / nevents_eff_branch
 
         if nevents_branch != total_events:
             f.Close()
@@ -710,7 +722,7 @@ class Sample:
 
         if (recalc_scale1fb - scale1fb_min)/scale1fb_min > 1e-6:
             f.Close()
-            return 1, "Inconsistent scale1fb"
+            return 1, "Inconsistent scale1fb. In file: %f, Calculated: %f" % (scale1fb_min, recalc_scale1fb)
 
         f.Close()
         return 0, ""
@@ -721,8 +733,8 @@ class Sample:
         return ch.GetEntries()
 
 
-    def make_merging_chunks(self):
-        if self.sample["imerged_to_ijob"]: return
+    def make_merging_chunks(self, force=False):
+        if self.sample["imerged_to_ijob"] and not force: return
 
         self.do_log("making map from merged index to unmerged indicies")
         group, groups = [], []
