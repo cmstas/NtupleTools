@@ -268,7 +268,39 @@ def purge_crabcache(verbose=False):
              "successfully purged file %s" % hkey
 
 
+def get_actions(actions_fname="actions.txt", dataset_name=None):
+    if not os.path.isfile(actions_fname): return []
 
+    with open(actions_fname, "r") as fhin:
+        actions = []
+        for line in fhin:
+            if ":" not in line: continue
+            dataset = line.split(":")[0].strip()
+            action = line.split(":")[1].strip()
+
+            if dataset_name and dataset != dataset_name: continue
+            actions.append( [dataset,action] )
+
+    return actions
+
+def consume_actions(dataset_name, actions_fname="actions.txt"):
+    if not os.path.isfile(actions_fname): return
+
+    lines = []
+    with open(actions_fname, "r") as fhin:
+        lines = fhin.readlines()
+
+    with open(actions_fname, "w") as fhout:
+        for line in lines:
+            if ":" not in line: continue
+            dataset = line.split(":")[0].strip()
+            action = line.split(":")[1].strip()
+
+            if dataset == dataset_name: 
+                print ">>> Consumed action for %s: %s" % (dataset, action)
+                continue
+
+            fhout.write(line)
 
 if __name__=='__main__':
 
@@ -280,6 +312,10 @@ if __name__=='__main__':
 
     print get_proxy_file()
 
+    # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/workflow?workflow=160415_063140:namin_crab_tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asym")
+    # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/workflow?workflow=160415_063546:namin_crab_ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v")
+    # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/task?subresource=webdirprx&workflow=160415_063546:namin_crab_ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v")
+    # print get_dbs_url("https://cmsweb.cern.ch/scheddmon/095/cms696/160415_063546:namin_crab_ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v")
 
     # print get_crabcache_info()
     # purge_crabcache()
