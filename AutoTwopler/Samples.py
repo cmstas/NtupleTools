@@ -176,7 +176,7 @@ class Sample:
 
         # figure out pset automatically
         if ds.endswith("SIM"): self.sample["pset"] = params.pset_mc
-        if len(self.sample["sparms"]) > 0: self.sample["pset"] = params.pset_mc_fastsim
+        # if len(self.sample["sparms"]) > 0: self.sample["pset"] = params.pset_mc_fastsim
         if "FSPremix" in ds: self.sample["pset"] = params.pset_mc_fastsim
         if "FastAsympt" in ds: self.sample["pset"] = params.pset_mc_fastsim
         if "/Run2015" in ds: self.sample["pset"] = params.pset_data
