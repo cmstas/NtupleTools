@@ -1,6 +1,7 @@
 import os, sys, glob, select
 import datetime, tarfile, pprint
 import pickle, json, logging
+import re
 
 try:
     from WMCore.Configuration import Configuration
@@ -75,6 +76,14 @@ class Sample:
         self.sample["crab"]["resubmissions"] = 0 # number of times we've "successfully" resubmitted a crab job
         self.sample["crab"]["jobs_left"] = [] # keep track of job ids that are not done
         self.sample["crab"]["jobs_left_tail"] = [] # keep track of job ids that are taking forever (in the tail)
+
+        # since extensions are at the end of the dataset name, the [:99] crab limit will give us duplicate requestnames
+        # so tack on _ext[0-9]{1,2} at the end of the crab requestname for distinction
+        ext = None
+        match = re.search("_ext([0-9]{1,2})", self.sample["dataset"])
+        if match: ext = match.group(0)
+        if ext: self.sample["crab"]["requestname"] = "%s%s" % (self.sample["crab"]["requestname"][:-6], str(ext))
+
 
         self.logger = logging.getLogger(params.log_file.replace(".","_"))
 
