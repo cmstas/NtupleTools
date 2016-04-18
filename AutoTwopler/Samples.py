@@ -185,11 +185,15 @@ class Sample:
 
         # figure out specialdir automatically
         if "50ns" in ds: self.sample["specialdir"] = "run2_50ns"
-        elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds: self.sample["specialdir"] = "run2_fastsim"
-        elif "RunIISpring15FSPremix" in ds: self.sample["specialdir"] = "run2_fastsim"
-        elif "T2bW" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
-        elif "TChi" in ds: self.sample["specialdir"] = "run2_fastsim_private" # FIXME: put all susy models
-        elif "Private74X" in ds: self.sample["specialdir"] = "run2_fastsim_private"
+        elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds:
+            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["specialdir"] = "run2_fastsim"
+        elif "RunIISpring15FSPremix" in ds:
+            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["specialdir"] = "run2_fastsim"
+        elif "Private74X" in ds:
+            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["specialdir"] = "run2_fastsim_private"
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
