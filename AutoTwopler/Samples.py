@@ -70,12 +70,6 @@ class Sample:
                 }
 
         self.sample["crab"]["requestname"] = self.sample["shortname"][:99] # damn crab has size limit for name
-        self.sample["crab"]["outputdir"] = None
-        self.sample["crab"]["taskdir"] = self.misc["pfx_crab"]+"/crab_"+self.sample["crab"]["requestname"]
-        self.sample["crab"]["datetime"] = None # "160220_151313" from crab request name
-        self.sample["crab"]["resubmissions"] = 0 # number of times we've "successfully" resubmitted a crab job
-        self.sample["crab"]["jobs_left"] = [] # keep track of job ids that are not done
-        self.sample["crab"]["jobs_left_tail"] = [] # keep track of job ids that are taking forever (in the tail)
 
         # since extensions are at the end of the dataset name, the [:99] crab limit will give us duplicate requestnames
         # so tack on _ext[0-9]{1,2} at the end of the crab requestname for distinction
@@ -83,6 +77,14 @@ class Sample:
         match = re.search("_ext([0-9]{1,2})", self.sample["dataset"])
         if match: ext = match.group(0)
         if ext: self.sample["crab"]["requestname"] = "%s%s" % (self.sample["crab"]["requestname"][:-6], str(ext))
+
+        self.sample["crab"]["outputdir"] = None
+        self.sample["crab"]["taskdir"] = self.misc["pfx_crab"]+"/crab_"+self.sample["crab"]["requestname"]
+        self.sample["crab"]["datetime"] = None # "160220_151313" from crab request name
+        self.sample["crab"]["resubmissions"] = 0 # number of times we've "successfully" resubmitted a crab job
+        self.sample["crab"]["jobs_left"] = [] # keep track of job ids that are not done
+        self.sample["crab"]["jobs_left_tail"] = [] # keep track of job ids that are taking forever (in the tail)
+
 
 
         self.logger = logging.getLogger(params.log_file.replace(".","_"))
@@ -177,7 +179,7 @@ class Sample:
             else:
                 self.do_log("successfully loaded %s" % (backup_file))
         else:
-            self.do_log("can't load. probably a new sample.")
+            self.do_log("backup doesn't exist. you probably just put in new samples, so ignore this if so.")
 
 
     def set_sample_specifics(self):
@@ -386,11 +388,12 @@ class Sample:
             def submit(q,config,proxy):
                 out = crabCommand('submit', config=config, proxy=proxy)
                 q.put(out)
+
+            self.do_log("submitting jobs...")
             p = Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
             p.start()
             p.join()
             out = q.get()
-
 
             dtstr = out["uniquerequestname"].split(":")[0]
             self.sample["crab"]["uniquerequestname"] = out["uniquerequestname"]
@@ -528,7 +531,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if nretries >= 1 and done_frac > 0.95:
+                    if (nretries >= 0 and done_frac > 0.95) or (nretries >= 1 and done_frac > 0.93):
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]
