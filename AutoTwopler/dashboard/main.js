@@ -241,7 +241,7 @@ function getProgress(sample) {
             tot = sample["crab"]["njobs"];
             if(tot < 1) tot = 1;
         }
-        return 1.0 + 65.0*(done/tot);
+        return 0.0 + 65.0*(done/tot);
 
     } else if (stat == "postprocessing") {
 
@@ -322,7 +322,14 @@ function fillDOM(data) {
 
         $("#pbar_"+i).progressbar("value", pct);
         $("#pbar_"+i).find(".ui-progressbar-value").css({"background": color});
-        $("#pbartextright_"+i).html(sample["status"] + " [" + pct + "%]");
+        var towrite = sample["status"] + " [" + pct + "%]";
+        if(("crab" in sample) && ("status" in sample["crab"])) {
+            if(sample["crab"]["status"] == "SUBMITFAILED") {
+                towrite = "<span class='alert'>submit failed</span>";
+            }
+        }
+        
+        $("#pbartextright_"+i).html(towrite);
         $("#pbartextleft_"+i).html(""); 
 
         if(adminMode) {
