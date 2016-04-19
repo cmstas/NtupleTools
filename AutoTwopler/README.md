@@ -30,6 +30,13 @@ files_per_job: 4
 - Next, get the full path to this filelist and put it in your instructions.txt in place of the dataset name, i.e., `/home/users/namin/forFrank/NtupleTools/AutoTwopler/filelist.txt 74X_mcRun2_asymptotic_v2 1 1 1 mStop,mLSP`
 - Now everything else follows as usual.
 
+### Ntupling multiple campaigns at once
+- You can't. However, since everything in the AutoTwopler directory is self contained, you can copy the directory and change the campaign in `params.py` (as well as `dashboard_name` in `params.py`, so that running multiple instances will have different dashboard URLs)
+
+### CRAB doesn't submit. What do I do?
+- Did you submit a lot of jobs recently? It could be that storage space on schedds is clogged. See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_scheduler. In this case, you can use the "get_crabcache_info()" code block in `scripts/misc.py` to purge old crab task metadata if you're sure you won't ever need it again
+- Did you not use your GRID certificate recently? I think proxies can go stale (whatever the hell that means) and CRAB will complain with something like "Impossible to retrieve proxy..." and say "SUBMITFAILED". Try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib . Again, if you get the same thing, try doing the `voms-proxy-destroy` again. Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
+
 
 ## TODO:
 - [ ] Support for CMS3 to babies
