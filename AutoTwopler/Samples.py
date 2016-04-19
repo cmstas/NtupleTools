@@ -265,6 +265,9 @@ class Sample:
         config.Data.unitsPerJob = 1
         config.Data.ignoreLocality = True
         config.Data.splitting = 'FileBased'
+        # TODO: per https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+        #       use outLFNDirBase to make samples go into, say "/hadoop/cms/store/user/<user>/80X/"
+        #       need to propagate this change everywhere else too
         config.Data.inputDBS = "phys03" if self.sample["dataset"].endswith("/USER") else "global"
         config.section_('User')
         config.section_('Site')

@@ -47,6 +47,7 @@ files_per_job: 4
 - [x] Copy metadata (AND json) to backup directory (right now, it's copied only to the final directory)
 - [x] If merged files are already in the final directory, either warn users or mark job as done
 - [ ] Be able to nuke and resubmit job from dashboard
+- [ ] Be able to instantaneously refresh statuses (i.e., interrupt sleeping for 10m)
 - [x] Resubmit crab task if been bootstrapped or some other thing for longer than x minutes
 - [x] Don't wait on last x% of MC samples to finish up in crab (put a mask on the job number)
 - [ ] Have Condor submission possibility for certain jobs that misbehave
@@ -61,3 +62,4 @@ files_per_job: 4
 - [x] Use time_stats key in data to make plot of crab jobs over time
 - [ ] Deal with CRAB HTTP exceptions elegantly
 - [x] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.
+- [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
