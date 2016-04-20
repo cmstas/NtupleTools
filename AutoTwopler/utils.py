@@ -60,7 +60,7 @@ def read_samples(filename="instructions.txt"):
             if len(parts) < 5: continue
             dataset, gtag, xsec, kfact, efact = parts[:5]
             sample = { "dataset": dataset, "gtag": gtag, "kfact": float(kfact), "efact": float(efact), "xsec": float(xsec) }
-            if len(parts) == 6: sample["sparms"] = parts[5].split(",")
+            if len(parts) >= 6: sample["sparms"] = "".join(parts[5:]).split(",")
 
             if dataset.endswith(".txt"):
                 d_parsed = parse_filelist(dataset)
