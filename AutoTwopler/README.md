@@ -63,3 +63,4 @@ files_per_job: 4
 - [ ] Deal with CRAB HTTP exceptions elegantly
 - [x] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
+- [ ] Parallelize sweepRooting (sweepRooting goes at 0.3Hz whereas finding miniaod is at 10Hz)

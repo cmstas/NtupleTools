@@ -737,7 +737,7 @@ class Sample:
 
         if nevents_branch != total_events:
             f.Close()
-            return 1, "evt_nEvts differs from total merged event count"
+            return 1, "evt_nEvts (%i) differs from total merged event count (%i)" % (nevents_branch, total_events)
 
         if (recalc_scale1fb - scale1fb_min)/scale1fb_min > 1e-6:
             f.Close()
