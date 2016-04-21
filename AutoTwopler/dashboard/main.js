@@ -27,7 +27,7 @@ $(function() {
 
 $.ajaxSetup({
    type: 'POST',
-   timeout: 5000,
+   timeout: 15000,
 });
 
 function handleSubmitButton() {
