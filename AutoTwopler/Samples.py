@@ -1,6 +1,7 @@
 import os, sys, glob, select
 import datetime, tarfile, pprint
 import pickle, json, logging
+import multiprocessing
 import re
 
 try:
@@ -386,14 +387,13 @@ class Sample:
             # # out = crabCommand('submit', config = self.misc["crab_config"], proxy=u.get_proxy_file())
             # gotta do this BS instead of the above because stupid crab didn't fix their issue
             # https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1191/1/1/1.html
-            from multiprocessing import Queue, Process
-            q = Queue()
+            q = multiprocessing.Queue()
             def submit(q,config,proxy):
                 out = crabCommand('submit', config=config, proxy=proxy)
                 q.put(out)
 
             self.do_log("submitting jobs...")
-            p = Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
+            p = multiprocessing.Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
             p.start()
             p.join()
             out = q.get()
@@ -642,7 +642,6 @@ class Sample:
         if njobs == len(self.misc["rootfiles"]) and njobs <= len(self.misc["logfiles"]):
             return True
 
-
         self.do_log("ERROR: crab says COMPLETED but not all files are there, even after getlog")
         self.do_log("# jobs, # root files, # log files = %i, %i, %i" % (njobs, len(self.misc["rootfiles"]), len(self.misc["logfiles"])))
         return False
@@ -692,7 +691,7 @@ class Sample:
             print "WARNING: %s has 0 entries" % fname
             return (True, 0, 0, 0)
 
-        pos_weight = tree.Draw("1", "genps_weight>=0", "goff")
+        pos_weight = tree.GetEntries("genps_weight>=0")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 

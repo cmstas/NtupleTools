@@ -35,32 +35,17 @@ files_per_job: 4
 
 ### CRAB doesn't submit. What do I do?
 - Did you submit a lot of jobs recently? It could be that storage space on schedds is clogged. See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_scheduler. In this case, you can use the "get_crabcache_info()" code block in `scripts/misc.py` to purge old crab task metadata if you're sure you won't ever need it again
-- Did you not use your GRID certificate recently? I think proxies can go stale (whatever the hell that means) and CRAB will complain with something like "Impossible to retrieve proxy..." and say "SUBMITFAILED". Try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib . Again, if you get the same thing, try doing the `voms-proxy-destroy` again. Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
-
+- "SUBMITFAILED: Impossible to retrieve proxy...": delete `~/.globus/proxy_for_${USER}.file` and rerun `run.py`. This time you will be prompted for a password. Submission should go smoothly from there. If that doesn't work try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib. Again, if you get the same thing, try doing the `voms-proxy-destroy` again.  Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
 
 ## TODO:
 - [ ] Support for CMS3 to babies
 - [ ] Integrate DIS querying
-- [x] Check that nothing happened to the files after copying (don't need to do full blown checkCMS3, just check event counts or something)
-- [x] Parse checkCMS3 output and remake stuff appropriately
-- [x] Be able to change xsec, kfact, efact before post-processing (through an updated instructions.txt)
-- [x] Copy metadata (AND json) to backup directory (right now, it's copied only to the final directory)
-- [x] If merged files are already in the final directory, either warn users or mark job as done
 - [ ] Be able to nuke and resubmit job from dashboard
 - [ ] Be able to instantaneously refresh statuses (i.e., interrupt sleeping for 10m)
-- [x] Resubmit crab task if been bootstrapped or some other thing for longer than x minutes
-- [x] Don't wait on last x% of MC samples to finish up in crab (put a mask on the job number)
 - [ ] Have Condor submission possibility for certain jobs that misbehave
-- [x] Make postprocessing part of sample show all jobs done when in done state
-- [x] If user enters full twiki name into the dashboard, automatically strip the beginning part to get only the end
-- [x] Re-read instructions.txt file every iteration to pull in new information/samples
-- [x] If crab status hasn't run yet, we'll have 0 running / 0 total, so monitor page shows NaN%. Force this to 0%.
 - [ ] Make tester class
-- [x] Add example instructions.txt
-- [x] Grep condor logfiles to get timing statistics for merging/branchadding/copying
-- [x] Handle odd hadoop mappings
-- [x] Use time_stats key in data to make plot of crab jobs over time
 - [ ] Deal with CRAB HTTP exceptions elegantly
-- [x] Don't rely on CRAB status codes. Use our own. In particular. isComplete = (nComplete == nTot) is all one needs.
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
 - [ ] Parallelize sweepRooting (sweepRooting goes at 0.3Hz whereas finding miniaod is at 10Hz)
+- [ ] Calculate eff_luminosity and cut down tail job threshold if it's large enough
+- [ ] Put in button to skip CRAB tail jobs from dashboard
