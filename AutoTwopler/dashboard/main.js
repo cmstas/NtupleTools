@@ -55,7 +55,7 @@ function handleOtherTwiki() {
 
 function handleAdminMode() {
     $( "#firstTitle" ).click(function() { 
-        $( "#admin" ).slideToggle(150); 
+        $( "#admin" ).fadeToggle(150); 
         if(adminMode) {
             adminMode = false;
             fillDOM(alldata);
@@ -186,6 +186,10 @@ function doTwiki(type) {
        });
 }
 
+function displayMessage(html) {
+    $("#message").stop().fadeIn(0).html(html).fadeOut(5000);
+}
+
 function addInstructions(type) {
     var formObj = {};
     formObj["action"] = type;
@@ -197,11 +201,11 @@ function addInstructions(type) {
             type: "POST",
             data: formObj,
             success: function(data) {
-                    $("#message").html("<span style='color:green'>"+data+"</span>");
+                    displayMessage("<span style='color:green'>"+data+"</span>")
                     console.log(data);
                 },
             error: function(data) {
-                    $("#message").html("<span style='color:red'>Error:</span> "+data["responseText"]);
+                    displayMessage("<span style='color:red'>Error:</span> "+data["responseText"])
                     console.log(data);
                 },
        });
@@ -254,6 +258,14 @@ function getProgress(sample) {
     } else if (stat == "done") return 100;
     else return -1.0;
 
+}
+
+function doSendAction(type, isample) {
+    var shortname = alldata["samples"][isample]["dataset"].split("/")[1];
+    console.log("action,isample: " + type + " " + isample);
+    // if (confirm('Are you sure you want to kill this job?')) {
+        displayMessage("<span style='color:green'>action,isample:"+type+" " +isample+" <b>"+shortname+"</b></span>")
+    // }
 }
 
 function syntaxHighlight(json) {
@@ -334,7 +346,10 @@ function fillDOM(data) {
 
         if(adminMode) {
             // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;  &#128035; </a>"); 
-            $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log("+i+");'>&#9762;</a> <a href='#/'> &#128035; </a>"); 
+            // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log("+i+");'>&#9762;</a> <a href='#/'> &#128035; </a> <a href='#/'>tail</a>"); 
+            // $("#pbartextleft_"+i).html("<a href='#/' onClick='doSendAction(\"kill\","+i+")'>kill</a> | <a href='#/' onClick='doSendAction(\"skiptail\","+i+")'>skip tail</a>"); 
+            $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")'> &#9762; </a>  " +  
+                                        "<a href='#/' onClick='doSendAction(\"skiptail\","+i+")'> &#9986; </a> " );
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));

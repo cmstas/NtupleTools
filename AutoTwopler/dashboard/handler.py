@@ -71,7 +71,9 @@ elif inp["action"] == "addinstructions":
     # fname = basedir + "instructions_autotupletest.txt"
     fname = basedir + "instructions.txt"
 
-    if len(samples) < 1: sys.exit()
+    if len(samples) < 1: 
+        print "Did not find valid samples. Check the formatting and make sure everything is there."
+        sys.exit()
 
     with open(fname, "a") as fhin:
         fhin.write("\n\n# following %i samples injected from dashboard on %s\n" \
