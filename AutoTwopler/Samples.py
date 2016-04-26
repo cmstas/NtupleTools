@@ -638,7 +638,6 @@ class Sample:
         requestname = self.sample["crab"]["requestname"]
         datetime = self.sample["crab"]["datetime"]
         if self.do_filelist:
-        if not self.do_filelist:
             primary_dataset = "_".join(self.sample["dataset"].split("/")[1:3])
 
         self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" % (self.sample["user"], primary_dataset, requestname, datetime)
