@@ -41,6 +41,7 @@ class Sample:
         self.misc["logfiles"] = []
         self.misc["last_saved"] = None # when was the last time we backed up this sample data
         self.misc["can_skip_tail"] = False
+        self.misc["email_when_done"] = False
 
         self.sample = {
                 "basedir" : "",
@@ -246,8 +247,13 @@ class Sample:
 
         elif "skip_tail" in action:
             self.do_log("found an action to skip tail crab jobs")
-            did_force = self.force_skip_tail()
-            return did_force
+            consume_action = self.force_skip_tail()
+            return consume_action
+
+        elif "email_done" in action:
+            self.do_log("found an action to send an email when job is complete")
+            self.misc["email_when_done"] = True
+            return True
         
         else:
             self.do_log("don't recognize action '%s'" % action)
@@ -258,7 +264,7 @@ class Sample:
     def force_skip_tail(self):
         if not self.sample["status"] == "crab":
             self.do_log("you want me to skip the tail jobs, but status is '%s', not 'crab'" % self.sample["status"])
-            return False
+            return True
 
         self.crab_status(do_long=False)
         stat = self.crab_status_res
@@ -1006,6 +1012,12 @@ class Sample:
         u.cmd('cp %s %s/' % (metadata_file, metadatabank_dir))
 
         self.do_log("made metadata and copied it to merged and backup areas")
+
+    def do_send_email(self):
+        if self.misc["email_when_done"]:
+            u.send_email(self.sample["dataset"])
+            self.misc["email_when_done"] = False
+
 
     def copy_files(self):
         self.do_log("started copying files to %s" % self.sample["finaldir"])

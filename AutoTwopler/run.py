@@ -22,9 +22,6 @@ if not os.path.isfile(instructions):
     print ">>> %s does not exist" % instructions
     sys.exit()
 
-if u.proxy_hours_left() < 60:
-    print ">>> Proxy near end of lifetime, renewing."
-    u.proxy_renew()
 
 u.copy_jecs()
 logger_name = u.setup_logger()
@@ -39,6 +36,8 @@ if os.path.isfile(data_json):
 
 all_samples = []
 for i in range(5000):
+
+    if u.proxy_hours_left() < 60: u.proxy_renew()
 
     data = { "samples": [], "last_updated": None, "time_stats": time_stats }
 
@@ -84,6 +83,7 @@ for i in range(5000):
                 else:
                     s.submit_merge_jobs()
             elif stat == "done":
+                s.do_send_email()
                 pass
 
             s.save()

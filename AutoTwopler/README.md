@@ -41,11 +41,10 @@ files_per_job: 4
 - [ ] Support for CMS3 to babies
 - [ ] Integrate DIS querying
 - [ ] Be able to nuke and resubmit job from dashboard
-- [x] Be able to instantaneously refresh statuses (i.e., interrupt sleeping for 10m)
 - [ ] Have Condor submission possibility for certain jobs that misbehave
 - [ ] Make tester class
 - [ ] Deal with CRAB HTTP exceptions elegantly
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
 - [ ] Parallelize sweepRooting (sweepRooting goes at 0.3Hz whereas finding miniaod is at 10Hz)
 - [ ] Calculate eff_luminosity and cut down tail job threshold if it's large enough
-- [x] Put in button to skip CRAB tail jobs from dashboard
+- [ ] Figure out what's causing proxy issues

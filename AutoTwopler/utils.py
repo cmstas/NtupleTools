@@ -312,12 +312,30 @@ def smart_sleep(t, files_to_watch=[]):
         return
 
     tenth = 0.1*t
-    for _ in range(10):
+    for i in range(10):
         time.sleep(tenth)
         for fname in files_to_watch:
             if os.path.isfile(fname) and time.time()-os.path.getmtime(fname) <= tenth:
                 return
     return
+
+def send_email(dataset):
+    email = get("git config --list | grep 'user.email' | cut -d '=' -f2")
+    firstname = get("git config --list | grep 'user.name' | cut -d '=' -f2 | cut -d ' ' -f1")
+    if "@" not in email:
+        return
+
+    subject = "[UAFNotify] AutoTwopler job finished on %s" % datetime.datetime.now().strftime("%-m/%d at %-I:%M%p")
+    dashboard_url = "http://uaf-7.t2.ucsd.edu/~%s/%s/" % (os.getenv("USER"), params.dashboard_name)
+
+    body = "Hi {0},\n\n" \
+           "    Dataset finished: {1}\n" \
+           "    Monitoring page URL: {2}\n\n" \
+           "Cheers!\n" \
+           "A. Script"
+    body = body.format(firstname, dataset, dashboard_url)
+
+    cmd("echo '%s' | mail -s '%s' %s" % (body, subject, email))
 
 
 if __name__=='__main__':

@@ -118,7 +118,7 @@ def update_samples(samples, username, page="Autotupletest"):
 
     if len(tosubmit) > 0.95*len(raw) and num_updatable > 0:
         br.form['text'] = "\n".join(lines_out)
-        print "Updated Twiki at %s" % url
+        print "Updated Twiki at %s" % url.replace("/edit/","/view/")
         br.submit()
 
 if __name__=='__main__':
