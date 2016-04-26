@@ -10,6 +10,7 @@ import urllib2
 import json
 import logging
 import re
+import time
 from collections import defaultdict
 
 
@@ -301,6 +302,23 @@ def consume_actions(dataset_name, actions_fname="actions.txt"):
                 continue
 
             fhout.write(line)
+
+def smart_sleep(t, files_to_watch=[]):
+    # sleeps for t seconds in ten 0.1*t second chunks
+    # if any file in files_to_watch is modified during one of
+    # these chunks, return prematurely
+    if t < 60:
+        time.sleep(t)
+        return
+
+    tenth = 0.1*t
+    for _ in range(int(10*tenth)):
+        time.sleep(tenth)
+        for fname in files_to_watch:
+            if os.path.isfile(fname) and time.time()-os.path.getmtime(fname) <= tenth:
+                return
+    return
+
 
 if __name__=='__main__':
 

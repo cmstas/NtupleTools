@@ -1,6 +1,6 @@
 var alldata = {};
 var jsonFile = "data.json";
-var baseDir = "BASEDIR_PLACEHOLDER";
+var baseDir = "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/";
 var refreshSecs = 10*60;
 var detailsVisible = false;
 var duckMode = false;
@@ -187,7 +187,7 @@ function doTwiki(type) {
 }
 
 function displayMessage(html) {
-    $("#message").stop().fadeIn(0).html(html).fadeOut(5000);
+    $("#message").stop().fadeIn(0).html(html).delay(5000).fadeOut(2000);
 }
 
 function addInstructions(type) {
@@ -261,11 +261,33 @@ function getProgress(sample) {
 }
 
 function doSendAction(type, isample) {
-    var shortname = alldata["samples"][isample]["dataset"].split("/")[1];
+    var dataset = alldata["samples"][isample]["dataset"]
+    var shortname = dataset.split("/")[1];
     console.log("action,isample: " + type + " " + isample);
-    // if (confirm('Are you sure you want to kill this job?')) {
-        displayMessage("<span style='color:green'>action,isample:"+type+" " +isample+" <b>"+shortname+"</b></span>")
-    // }
+
+    // FIXME uncomment before letting people use
+    // if (!confirm('Are you sure you want to do the action: ' + type)) return;
+    // FIXME uncomment before letting people use
+
+    var obj = {};
+    obj["action"] = "action";
+    obj["action_type"] = type;
+    obj["dataset"] = dataset;
+    obj["basedir"] = baseDir;
+    console.log(obj);
+    $.ajax({
+            url: "./handler.py",
+            type: "POST",
+            data: obj,
+            success: function(data) {
+                    displayMessage("<span style='color:green'>"+data+"</span>")
+                    console.log(data);
+                },
+            error: function(data) {
+                    displayMessage("<span style='color:red'>Error:</span> "+data["responseText"])
+                    console.log(data);
+                },
+       });
 }
 
 function syntaxHighlight(json) {
@@ -349,7 +371,7 @@ function fillDOM(data) {
             // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log("+i+");'>&#9762;</a> <a href='#/'> &#128035; </a> <a href='#/'>tail</a>"); 
             // $("#pbartextleft_"+i).html("<a href='#/' onClick='doSendAction(\"kill\","+i+")'>kill</a> | <a href='#/' onClick='doSendAction(\"skiptail\","+i+")'>skip tail</a>"); 
             $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")'> &#9762; </a>  " +  
-                                        "<a href='#/' onClick='doSendAction(\"skiptail\","+i+")'> &#9986; </a> " );
+                                        "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")'> &#9986; </a> " );
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));

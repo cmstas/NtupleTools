@@ -82,6 +82,21 @@ elif inp["action"] == "addinstructions":
 
     print "Wrote %i samples to %s" % (len(samples), fname)
 
+elif inp["action"] == "action":
+    if "dataset" not in inp or "action_type" not in inp:
+        sys.exit()
+
+    dataset = inp["dataset"]
+    basedir = inp["basedir"]
+    action = inp["action_type"]
+
+    fname = basedir + "actions.txt"
+
+    with open(fname, "a") as fhin:
+        fhin.write("%s: %s\n" % (dataset, action))
+
+    print "Injected action <b>%s</b> for sample <b>%s</b>" % (action, dataset.split("/")[1])
+
 
 
 

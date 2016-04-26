@@ -103,5 +103,5 @@ for i in range(5000):
 
     sleep_time = 5 if i < 2 else 600
     logger.debug("sleeping for %i seconds..." % sleep_time)
-    time.sleep(sleep_time)
+    u.smart_sleep(sleep_time, files_to_watch=["actions.txt"])
 

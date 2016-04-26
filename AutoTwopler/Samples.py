@@ -233,15 +233,49 @@ class Sample:
 
 
     def handle_action(self, action):
+        # if we return True, then run.py will consume the action
+
         if "set status" in action:
+            # FIXME use case is to repostprocess, so make this clear
+            # beware of subtleties with repostprocessing stuff that skipped tail jobs
             new_status = action.split("set status")[1].strip()
             old_status = self.sample["status"]
             self.sample["status"] = new_status
             self.do_log("found and performed an action to change status from %s to %s" % (old_status, new_status))
             return True
 
+        elif "skip_tail" in action:
+            self.do_log("found an action to skip tail crab jobs")
+            did_force = self.force_skip_tail()
+            return did_force
+        
+        else:
+            self.do_log("don't recognize action '%s'" % action)
+
         return False
 
+    
+    def force_skip_tail(self):
+        if not self.sample["status"] == "crab":
+            self.do_log("you want me to skip the tail jobs, but status is '%s', not 'crab'" % self.sample["status"])
+            return False
+
+        self.crab_status(do_long=False)
+        stat = self.crab_status_res
+        self.sample["crab"]["jobs_left_tail"] = []
+        if "jobs" in stat and "jobList" in stat:
+            for status, ijob in stat["jobList"]:
+                if not(status == "finished"):
+                    self.sample["crab"]["jobs_left_tail"].append(ijob)
+
+        # if we didn't find any jobs in the tail, either we're done (in which case
+        # we don't need to force skip anything), or crab status failed
+        if not self.sample["crab"]["jobs_left_tail"]: return False 
+
+        self.do_skip_tail = True
+        self.misc["can_skip_tail"] = True
+        self.sample["crab"]["status"] = "COMPLETED"
+        return True
 
     def make_crab_config(self):
         if self.misc["crab_config"] is not None: 
@@ -409,7 +443,7 @@ class Sample:
             return 0 # failed
 
 
-    def crab_status(self):
+    def crab_status(self, do_long=True):
 
         if self.sample["nevents_DAS"] == 0 and not self.do_filelist:
             try: 
@@ -418,7 +452,7 @@ class Sample:
             except: pass
 
         try:
-            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), long=True)
+            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), long=do_long)
             if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
                 self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
                 self.do_log("falling back to regular old crab status, but I thought you'd like to know at least")
@@ -427,7 +461,7 @@ class Sample:
             return 1 # succeeded
         except Exception as e:
             self.do_log("ERROR getting status: "+str(e))
-            if self.do_skip_tail:
+            if do_long:
                 self.do_log("try executing: crab status %s --proxy=%s --json" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
             else:
                 self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
@@ -452,6 +486,8 @@ class Sample:
         return (then-now).seconds / 60.0
 
     def crab_parse_status(self):
+        if self.misc["can_skip_tail"]: return
+
         self.crab_status()
         stat = self.crab_status_res
 
@@ -598,12 +634,14 @@ class Sample:
 
     def is_crab_done(self):
 
+        primary_dataset = self.sample["dataset"].split("/")[1]
+        requestname = self.sample["crab"]["requestname"]
+        datetime = self.sample["crab"]["datetime"]
+        if self.do_filelist:
         if not self.do_filelist:
-            self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
-                    % (self.sample["user"], self.sample["dataset"].split("/")[1], self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
-        else:
-            self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" \
-                    % (self.sample["user"], "_".join(self.sample["dataset"].split("/")[1:3]), self.sample["crab"]["requestname"], self.sample["crab"]["datetime"])
+            primary_dataset = "_".join(self.sample["dataset"].split("/")[1:3])
+
+        self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" % (self.sample["user"], primary_dataset, requestname, datetime)
 
         if "status" not in self.sample["crab"]: return False
         if self.sample["crab"]["status"] != "COMPLETED": return False
