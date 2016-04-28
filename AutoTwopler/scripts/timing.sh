@@ -13,9 +13,9 @@ samples=$(ls -1 -d /nfs-7/userdata/$USER/tupler/*/std_logs/)
  # 10 [merge wrapper] t after lcg-cp: 1458141082
  # 11 [merge wrapper] cleaning up.
 
-echo "# user,sample,t_before_merge,t_before_addbranch,t_after_addbranch,t_after_lcgcp,nevents"
+echo "# user,sample,t_before_merge,t_before_addbranch,t_after_addbranch,t_after_lcgcp,nevents" >> timing_data.txt
 for sample in $samples; do
-    # echo $sample
+    echo $sample
 
     sampleName=$(echo $sample | sed 's#/std_logs/##' | rev | cut -d '/' -f1 | rev)
 
@@ -33,7 +33,7 @@ for sample in $samples; do
         # user sample t_before_merge t_before_addbranch t_after_addbranch t_after_lcgcp nevents
         line=$(echo $USER $sampleName $tvals $nevents)
         line=$(echo $line | sed 's/ \{1,\}/,/g')
-        echo $line
+        echo $line >> timing_data.txt
 
     done
 

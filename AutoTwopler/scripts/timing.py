@@ -2,12 +2,16 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from collections import Counter
 from pprint import pprint
 
 def makeHist(vals, filename, title=None, nbins=50, lower=0, upper=10, logscale=False):
+
     if not title: title = ".".join(filename.split("/")[-1].split(".")[:-1])
     fig, ax = plt.subplots( nrows=1, ncols=1 )  # create figure & 1 axis
+    ax.text(0.985,0.985,"N: %i" % len(vals), horizontalalignment='right', verticalalignment='top',transform=ax.transAxes,color='black')
+    ax.text(0.985,0.925,"mean: %.1f" % vals.mean(), horizontalalignment='right', verticalalignment='top',transform=ax.transAxes,color='black')
     if logscale: ax.set_yscale("log")
     fig.suptitle(title, fontsize=20)
     ax.hist(vals,nbins,color='green',alpha=0.8,range=[lower,upper], histtype="stepfilled")
