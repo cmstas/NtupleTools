@@ -72,6 +72,7 @@ class Sample:
                 }
 
         self.sample["crab"]["requestname"] = self.sample["shortname"][:99] # damn crab has size limit for name
+        self.pfx = self.sample["shortname"][:25] + "..."
 
         # since extensions are at the end of the dataset name, the [:99] crab limit will give us duplicate requestnames
         # so tack on _ext[0-9]{1,2} at the end of the crab requestname for distinction
@@ -207,6 +208,10 @@ class Sample:
         elif "Private74X" in ds:
             self.sample["pset"] = params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim_private"
+        elif "T2ttZH_" in ds or "T5qqqqWH_" in ds:
+            self.sample["pset"] = params.pset_mc
+            self.sample["specialdir"] = "run2_25ns_80Private"
+
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
@@ -223,7 +228,6 @@ class Sample:
         self.sample["basedir"] = os.getcwd()+"/"
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
-        self.pfx = self.sample["shortname"][:25] + "..."
 
 
     def update_params(self, d):
