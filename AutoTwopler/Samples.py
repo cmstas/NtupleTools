@@ -689,6 +689,12 @@ class Sample:
         if njobs == len(self.misc["rootfiles"]) and njobs <= len(self.misc["logfiles"]):
             return True
 
+        # at this point, #root files != #jobs
+        # could be related to https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1599/2.html
+        if self.do_skip_tail and self.misc["can_skip_tail"]:
+            # however, we do not care if we're skipping the tail anyways
+            return True
+
         self.do_log("ERROR: crab says COMPLETED but not all files are there, even after getlog")
         self.do_log("# jobs, # root files, # log files = %i, %i, %i" % (njobs, len(self.misc["rootfiles"]), len(self.misc["logfiles"])))
         return False
