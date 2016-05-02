@@ -41,7 +41,7 @@ class Sample:
         self.misc["logfiles"] = []
         self.misc["last_saved"] = None # when was the last time we backed up this sample data
         self.misc["can_skip_tail"] = False
-        self.misc["email_when_done"] = False
+        self.misc["email_when_done"] = params.EMAIL_WHEN_DONE
 
         self.sample = {
                 "basedir" : "",
@@ -1038,6 +1038,7 @@ class Sample:
 
         if self.get_events_in_chain(self.sample["finaldir"]+"/*.root") == self.sample['nevents_merged']:
             # if finaldir doesn't have nevents_merged, must've been a mv error, so redo merging and mv again
+            self.do_log("copying was successful, so we're done!!!")
             self.sample["status"] = "done"
         else:
             self.do_log("lost some events after moving into final directory. re-merging now.")
