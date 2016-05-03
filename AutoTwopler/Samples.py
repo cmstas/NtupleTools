@@ -360,7 +360,7 @@ class Sample:
                 elif ".GlobalTag." in line: line = line.split("=")[0]+" = '"+self.sample["gtag"]+"'\n"
                 elif ".reportEvery" in line: line = line.split("=")[0]+" = 1000\n"
                 elif ".eventMaker.datasetName." in line: line = line.split("(")[0]+"('%s')\n" % self.sample["dataset"]
-                elif "era=" in line: line = line.split("=")[0]+" = '"+params.jecs+"'\n"
+                elif "era=" in line: line = line.split("=")[0]+" = '"+params.jecs.replace(".db","")+"'\n"
                 elif "runOnData=" in line: line = '%s = %s\n' % (line.split("=")[0], self.sample["isdata"])
                 elif ".eventMaker.isData" in line: line = "%s = cms.bool(%s)\n" % (line.split("=")[0], self.sample["isdata"])
                 elif "cms.Path" in line:
