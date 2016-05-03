@@ -60,9 +60,7 @@ for i in range(5000):
             stat = s.get_status()
 
             # grab actions from a text file and act on them, consuming (removing) them if successful
-            actions = u.get_actions(dataset_name=s["dataset"])
-            if actions:
-                for dataset_name, action in actions:
+            for dataset_name, action in u.get_actions(dataset_name=s["dataset"])
                     if s.handle_action(action): u.consume_actions(dataset_name=s["dataset"])
 
             if not s.pass_tsa_prechecks(): continue
@@ -72,8 +70,8 @@ for i in range(5000):
             elif stat == "crab":
                 s.crab_parse_status()
                 if s.is_crab_done():
-                    s.make_miniaod_map(force=True)
-                    s.make_merging_chunks(force=True)
+                    s.make_miniaod_map()
+                    s.make_merging_chunks()
                     s.submit_merge_jobs()
             elif stat == "postprocessing":
                 if s.is_merging_done():
@@ -103,5 +101,5 @@ for i in range(5000):
 
     sleep_time = 5 if i < 2 else 600
     logger.debug("sleeping for %i seconds..." % sleep_time)
-    u.smart_sleep(sleep_time, files_to_watch=["actions.txt"])
+    u.smart_sleep(sleep_time, files_to_watch=["actions.txt", "instructions.txt"])
 

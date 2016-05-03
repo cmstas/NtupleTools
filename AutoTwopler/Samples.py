@@ -240,13 +240,19 @@ class Sample:
     def handle_action(self, action):
         # if we return True, then run.py will consume the action
 
-        if "set status" in action:
-            # FIXME use case is to repostprocess, so make this clear
+        # if "set status" in action:
+        #     # FIXME use case is to repostprocess, so make this clear
+        #     # beware of subtleties with repostprocessing stuff that skipped tail jobs
+        #     new_status = action.split("set status")[1].strip()
+        #     old_status = self.sample["status"]
+        #     self.sample["status"] = new_status
+        #     self.do_log("found and performed an action to change status from %s to %s" % (old_status, new_status))
+        #     return True
+
+        if "repostprocess" in action:
             # beware of subtleties with repostprocessing stuff that skipped tail jobs
-            new_status = action.split("set status")[1].strip()
-            old_status = self.sample["status"]
-            self.sample["status"] = new_status
-            self.do_log("found and performed an action to change status from %s to %s" % (old_status, new_status))
+            self.sample["status"] = "crab"
+            self.do_log("found and performed an action to repostprocess, so put status back to 'crab'")
             return True
 
         elif "skip_tail" in action:
@@ -700,7 +706,7 @@ class Sample:
         return False
 
 
-    def make_miniaod_map(self, force=False):
+    def make_miniaod_map(self, force=True):
         if self.sample["ijob_to_miniaod"] and not force: return
 
         self.do_log("making map from unmerged number to miniaod name")
@@ -804,7 +810,7 @@ class Sample:
         return ch.GetEntries()
 
 
-    def make_merging_chunks(self, force=False):
+    def make_merging_chunks(self, force=True):
         if self.sample["imerged_to_ijob"] and not force: return
 
         self.do_log("making map from merged index to unmerged indicies")
