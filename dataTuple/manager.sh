@@ -196,7 +196,7 @@ do
   currentFile=$line
 
   #a.  See if job is on failure list.  If yes, continue (unless this is a N%5000 = 0 run).  
-  echo "step 4a"
+  echo "step 4a -- $(date)"
   if [ "$(( $cycleNumber%5000 ))" -eq "0" ]
   then 
     . isOnFailureList.sh $currentFile
@@ -216,7 +216,7 @@ do
   fi
 
   #c. Otherwise, it's on the submitList. Get the jobID from there and see if the job is running.
-  echo "step 4c"
+  echo "step 4c -- $(date)"
   echo "job id: $jobid"
   condor_q $jobid > temp_isRunning.txt
   sed -i '1,4d' temp_isRunning.txt
@@ -229,7 +229,7 @@ do
   . checkStatus.sh $currentFile $jobid
 
   #d. If job is on run list, check time. If has been running for more than 24 hours, kill it, mark for submission, and on to step 5.
-  echo "step 4d"
+  echo "step 4d -- $(date)"
   if [ $isRunning == true ] 
   then
     echo "starttime: $starttime"
@@ -254,7 +254,7 @@ do
   fi
 
   #e. If not on run list, check if the output file is present and valid. If not present and valid, mark for submission and on to step 5.
-  echo "step 4e"
+  echo "step 4e -- $(date)"
   if [ $isRunning == false ] 
   then
     fileName=$(python getFileName.py $currentFile 2>&1)
@@ -310,7 +310,7 @@ then
     currentLine=$line
  
     #a. Check number of times submitted
-    echo "step 5a"
+    echo "step 5a -- $(date)"
     . isOnSubmitList.sh $currentLine
     isOnSubmitList=$?
     if [ "$isOnSubmitList" -eq "1"  ] 
@@ -332,7 +332,7 @@ then
     fi
 
     #5b. Submit them
-    echo "step 5b"
+    echo "step 5b -- $(date)"
     outputName=$(python getFileName.py $currentLine 2>&1)
     CMS3tagFragment=`echo $CMS3tag | tr '_' ' ' | awk '{print $2}'`
     outputDir=`echo $currentLine | tr '/' ' ' |  awk '{print $3"_"$4"_"$5"_"$6}'`
@@ -341,7 +341,7 @@ then
     echo "submitting!  $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $GTAG"
 
     #c. Update submitted list
-    echo "step 5c"
+    echo "step 5c -- $(date)"
     . getJobNumber.sh $currentTime
     . isOnSubmitList.sh $currentLine
     if [ $? != 1 ] 
@@ -362,7 +362,7 @@ then
 fi
 
 #6. Check the post-processing status of jobs. Resubmit post-processing jobs without output.
-echo "step 6"
+echo "step 6 -- $(date)"
 if [ -d $BASEPATH/mergedLists ]; then
     for dir in $( ls -d $BASEPATH/mergedLists/*/ )
     do
