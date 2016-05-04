@@ -25,12 +25,12 @@ echo "host: `hostname`"
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 #The lib and python directories come from the libCMS3 tarball
-export LD_LIBRARY_PATH=$PWD/lib/slc6_amd64_gcc491:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$PWD/lib/slc6_amd64_gcc530:$LD_LIBRARY_PATH
 export PATH=$PWD:$PATH
 export PYTHONPATH=$PWD/python:$PYTHONPATH:python/
 
 #Set environment
-pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc491/cms/cmssw/CMSSW_7_4_12/src/
+pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_6/src/
 eval `scramv1 runtime -sh`
 echo "should be in cvmfs: $PWD"
 popd
@@ -40,9 +40,9 @@ echo "libCMS3 = $libCMS3"
 
 if [ -e $libCMS3 ]
 then
-  scramv1 project CMSSW CMSSW_7_4_12
-  mv $libCMS3 CMSSW_7_4_12/
-  cd CMSSW_7_4_12
+  scramv1 project CMSSW CMSSW_8_0_6
+  mv $libCMS3 CMSSW_8_0_6/
+  cd CMSSW_8_0_6
   tar -xzvf $libCMS3
   scram b -j 8
   eval `scramv1 runtime -sh`

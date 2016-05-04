@@ -50,6 +50,7 @@ do
     fi
     break;
   elif [ "$i" == "SUMMARY: 1 bad, 0 good" ]; then
+    echo "WARNING: File $2 was deemed unworthy by sweepRoot on $(date) and is going to be deleted"
     rm $2
     isGood=0
     echo $3 >> filesToSubmit.txt

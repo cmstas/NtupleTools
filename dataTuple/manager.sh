@@ -43,10 +43,10 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V07-04-11
+CMS3tag=CMS3_V08-00-04_Data
 
 #Set the global tag to use
-GTAG=74X_dataRun2_Prompt_v4
+GTAG=80X_dataRun2_Prompt_v8
 #for reminiAOD data, change this to 74X_dataRun2_reMiniAOD_v0
 
 #State the maxmimum number of events
@@ -71,9 +71,9 @@ fi
 
 #Set environment
 source /code/osgcode/cmssoft/cmsset_default.sh
-export SCRAM_ARCH=slc6_amd64_gcc491
+export SCRAM_ARCH=slc6_amd64_gcc530
 pushd .
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc491/cms/cmssw/CMSSW_7_4_14
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_6
 eval `scramv1 runtime -sh`
 popd
 
@@ -196,7 +196,7 @@ do
   currentFile=$line
 
   #a.  See if job is on failure list.  If yes, continue (unless this is a N%5000 = 0 run).  
-  echo "step 4a"
+  echo "step 4a -- $(date)"
   if [ "$(( $cycleNumber%5000 ))" -eq "0" ]
   then 
     . isOnFailureList.sh $currentFile
@@ -216,17 +216,20 @@ do
   fi
 
   #c. Otherwise, it's on the submitList. Get the jobID from there and see if the job is running.
-  echo "step 4c"
+  echo "step 4c -- $(date)"
   echo "job id: $jobid"
   condor_q $jobid > temp_isRunning.txt
   sed -i '1,4d' temp_isRunning.txt
+  sed -i '$d' temp_isRunning.txt
+  sed -i '$d' temp_isRunning.txt
   if [ -s temp_isRunning.txt ]; then isRunning=true; else isRunning=false; fi
   echo "isRunning: $isRunning"
   rm temp_isRunning.txt
+  echo "executing: . checkStatus.sh $currentFile $jobid"
   . checkStatus.sh $currentFile $jobid
 
   #d. If job is on run list, check time. If has been running for more than 24 hours, kill it, mark for submission, and on to step 5.
-  echo "step 4d"
+  echo "step 4d -- $(date)"
   if [ $isRunning == true ] 
   then
     echo "starttime: $starttime"
@@ -251,7 +254,7 @@ do
   fi
 
   #e. If not on run list, check if the output file is present and valid. If not present and valid, mark for submission and on to step 5.
-  echo "step 4e"
+  echo "step 4e -- $(date)"
   if [ $isRunning == false ] 
   then
     fileName=$(python getFileName.py $currentFile 2>&1)
@@ -288,6 +291,7 @@ do
         popd
         cp ../sweepRoot/sweepRoot .
       fi
+      echo "executing: . checkFile.sh $BASEPATH $outputPath/$outputDir/$fileName $currentFile $JOBTYPE"
       . checkFile.sh $BASEPATH $outputPath/$outputDir/$fileName $currentFile $JOBTYPE
       continue
     fi
@@ -306,7 +310,7 @@ then
     currentLine=$line
  
     #a. Check number of times submitted
-    echo "step 5a"
+    echo "step 5a -- $(date)"
     . isOnSubmitList.sh $currentLine
     isOnSubmitList=$?
     if [ "$isOnSubmitList" -eq "1"  ] 
@@ -321,14 +325,14 @@ then
         continue
       elif [ "$nTries" -eq "135" ] 
       then
-        echo "DataTupleError!  File $currentLine has failed many times." | /bin/mail -r "george@physics.ucsb.edu" -s "[dataTuple] error report" "george@physics.ucsb.edu, jgran@physics.ucsb.edu, mark.derdzinski@gmail.com" 
+        echo "DataTupleError!  File $currentLine has failed many times." | /bin/mail -r "namin@physics.ucsb.edu" -s "[dataTuple] error report" "namin@physics.ucsb.edu, mark.derdzinski@gmail.com" 
         echo "$currentLine" >> failureList.txt
         continue
       fi
     fi
 
     #5b. Submit them
-    echo "step 5b"
+    echo "step 5b -- $(date)"
     outputName=$(python getFileName.py $currentLine 2>&1)
     CMS3tagFragment=`echo $CMS3tag | tr '_' ' ' | awk '{print $2}'`
     outputDir=`echo $currentLine | tr '/' ' ' |  awk '{print $3"_"$4"_"$5"_"$6}'`
@@ -337,7 +341,7 @@ then
     echo "submitting!  $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $GTAG"
 
     #c. Update submitted list
-    echo "step 5c"
+    echo "step 5c -- $(date)"
     . getJobNumber.sh $currentTime
     . isOnSubmitList.sh $currentLine
     if [ $? != 1 ] 
@@ -358,7 +362,7 @@ then
 fi
 
 #6. Check the post-processing status of jobs. Resubmit post-processing jobs without output.
-echo "step 6"
+echo "step 6 -- $(date)"
 if [ -d $BASEPATH/mergedLists ]; then
     for dir in $( ls -d $BASEPATH/mergedLists/*/ )
     do
@@ -369,10 +373,10 @@ if [ -d $BASEPATH/mergedLists ]; then
    done
 fi
 
-if [ "$JOBTYPE" == "cms3" ] && [ "$USER" == "cgeorge" ]
+if [ "$JOBTYPE" == "cms3" ] && [ "$USER" == "namin" ]
 then
   pushd DataTuple-backup
-  for theUser in alex jason mark
+  for theUser in nick mark
   do
     cd $theUser
     cp /nfs-7/userdata/dataTuple/$theUser/completedList.txt . 
@@ -380,7 +384,7 @@ then
     cp -r /nfs-7/userdata/dataTuple/$theUser/fileLists .
     cd ..
   done
-  git add alex jason mark
+  git add nick mark
   git commit -m "dataTuple commit on `date` by $USER"
   git push origin master
   popd
