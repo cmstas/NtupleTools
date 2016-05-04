@@ -240,20 +240,10 @@ class Sample:
     def handle_action(self, action):
         # if we return True, then run.py will consume the action
 
-        # if "set status" in action:
-        #     # FIXME use case is to repostprocess, so make this clear
-        #     # beware of subtleties with repostprocessing stuff that skipped tail jobs
-        #     new_status = action.split("set status")[1].strip()
-        #     old_status = self.sample["status"]
-        #     self.sample["status"] = new_status
-        #     self.do_log("found and performed an action to change status from %s to %s" % (old_status, new_status))
-        #     return True
-
         if "repostprocess" in action:
-            # beware of subtleties with repostprocessing stuff that skipped tail jobs
-            self.sample["status"] = "crab"
-            self.do_log("found and performed an action to repostprocess, so put status back to 'crab'")
-            return True
+            self.do_log("found an action to repostprocess, so put status back to 'crab' and enabled skip_tail")
+            consume_action = self.force_repostprocess()
+            return consume_action
 
         elif "skip_tail" in action:
             self.do_log("found an action to skip tail crab jobs")
@@ -269,6 +259,22 @@ class Sample:
             self.do_log("don't recognize action '%s'" % action)
 
         return False
+
+    def force_repostprocess(self):
+        # start workflow from "crab" step
+        self.sample["status"] = "crab"
+
+        # clear these dictionaries to regenerate them
+        self.sample["ijob_to_nevents"] = {}
+        self.sample["imerged_to_ijob"] = {}
+        self.sample["ijob_to_miniaod"] = {}
+
+        # delete any residual merged files
+        merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
+        u.cmd("rm %s" % merged_wildcard)
+
+        consume_action = self.force_skip_tail()
+        return consume_action
 
     
     def force_skip_tail(self):
@@ -711,6 +717,8 @@ class Sample:
 
         self.do_log("making map from unmerged number to miniaod name")
         nlogfiles = len(self.misc["logfiles"])
+        # use temp so that if any crashes happen mid-processing, self.sample["ijob_to_miniaod"] will be empty and we re-do the whole thing
+        temp = {}
         for ilogfile,logfile in enumerate(self.misc["logfiles"]):
             # print logfile
             if ".tar.gz" in logfile:
@@ -721,7 +729,7 @@ class Sample:
                         fh = tar.extractfile(member)
                         lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
                         miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
-                        self.sample["ijob_to_miniaod"][jobnum] = miniaod
+                        temp[jobnum] = miniaod
                         self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
                         fh.close()
                         break
@@ -732,8 +740,9 @@ class Sample:
                     jobnum = int(logfile.split("job_out.")[1].split(".")[0])
                     lines = [line for line in fh.readlines() if "Initiating request to open file" in line]
                     miniaod = list(set(map(lambda x: "/store/"+x.split("/store/")[1].split(".root")[0]+".root", lines)))
-                    self.sample["ijob_to_miniaod"][jobnum] = miniaod
+                    temp[jobnum] = miniaod
 
+        self.sample["ijob_to_miniaod"][jobnum] = temp
 
     def get_rootfile_info(self, fname):
         # returns: is bad, nevents, nevents effective, file size in GB
@@ -764,27 +773,27 @@ class Sample:
         f.Close()
         return (False, n_entries, n_entries_eff, f.GetSize()/1.0e9)
 
-    def check_merged_rootfile(self, fname, total_events, treename="Events"):
+    def check_merged_rootfile(self, fname, total_events, treename="Events", ignore_total=True):
         f = TFile.Open(fname,"READ")
         imerged = int(fname.split(".root")[0].split("_")[-1])
 
         if not f or f.IsZombie():
             try: f.Close()
             except: pass
-            return 1, "Could not open file"
+            return 1, -1, "Could not open file"
 
         tree = f.Get(treename)
         n_entries = tree.GetEntries()
         if n_entries == 0: 
             f.Close()
-            return 1, "No events in file"
+            return 1, -1, "No events in file"
 
         scale1fb_max = abs(tree.GetMaximum("evt_scale1fb"))
         scale1fb_min = abs(tree.GetMinimum("evt_scale1fb"))
 
         if (scale1fb_max - scale1fb_min)/scale1fb_max > 1e-6:
             f.Close()
-            return 1, "Inconsistent scale1fb. abs(min): %f, abs(max): %f" % (scale1fb_min, scale1fb_max)
+            return 1, n_entries, "Inconsistent scale1fb. abs(min): %f, abs(max): %f" % (scale1fb_min, scale1fb_max)
 
         kfactor = tree.GetMaximum("evt_kfactor")
         filteff = tree.GetMaximum("evt_filt_eff")
@@ -793,25 +802,29 @@ class Sample:
         nevents_eff_branch = int(tree.GetMaximum("evt_nEvts_effective"))
         recalc_scale1fb = 1000.*xsec*filteff*kfactor / nevents_eff_branch
 
-        if nevents_branch != total_events:
+        if nevents_branch != total_events and not ignore_total:
             f.Close()
-            return 1, "evt_nEvts (%i) differs from total merged event count (%i)" % (nevents_branch, total_events)
+            return 1, n_entries, "evt_nEvts (%i) differs from total merged event count (%i)" % (nevents_branch, total_events)
 
         if (recalc_scale1fb - scale1fb_min)/scale1fb_min > 1e-6:
             f.Close()
-            return 1, "Inconsistent scale1fb. In file: %f, Calculated: %f" % (scale1fb_min, recalc_scale1fb)
+            return 1, n_entries, "Inconsistent scale1fb. In file: %f, Calculated: %f" % (scale1fb_min, recalc_scale1fb)
 
         f.Close()
-        return 0, ""
+        return 0, n_entries, ""
 
     def get_events_in_chain(self, fname_wildcard):
-        ch = TChain("Events")
-        ch.Add(fname_wildcard)
-        return ch.GetEntries()
+        nevents = 0
+        try:
+            ch = TChain("Events")
+            ch.Add(fname_wildcard)
+            nevents = ch.GetEntries()
+        except: pass
+        return nevents
 
 
     def make_merging_chunks(self, force=True):
-        if self.sample["imerged_to_ijob"] and not force: return
+        if self.sample["imerged_to_ijob"] and self.sample["nevents_unmerged"] and not force: return
 
         self.do_log("making map from merged index to unmerged indicies")
         group, groups = [], []
@@ -840,32 +853,30 @@ class Sample:
 
     def get_condor_submitted(self, running_at_least_hours=0.0):
         # return set of merged indices and set of condor clusterID
-        output = u.get("condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS")
+        cmd = "condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS -const 'AutoTwopleRequestname==\"%s\"'" % self.sample["crab"]["requestname"]
+        output = u.get(cmd)
 
         merged_id_set = set()
         clusterID_set = set()
         for line in output.split("\n"):
-            if "mergeWrapper" not in line: continue
+            if len(line.strip()) < 2: continue
 
-            clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.split(" ")[:7]
+            clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.strip().split(" ")[:7]
             requestname = unmerged_dir.split("crab_")[1].split("/")[0]
 
             # if we've specified to look only at jobs which have been running for at least x hours
             if running_at_least_hours > 0.01:
                 hours = 1.0*(datetime.datetime.now()-datetime.datetime.fromtimestamp(int(entered_current_status))).seconds / 3600.0
-                # print hours
                 if status == "RUNNING":
                     if hours < running_at_least_hours: continue
                 else:
                     # if the job is not running, then don't consider it regardless of time
                     continue
 
-            if self.sample["crab"]["requestname"] == requestname:
-                merged_id_set.add(int(merged_index))
-                clusterID_set.add(int(clusterID))
+            merged_id_set.add(int(merged_index))
+            clusterID_set.add(int(clusterID))
 
         return merged_id_set, clusterID_set
-
 
     def get_merged_done(self):
         # return set of merged indices
@@ -897,7 +908,8 @@ class Sample:
 
     def is_merging_done(self):
         # want 0 running condor jobs and all merged files in output area
-        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == len(self.sample["imerged_to_ijob"].keys())
+        nmerged = len(self.sample["imerged_to_ijob"].keys())
+        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
         if done:
             self.sample["postprocessing"]["running"] = 0
             self.sample["postprocessing"]["done"] = self.sample["postprocessing"]["total"]
@@ -939,6 +951,7 @@ class Sample:
                 "condorlog": condor_log_files,
                 "stdlog": std_log_files,
                 "proxy": proxy_file,
+                "requestname": self.sample["crab"]["requestname"]
                 }
 
         cfg_format = "universe=grid \n" \
@@ -950,6 +963,7 @@ class Sample:
                      "when_to_transfer_output = ON_EXIT \n" \
                      "transfer_input_files={inpfiles} \n" \
                      "+Owner = undefined  \n" \
+                     "+AutoTwopleRequestname=\"{requestname}\" \n" \
                      "log={condorlog} \n" \
                      "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
                      "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
@@ -1059,12 +1073,49 @@ class Sample:
 
         num_failed = 0
         problems = []
+        fname_to_info = {}
+        imerged_to_ijob = self.sample["imerged_to_ijob"]
+        ijob_to_nevents = self.sample["ijob_to_nevents"]
+
+        # main loop to store any and all problems with each merged file
         for fname in fnames:
-            failed, problem = self.check_merged_rootfile(fname, tot_events)
-            if failed:
-                problems.append("%s: %s" % (problem, fname))
+            failed, nevents_actual, problem = self.check_merged_rootfile(fname, tot_events)
+
+            merged_idx = int(fname.split(".root")[0].split("_")[-1])
+            unmerged_indices = imerged_to_ijob[merged_idx]
+            nevents_expected = sum(map(lambda x: ijob_to_nevents.get(x)[0], unmerged_indices))
+
+            fname_to_info[fname] = {}
+            fname_to_info[fname]["failed"] = failed
+            fname_to_info[fname]["nevents_actual"] = nevents_actual
+            fname_to_info[fname]["nevents_expected"] = nevents_expected
+            fname_to_info[fname]["problem"] = problem
+
+        # first loop over merged files
+        # if any merged file has difference between actual and expected events, resubmit it
+        for fname in fname_to_info.keys():
+            nevents_actual = fname_to_info[fname]["nevents_actual"]
+            nevents_expected = fname_to_info[fname]["nevents_expected"]
+            
+            if nevents_actual != nevents_expected:
+                problem_str = "%s: actual (%i) and expected events (%i) differ" % (fname, nevents_actual, nevents_expected)
+                problems.append(problem_str)
+                self.do_log(problem_str)
                 u.cmd("rm %s" % fname)
                 num_failed += 1
+
+        # second loop over merged files where we consider more detailed problems
+        # only do this if each of the merged files have the correct event counts
+        if num_failed == 0:
+            for fname in fname_to_info.keys():
+                failed = fname_to_info[fname]["failed"]
+                problem = fname_to_info[fname]["problem"]
+                if failed:
+                    problem_str = "%s: %s" % (problem, fname)
+                    problems.append(problem_str)
+                    self.do_log(problem_str)
+                    u.cmd("rm %s" % fname)
+                    num_failed += 1
 
         if num_failed > 0:
             self.do_log("%i merged ntuples are bad" % num_failed)
