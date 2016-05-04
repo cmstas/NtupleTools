@@ -2,6 +2,7 @@
 
 #Figure out name
 if [ "$USER" == "cgeorge" ]; then name="alex"; fi
+if [ "$USER" == "namin"       ]; then name="nick" ; fi
 if [ "$USER" == "jgran" ]; then name="jason"; fi
 if [ "$USER" == "mderdzinski" ]; then name="mark"; fi
 

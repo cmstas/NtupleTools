@@ -13,6 +13,7 @@ if [ "$basedir" == "" ]; then basedir="/nfs-7/userdata/dataTuple/$shortusername"
 
 #Short usernames
 if [ "$USER" == "cgeorge"     ]; then shortusername="alex" ; fi
+if [ "$USER" == "namin"       ]; then shortusername="nick" ; fi
 if [ "$USER" == "jgran"       ]; then shortusername="jason"; fi
 if [ "$USER" == "mderdzinski" ]; then shortusername="mark" ; fi
 

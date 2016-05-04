@@ -10,16 +10,16 @@ sed -i '1,4d' temp_status.txt
 #Read condor_q output to fill lists.  
 while read line
 do
-  if [ `echo $line | awk '{ print $6 }'` == "R" ]
+  if [[ `echo $line | awk '{ print $6 }'` == "R" ]]
   then
     echo $FILENAME >> runningList.txt
-  elif [ `echo $line | awk '{ print $6 }'` == "C" ]
+  elif [[ `echo $line | awk '{ print $6 }'` == "C" ]]
   then
     echo $FILENAME >> runningList.txt
-  elif [ `echo $line | awk '{ print $6 }'` == "I" ]
+  elif [[ `echo $line | awk '{ print $6 }'` == "I" ]]
   then
     echo $FILENAME >> idleList.txt
-  elif [ `echo $line | awk '{ print $6 }'` == "H" ]
+  elif [[ `echo $line | awk '{ print $6 }'` == "H" ]]
   then
     echo $FILENAME >> heldList.txt
   fi

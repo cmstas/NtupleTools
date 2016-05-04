@@ -44,6 +44,7 @@ do
   NCOMPLETED=`cat $BASEPATH/completedList.txt | grep $DATASET | wc -l`
   name="alex"
   if [ "$USER" == "jgran" ]; then name="jason"; fi
+  if [ "$USER" == "namin" ]; then name="nick"; fi
   if [ "$USER" == "mderdzinski" ]; then name="mark"; fi
   cp /nfs-7/userdata/dataTuple/$name/json_lists/full_JSON_${ERA}_${DATASET}_MINIAOD_PromptReco-$VERSION.txt /home/users/$USER/public_html/json_$i.txt
   if [ -e runningList.txt ]; then NJOBSRUNNING=`cat runningList.txt | grep $DATASET | wc -l`; fi

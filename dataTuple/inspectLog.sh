@@ -34,7 +34,7 @@ fi
 #If not already reported, report it
 if [ "$isReported" == "no" ] 
 then
-  echo "Error!! $USER doesn't have a proxy!!" | /bin/mail -r "george@physics.ucsb.edu" -s "[dataTuple] error report" "george@physics.ucsb.edu, jgran@physics.ucsb.edu, mark.derdzinski@gmail.com" 
+  echo "Error!! $USER doesn't have a proxy!!" | /bin/mail -r "namin@physics.ucsb.edu" -s "[dataTuple] error report" "namin@physics.ucsb.edu, mark.derdzinski@gmail.com" 
   echo "passwordProblem" > voms_status.txt
   echo "reporting"
 else

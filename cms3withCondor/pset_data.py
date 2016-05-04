@@ -1,8 +1,11 @@
 import FWCore.ParameterSet.Config as cms
+import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as pt
 from Configuration.EventContent.EventContent_cff        import *
 
 import CMS3.NtupleMaker.configProcessName as configProcessName
-configProcessName.name="RECO"
+is_relval = False
+configProcessName.name = configProcessName.name2 = "reRECO" if is_relval else "RECO"
+configProcessName.isFastSim=False
 
 #CMS3
 process = cms.Process("CMS3")
@@ -28,7 +31,7 @@ process.GlobalTag.globaltag = "SUPPLY_GLOBAL_TAG"
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.MessageLogger.cerr.threshold  = ''
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
-process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True),SkipEvent = cms.untracked.vstring('ProductNotFound') )
+process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(False),SkipEvent = cms.untracked.vstring('ProductNotFound') )
 
 #Output
 process.out = cms.OutputModule("PoolOutputModule",
@@ -59,9 +62,14 @@ process.fixedGridRhoFastjetAll = fixedGridRhoFastjetAll.clone(pfCandidatesTag = 
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
 process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
+process.load("RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi")
 process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons',"",configProcessName.name)
-process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
+process.electronMVAValueMapProducer.srcMiniAOD = cms.InputTag('slimmedElectrons',"",configProcessName.name)
+process.egmGsfElectronIDSequence = cms.Sequence(process.electronMVAValueMapProducer * process.egmGsfElectronIDs)
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff']
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
 
@@ -93,14 +101,14 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(SUPPLY_MAX_N
 #configurable options =======================================================================
 runOnData=True #data/MC switch
 usePrivateSQlite=False #use external JECs (sqlite file)
-useHFCandidates=False #create an additionnal NoHF slimmed MET collection if the option is set to false
+useHFCandidates=True #create an additionnal NoHF slimmed MET collection if the option is set to false
 applyResiduals=True #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
 #===================================================================
 
 if usePrivateSQlite:
     from CondCore.DBCommon.CondDBSetup_cfi import *
     import os
-    era="Summer15_25nsV5_MC"
+    era="Summer15_25nsV3_DATA"
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
                                connect = cms.string( "sqlite_file:"+era+".db" ),
                                toGet =  cms.VPSet(
@@ -135,19 +143,20 @@ if not useHFCandidates:
 
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
-
 #default configuration for miniAOD reprocessing, change the isData flag to run on data
 #for a full met computation, remove the pfCandColl input
-runMetCorAndUncFromMiniAOD(process,
-                           isData=runOnData,
-                           )
+pt.runMETCorrectionsAndUncertainties(process,
+      addToPatDefaultSequence=False, #This seems to crash if true
+      pfCandCollection=cms.InputTag('particleFlow'),
+      onMiniAOD=True 
+)
 
 if not useHFCandidates:
-    runMetCorAndUncFromMiniAOD(process,
-                               isData=runOnData,
-                               pfCandColl=cms.InputTag("noHFCands"),
-                               postfix="NoHF"
-                               )
+    pt.runMETCorrectionsAndUncertainties(process,
+      addToPatDefaultSequence=False, #This seems to crash if true
+      pfCandCollection=cms.InputTag('noHFCands'),
+      onMiniAOD=True 
+    )
 
 ### -------------------------------------------------------------------
 ### the lines below remove the L2L3 residual corrections when processing data
@@ -189,14 +198,10 @@ process.p = cms.Path(
   process.muonMaker *
   process.pfJetMaker *
   process.pfJetPUPPIMaker *
-  process.METToolboxJetMaker *
+  # process.METToolboxJetMaker *
   process.subJetMaker *
 #  process.ca12subJetMaker *
   process.pfmetMaker *
-  process.pfmetNoHFMaker *
-  process.pfmetpuppiMaker *
-  process.T1pfmetMaker *
-  process.T1pfmetNoHFMaker *
   process.hltMakerSequence *
   process.pftauMaker *
   process.photonMaker *
@@ -215,6 +220,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.eventMaker.isData                        = cms.bool(True)
 process.pfmetMaker.isData                        = process.eventMaker.isData
 
+
 # redefine
-process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","",configProcessName.name)
-process.slimmedMETsNoHF.t01Variation = cms.InputTag("slimmedMETsNoHF","",configProcessName.name)
+# process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","",configProcessName.name)
+# process.slimmedMETsNoHF.t01Variation = cms.InputTag("slimmedMETsNoHF","",configProcessName.name)

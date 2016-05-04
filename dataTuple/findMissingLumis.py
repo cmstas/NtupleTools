@@ -61,7 +61,7 @@ if(len(sys.argv) > 2):
     datasetPattern = sys.argv[2]
     print "Using dataset pattern:",datasetPattern
 
-for user in ['mderdzinski','jgran','cgeorge']:
+for user in ['mderdzinski','namin']:
     html = urllib2.urlopen("http://uaf-7.t2.ucsd.edu/~%s/dataTupleMonitor.html" % user).readlines()
     for line in html:
         if ('Dataset: ' in line):
