@@ -372,6 +372,7 @@ function fillDOM(data) {
             // $("#pbartextleft_"+i).html("<a href='#/' onClick='doSendAction(\"kill\","+i+")'>kill</a> | <a href='#/' onClick='doSendAction(\"skiptail\","+i+")'>skip tail</a>"); 
             $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")'> &#9762; </a>  " +  
                                         "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")'> &#9986; </a> " +
+                                        "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")'> &#128296; </a> " +
                                         "<a href='#/' onClick='doSendAction(\"email_done\","+i+")'> &#9993; </a> " );
         }
 
