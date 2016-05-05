@@ -1,6 +1,6 @@
 var alldata = {};
 var jsonFile = "data.json";
-var baseDir = "BASEDIR_PLACEHOLDER";
+var baseDir = '/home/users/namin/duck_80x/NtupleTools/AutoTwopler';
 var refreshSecs = 10*60;
 var detailsVisible = false;
 var duckMode = false;
@@ -21,6 +21,8 @@ $(function() {
     handleOtherTwiki();
     handleSubmitButton();
     handleAdminMode();
+
+    $( document ).tooltip({ track: true });
 
 
 });
@@ -367,13 +369,10 @@ function fillDOM(data) {
         $("#pbartextleft_"+i).html(""); 
 
         if(adminMode) {
-            // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log($(this).parent().parent().prev().text());'>&#9762;  &#128035; </a>"); 
-            // $("#pbartextleft_"+i).html("<a href='#/' onClick='console.log("+i+");'>&#9762;</a> <a href='#/'> &#128035; </a> <a href='#/'>tail</a>"); 
-            // $("#pbartextleft_"+i).html("<a href='#/' onClick='doSendAction(\"kill\","+i+")'>kill</a> | <a href='#/' onClick='doSendAction(\"skiptail\","+i+")'>skip tail</a>"); 
-            $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")'> &#9762; </a>  " +  
-                                        "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")'> &#9986; </a> " +
-                                        "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")'> &#128296; </a> " +
-                                        "<a href='#/' onClick='doSendAction(\"email_done\","+i+")'> &#9993; </a> " );
+            $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")' title='kill job (not enabled)'> &#9762; </a>  " +  
+                                        "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")' title='skip tail CRAB jobs'> &#9986; </a> " +
+                                        "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")' title='re-postprocess'> &#128296; </a> " +
+                                        "<a href='#/' onClick='doSendAction(\"email_done\","+i+")' title='send email when done'> &#9993; </a> " );
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));
