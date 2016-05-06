@@ -1017,6 +1017,7 @@ class Sample:
 
             if " submitted " in submit_output: 
                 self.do_log("job for merged_ntuple_%i.root submitted successfully" % imerged)
+                self.sample["postprocessing"]["tosubmit"] -= 1
             else:
                 self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
