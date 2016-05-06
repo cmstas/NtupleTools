@@ -912,8 +912,8 @@ class Sample:
         done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
         if done:
             self.sample["postprocessing"]["running"] = 0
+            self.sample["postprocessing"]["idle"] = 0
             self.sample["postprocessing"]["done"] = self.sample["postprocessing"]["total"]
-            self.sample["postprocessing"]["tosubmit"] = 0
 
         return done
 
@@ -978,10 +978,10 @@ class Sample:
 
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
-            # only 1% of jobs take more than 6 hours
-            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=6.0)
+            # only ~2% of jobs take more than 5 hours
+            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=5.0)
             if len(longrunning_set) > 0:
-                self.do_log("The following merged file indices have been merging for more than 6 hours: %s" % ", ".join(map(str,longrunning_set)))
+                self.do_log("The following merged file indices have been merging for more than 5 hours: %s" % ", ".join(map(str,longrunning_set)))
                 self.do_log("Killing and resubmitting condor IDs: %s" % ", ".join(map(str,longrunning_ID_set)))
 
                 u.cmd( "condor_rm %s" % " ".join(map(str,longrunning_ID_set)) )
@@ -996,7 +996,6 @@ class Sample:
         self.sample["postprocessing"]["total"] = len(imerged_set)
         self.sample["postprocessing"]["running"] = len(processing_set)
         self.sample["postprocessing"]["done"] = len(done_set)
-        self.sample["postprocessing"]["tosubmit"] = len(imerged_list)
 
         if len(imerged_list) > 0:
             self.sample["status"] = "postprocessing"
@@ -1017,10 +1016,11 @@ class Sample:
 
             if " submitted " in submit_output: 
                 self.do_log("job for merged_ntuple_%i.root submitted successfully" % imerged)
-                self.sample["postprocessing"]["tosubmit"] -= 1
             else:
                 self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
+
+        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"]
 
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
