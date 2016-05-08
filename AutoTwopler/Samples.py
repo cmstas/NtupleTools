@@ -2,8 +2,7 @@ import os, sys, glob, select
 import datetime, tarfile, pprint
 import pickle, json, logging
 import multiprocessing
-import re
-
+import re, copy
 
 try:
     from WMCore.Configuration import Configuration
@@ -114,7 +113,7 @@ class Sample:
                 "have_set_inputs": False,
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "input_filenames": [],
-                "imerged": []
+                "imerged": [],
             }
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
 
@@ -162,7 +161,7 @@ class Sample:
 
 
     def get_slimmed_dict(self):
-        new_dict = self.sample.copy()
+        new_dict = copy.deepcopy(self.sample)
         del new_dict["imerged_to_ijob"]
         del new_dict["ijob_to_miniaod"]
         del new_dict["ijob_to_nevents"]
@@ -174,11 +173,11 @@ class Sample:
         elif self.sample["type"] == "BABY":
             for key in ["xsec", "specialdir", "sparms", "pset", "postprocessing", "nevents_unmerged", "nevents_merged", "nevents_DAS", \
                         "kfact", "isdata", "gtag", "finaldir", "efact", "cmsswver", "cms3tag", "checks"]:
-                del new_dict[key]
+                if key in new_dict: del new_dict[key]
             for key in ["datetime", "jobs_left_tail", "outputdir", "resubmissions"]:
-                del new_dict["crab"][key]
+                if key in new_dict["crab"]: del new_dict["crab"][key]
             for key in ["have_set_inputs", "imerged", "input_filenames", "outputdir_pattern"]:
-                del new_dict["baby"][key]
+                if key in new_dict["baby"]: del new_dict["baby"][key]
         return new_dict
 
 
@@ -218,7 +217,8 @@ class Sample:
             with open(backup_file,"r") as fhin:
                 d_tot = pickle.load(fhin)
 
-            for key in d_tot["sample"].keys(): self.sample[key] = d_tot["sample"][key]
+            for key in d_tot["sample"].keys():
+                self.sample[key] = d_tot["sample"][key]
             for key in d_tot["misc"].keys(): self.misc[key] = d_tot["misc"][key]
             last_saved = self.misc["last_saved"]
             if last_saved:

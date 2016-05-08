@@ -163,6 +163,8 @@ function doTwiki(type) {
     if(type == "update") {
         var donesamples = [];
         for(var i = 0; i < alldata["samples"].length; i++) {
+            if(alldata["samples"][i]["type"] == "BABY") continue;
+            
             donesamples.push( alldata["samples"][i] );
         }
         console.log(donesamples);
@@ -244,8 +246,8 @@ function getProgress(sample) {
 
     } else if(type == "BABY") {
         done = sample["baby"]["done"];
-        total = sample["baby"]["total"];
-        return 1.0*done/tot;
+        tot = sample["baby"]["total"];
+        return 100.0*done/tot;
     }
 
 }
@@ -420,7 +422,7 @@ function fillDOM(data) {
 function expandAll() {
     // do it this way because one guy may be reversed
     if(detailsVisible) {
-        $("#toggle_all").text("show details")
+        $("#toggle_all").text("show details");
         $("[id^=details_]").slideUp(100);
     } else {
         $("#toggle_all").text("hide details")
