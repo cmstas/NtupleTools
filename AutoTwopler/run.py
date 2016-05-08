@@ -50,14 +50,12 @@ for i in range(5000):
         else:
             all_samples[all_samples.index(samp)].update_params(samp)
 
-    # for isample, s in enumerate(all_samples):
-    #     s.nuke()
-    # sys.exit()
 
     for isample, s in enumerate(all_samples):
 
         try:
             stat = s.get_status()
+            typ = s.get_type()
 
             # grab actions from a text file and act on them, consuming (removing) them if successful
             for dataset_name, action in u.get_actions(dataset_name=s["dataset"]):
@@ -65,24 +63,42 @@ for i in range(5000):
 
             if not s.pass_tsa_prechecks(): continue
 
-            if stat == "new":
-                s.crab_submit()
-            elif stat == "crab":
-                s.crab_parse_status()
-                if s.is_crab_done():
-                    s.make_miniaod_map()
-                    s.make_merging_chunks()
-                    s.submit_merge_jobs()
-            elif stat == "postprocessing":
-                if s.is_merging_done():
-                    if s.check_output():
-                        s.make_metadata()
-                        s.copy_files()
-                else:
-                    s.submit_merge_jobs()
-            elif stat == "done":
-                s.do_send_email()
-                pass
+
+            if typ == "CMS3":
+
+                if stat == "new":
+                    s.crab_submit()
+                elif stat == "crab":
+                    s.crab_parse_status()
+                    if s.is_crab_done():
+                        s.make_miniaod_map()
+                        s.make_merging_chunks()
+                        s.submit_merge_jobs()
+                elif stat == "postprocessing":
+                    if s.is_merging_done():
+                        if s.check_output():
+                            s.make_metadata()
+                            s.copy_files()
+                    else:
+                        s.submit_merge_jobs()
+                elif stat == "done":
+                    s.do_send_email()
+
+            elif typ == "BABY":
+                
+                if stat == "new":
+                    s.set_baby_inputs()
+                    s.submit_baby_jobs()
+
+                elif stat == "condor":
+                    if s.is_babymaking_done():
+                        s["status"] = "done"
+                    else:
+                        s.submit_baby_jobs()
+
+                elif stat == "done":
+                    s.do_send_email()
+
 
             s.save()
             data["samples"].append( s.get_slimmed_dict() )
@@ -92,6 +108,7 @@ for i in range(5000):
             logger.info( traceback.format_exc() )
 
     tot_crab_breakdown = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
+    # TODO add breakdown of postprocessing and baby jobs as well
     data["last_updated"] = u.get_timestamp()
     data["time_stats"].append( (u.get_timestamp(), tot_crab_breakdown) )
     data["log"] = u.get_last_n_lines(fname=params.log_file, N=100)

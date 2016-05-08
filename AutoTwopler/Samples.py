@@ -4,6 +4,7 @@ import pickle, json, logging
 import multiprocessing
 import re
 
+
 try:
     from WMCore.Configuration import Configuration
     from CRABAPI.RawCommand import crabCommand
@@ -17,10 +18,14 @@ except:
 
 import params
 import utils as u
+import scripts.dis_client as dis
 
 class Sample:
 
-    def __init__(self, dataset=None, gtag=None, kfact=None, efact=None,xsec=None, sparms=[], extra={}):
+    def __init__(self, type="CMS3", dataset=None, gtag=None,  \
+            kfact=None, efact=None,xsec=None,  \
+            executable=None,package=None,analysis=None,baby_tag=None, \
+            sparms=[], extra={}):
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
@@ -30,11 +35,15 @@ class Sample:
         self.do_filelist = "filelist" in extra
         self.extra = extra
 
+        self.baby = type == "BABY"
+
         if params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
+
 
         self.misc = {}
         self.misc["pfx_pset"] = 'pset' # where to hold the psets
         self.misc["pfx_crab"] = 'crab' # where to keep all crab tasks
+        self.misc["pfx_babies"] = 'babies' # where to keep all babymaking misc files
         self.misc["crab_config"] = None
         self.misc["handled_more_than_1k"] = False
         self.misc["rootfiles"] = []
@@ -44,9 +53,10 @@ class Sample:
         self.misc["email_when_done"] = params.EMAIL_WHEN_DONE
 
         self.sample = {
-                "basedir" : "",
+                "type": type,
+                "basedir" : os.getcwd()+"/",
                 "dataset" : dataset,
-                "shortname": dataset.split("/")[1]+"_"+dataset.split("/")[2],
+                "shortname": u.get_shortname_from_dataset(dataset),
                 "user" : u.get_hadoop_name(),
                 "cms3tag" : params.cms3tag,
                 "cmsswver" : params.cmssw_ver,
@@ -72,7 +82,10 @@ class Sample:
                 }
 
         self.sample["crab"]["requestname"] = self.sample["shortname"][:99] # damn crab has size limit for name
-        self.pfx = self.sample["shortname"][:25] + "..."
+        if self.baby:
+            self.pfx = "BABY_"+self.sample["shortname"][:20] + "..."
+        else:
+            self.pfx = self.sample["shortname"][:25] + "..."
 
         # since extensions are at the end of the dataset name, the [:99] crab limit will give us duplicate requestnames
         # so tack on _ext[0-9]{1,2} at the end of the crab requestname for distinction
@@ -88,6 +101,22 @@ class Sample:
         self.sample["crab"]["jobs_left"] = [] # keep track of job ids that are not done
         self.sample["crab"]["jobs_left_tail"] = [] # keep track of job ids that are taking forever (in the tail)
 
+        # HANDLE BABY STUFF
+        if self.baby:
+            self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]
+            self.sample["type"] = "BABY"
+            self.sample["baby"] = {
+                "baby_tag": baby_tag,
+                "analysis": analysis,
+                "user_package": package,
+                "user_executable": executable,
+                "outputdir_pattern": "/hadoop/cms/store/user/%s/AutoTwopler_babies/${ANALYSIS}_${BABY_TAG}/${SHORTNAME}/" % os.getenv("USER"),
+                "have_set_inputs": False,
+                "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
+                "input_filenames": [],
+                "imerged": []
+            }
+            self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
 
 
         self.logger = logging.getLogger(params.log_file.replace(".","_"))
@@ -95,7 +124,8 @@ class Sample:
         self.crab_status_res = { }
 
 
-        self.set_sample_specifics()
+        if not self.baby:
+            self.set_sample_specifics()
 
         self.load() # load backup of this sample when we instantiate it
 
@@ -109,7 +139,8 @@ class Sample:
     
 
     def __eq__(self, other):
-        return "dataset" in other and other["dataset"] == self.sample["dataset"]
+        return "dataset" in other and other["dataset"] == self.sample["dataset"] \
+           and "type" in other and other["type"] == self.sample["type"]
 
 
     def __str__(self):
@@ -137,11 +168,26 @@ class Sample:
         del new_dict["ijob_to_nevents"]
         if "jobs_left" in new_dict["crab"]:
             del new_dict["crab"]["jobs_left"]
+
+        if self.sample["type"] == "CMS3":
+            del new_dict["baby"]
+        elif self.sample["type"] == "BABY":
+            for key in ["xsec", "specialdir", "sparms", "pset", "postprocessing", "nevents_unmerged", "nevents_merged", "nevents_DAS", \
+                        "kfact", "isdata", "gtag", "finaldir", "efact", "cmsswver", "cms3tag", "checks"]:
+                del new_dict[key]
+            for key in ["datetime", "jobs_left_tail", "outputdir", "resubmissions"]:
+                del new_dict["crab"][key]
+            for key in ["have_set_inputs", "imerged", "input_filenames", "outputdir_pattern"]:
+                del new_dict["baby"][key]
         return new_dict
 
 
     def get_status(self):
         return self.sample["status"]
+
+
+    def get_type(self):
+        return self.sample["type"]
 
 
     def do_log(self, text, typ='info'):
@@ -225,10 +271,61 @@ class Sample:
         if self.specialdir_test:
             self.sample["specialdir"] = "test"
 
-        self.sample["basedir"] = os.getcwd()+"/"
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
 
+
+    def set_baby_inputs(self):
+        if self.sample["baby"]["have_set_inputs"]: return
+
+        if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
+        if not os.path.isdir(self.sample["crab"]["taskdir"]): os.makedirs(self.sample["crab"]["taskdir"])
+
+        user_executable = self.sample["baby"]["user_executable"]
+        user_package = self.sample["baby"]["user_package"]
+
+        u.cmd( "cp %s %s/%s/package.tar.gz" % (user_package, self.sample["basedir"], self.misc["pfx_babies"]) )
+        u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
+
+        # make new executable file with copy command at bottom and variables at top
+        # so um, one thing. it seems like condor doesn't immediately copy the executable when you submit the job
+        # thus, if we rapidfire submit jobs, they will all end up seeing the last version of the executable
+        # ie, they might all output to output_N.root where N is the last imerged value. so all the variables below
+        # make the submission file independent of file number (stuff like imerged is computed on the fly)
+        copy_cmd = "lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
+        with open(self.sample["baby"]["executable_script"], "w") as fhout:
+            fhout.write("#!/bin/bash\n\n")
+            fhout.write("DATASET=$1\n")
+            fhout.write("FILENAME=$2\n")
+            fhout.write("ANALYSIS=$3\n")
+            fhout.write("BABY_TAG=$4\n")
+            fhout.write("SHORTNAME=$5\n")
+            fhout.write("EXTRA1=$6\n")
+            fhout.write("EXTRA2=$7\n")
+            fhout.write("EXTRA3=$8\n")
+            fhout.write("IMERGED=$(echo $FILENAME | sed 's/.*merged_ntuple_\\([0-9]\\+\\)\\.root/\\1/')\n\n")
+            fhout.write("echo dataset: $DATASET\n")
+            fhout.write("echo filename: $FILENAME\n")
+            fhout.write("echo analysis: $ANALYSIS\n")
+            fhout.write("echo baby_tag: $BABY_TAG\n")
+            fhout.write("echo shortname: $SHORTNAME\n")
+            fhout.write("echo extra1: $EXTRA1\n")
+            fhout.write("echo extra2: $EXTRA2\n")
+            fhout.write("echo extra3: $EXTRA3\n")
+            fhout.write("echo imerged: $IMERGED\n\n")
+            fhout.write("echo Before executable\necho Date: $(date +%s)\nhostname\nls -l\n\n")
+            fhout.write("# ----------------- BEGIN USER EXECUTABLE -----------------\n")
+            with open(user_executable, "r") as fhin:
+                for line in fhin:
+                    fhout.write(line)
+            fhout.write("# ----------------- END USER EXECUTABLE -----------------\n\n\n")
+            fhout.write("echo After executable\necho Date: $(date +%s)\nls -l\n\n")
+            fhout.write(copy_cmd + "\n\n")
+            fhout.write("echo After copy\necho Date: $(date +%s)")
+        
+        self.sample["baby"]["input_filenames"] = self.get_snt_merged_files()
+        self.sample["baby"]["imerged"] = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
+        self.sample["baby"]["have_set_inputs"] = True
 
     def update_params(self, d):
         for param in ["xsec", "kfact", "efact", "sparms"]:
@@ -290,14 +387,20 @@ class Sample:
                 if not(status == "finished"):
                     self.sample["crab"]["jobs_left_tail"].append(ijob)
 
-        # if we didn't find any jobs in the tail, either we're done (in which case
-        # we don't need to force skip anything), or crab status failed
-        if not self.sample["crab"]["jobs_left_tail"]: return False 
-
         self.do_skip_tail = True
         self.misc["can_skip_tail"] = True
         self.sample["crab"]["status"] = "COMPLETED"
         return True
+
+    def get_snt_merged_files(self):
+        filenames = []
+
+        query_str = "%s | grep location" % self.sample["dataset"]
+        response = dis.query(query_str, typ='snt')
+        finaldir = response["response"]["payload"][0]
+        filenames = glob.glob("%s/merged_ntuple_*.root" % finaldir)
+
+        return filenames
 
     def make_crab_config(self):
         if self.misc["crab_config"] is not None: 
@@ -750,13 +853,13 @@ class Sample:
         treename = "Events"
 
         if not f or f.IsZombie():
-            print "WARNING: %s is unopenable or zombified" % fname
+            self.do_log("WARNING: %s is unopenable or zombified" % fname)
             return (True, 0, 0, 0)
 
         tree = f.Get(treename)
         n_entries = tree.GetEntriesFast()
         if n_entries == 0:
-            print "WARNING: %s has 0 entries" % fname
+            self.do_log("WARNING: %s has 0 entries" % fname)
             return (True, 0, 0, 0)
 
         pos_weight = tree.GetEntries("genps_weight>=0")
@@ -767,7 +870,7 @@ class Sample:
         tree.Draw("evt_pfmet >> h_pfmet", "", "goff")
         avg_pfmet = h_pfmet.GetMean()
         if avg_pfmet < 0.01 or avg_pfmet > 10000:
-            print "WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet)
+            self.do_log("WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet))
             return (True, 0, 0, 0)
 
         f.Close()
@@ -852,17 +955,23 @@ class Sample:
 
 
     def get_condor_submitted(self, running_at_least_hours=0.0):
-        # return set of merged indices and set of condor clusterID
-        cmd = "condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS -const 'AutoTwopleRequestname==\"%s\"'" % self.sample["crab"]["requestname"]
+        # return lists of merged indices and set of condor clusterID
+        macro_val = self.sample["crab"]["requestname"]
+        if self.sample["type"] == "BABY":
+            macro_val = "BABY_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], self.sample["shortname"])
+        cmd = "condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS -const 'AutoTwopleRequestname==\"%s\"'" % macro_val
         output = u.get(cmd)
 
-        merged_id_set = set()
-        clusterID_set = set()
+        merged_ids = []
+        clusterIDs = []
         for line in output.split("\n"):
             if len(line.strip()) < 2: continue
 
-            clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.strip().split(" ")[:7]
-            requestname = unmerged_dir.split("crab_")[1].split("/")[0]
+            if self.sample["type"] == "BABY":
+                clusterID, status, entered_current_status, cmd = line.strip().split(" ")[:4]
+                merged_index = int(line.split("merged_ntuple_",1)[1].split(".root")[0])
+            else:
+                clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.strip().split(" ")[:7]
 
             # if we've specified to look only at jobs which have been running for at least x hours
             if running_at_least_hours > 0.01:
@@ -873,14 +982,17 @@ class Sample:
                     # if the job is not running, then don't consider it regardless of time
                     continue
 
-            merged_id_set.add(int(merged_index))
-            clusterID_set.add(int(clusterID))
+            merged_ids.append(int(merged_index))
+            clusterIDs.append(int(clusterID))
 
-        return merged_id_set, clusterID_set
+        return merged_ids, clusterIDs
+
 
     def get_merged_done(self):
         # return set of merged indices
-        merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
+        merged_dir = ""
+        if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
+        elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
         if not os.path.isdir(merged_dir): return set()
         files = os.listdir(merged_dir)
         files = [f for f in files if f.endswith(".root")]
@@ -914,6 +1026,17 @@ class Sample:
             self.sample["postprocessing"]["running"] = 0
             self.sample["postprocessing"]["idle"] = 0
             self.sample["postprocessing"]["done"] = self.sample["postprocessing"]["total"]
+
+        return done
+
+    def is_babymaking_done(self):
+        # want 0 running condor jobs and all merged files in output area
+        nmerged = len(self.sample["baby"]["imerged"])
+        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
+        if done:
+            self.sample["baby"]["running"] = 0
+            self.sample["baby"]["idle"] = 0
+            self.sample["baby"]["done"] = self.sample["baby"]["total"]
 
         return done
 
@@ -974,7 +1097,9 @@ class Sample:
 
         # don't resubmit the ones that are already running or done
         imerged_set = set(self.sample['imerged_to_ijob'].keys())
-        processing_set, processing_ID_set = self.get_condor_submitted()
+        processing_list, processing_ID_list = self.get_condor_submitted()
+        processing_set = set(processing_list)
+        processing_ID_set = set(processing_ID_list)
 
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
@@ -1020,10 +1145,106 @@ class Sample:
                 self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
 
-        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"]
+        self.sample["baby"]["idle"] = self.sample["baby"]["total"] - self.sample["baby"]["running"]
 
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
+
+    def submit_baby_jobs(self):
+        filenames = self.sample["baby"]["input_filenames"]
+        extra1 = "1000"
+        extra2 = ""
+        extra3 = ""
+
+        tag = self.sample["baby"]["baby_tag"]
+        analysis = self.sample["baby"]["analysis"]
+        package = "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"])
+        executable_script = "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"])
+        shortname = self.sample["shortname"]
+
+        path_fragment = "%s/%s/%s" % (analysis, tag, shortname)
+        condor_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/%s.log" % (os.getenv("USER"),path_fragment,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
+        std_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/std_logs/" % (os.getenv("USER"),path_fragment)
+
+        for directory in [condor_log_files, std_log_files]:
+            if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
+
+        submit_file = "%s/%s/submit.cmd" % (self.sample["basedir"], self.misc["pfx_babies"])
+        proxy_file = u.get_proxy_file()
+        input_files = ",".join([package,executable_script])
+
+        try:
+            if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
+        except:
+            self.do_log("ERROR making log file directory: %s" % std_log_files)
+            self.do_log("see if you can make it manually. if not, switch to another uaf.")
+            raise Exception("can't make log file directory: %s" % std_log_files)
+
+        condor_params = {
+                "exe": executable_script,
+                "inpfiles": input_files,
+                "condorlog": condor_log_files,
+                "stdlog": std_log_files,
+                "proxy": proxy_file,
+                "requestname": "BABY_%s_%s_%s" % (analysis, tag, shortname),
+                }
+
+        cfg_format = "universe=grid \n" \
+                     "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
+                     "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
+                     "executable={exe} \n" \
+                     "arguments={args} \n" \
+                     "transfer_executable=True \n" \
+                     "transfer_input_files={inpfiles} \n" \
+                     "transfer_output_files = \"\"\n" \
+                     "+Owner = undefined  \n" \
+                     "+AutoTwopleRequestname=\"{requestname}\" \n" \
+                     "log={condorlog} \n" \
+                     "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
+                     "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
+                     "notification=Never \n" \
+                     "should_transfer_files = YES \n" \
+                     "when_to_transfer_output = ON_EXIT \n" \
+                     "x509userproxy={proxy} \n" \
+                     "queue \n" 
+
+        # don't resubmit the ones that are already running or done
+        imerged_set = set(self.sample['baby']['imerged'])
+        processing_list, processing_ID_list = self.get_condor_submitted()
+        processing_set = set(processing_list)
+
+        # subtract running jobs from done. we might think they're done if they begin
+        # to stageout, but they're not yet done staging out
+        done_set = self.get_merged_done() - processing_set
+        imerged_set = imerged_set - processing_set - done_set
+
+        self.sample["baby"]["total"] = len(self.sample['baby']['imerged'])
+        self.sample["baby"]["running"] = len(processing_set)
+        self.sample["baby"]["done"] = len(done_set)
+
+        error = ""
+        for filename in filenames:
+            imerged = int(filename.split(".root")[0].split("_")[-1])
+            if imerged not in imerged_set: continue
+
+
+            condor_params["args"] = " ".join(map(str,\
+                    [self.sample["dataset"], filename, analysis, tag, shortname, extra1, extra2, extra3]\
+                    ))
+            
+            cfg = cfg_format.format(**condor_params)
+            with open(submit_file, "w") as fhout:
+                fhout.write(cfg)
+
+
+            submit_output = u.get("condor_submit %s" % submit_file)
+            if " submitted " in submit_output: 
+                self.do_log("baby job for merged_ntuple_%i.root submitted successfully" % imerged)
+            else:
+                self.do_log("error submitting baby job for merged_ntuple_%i.root" % imerged)
+                error = submit_output
+
+        self.sample["status"] = "condor"
 
     
     def make_metadata(self):
@@ -1077,6 +1298,9 @@ class Sample:
         fname_to_info = {}
         imerged_to_ijob = self.sample["imerged_to_ijob"]
         ijob_to_nevents = self.sample["ijob_to_nevents"]
+
+        # TODO/FIXME maybe if we run the rootfile checking function twice and require the output is the same
+        # then we can eliminate uber-transient issues? (or run thrice if first two don't agree)
 
         # main loop to store any and all problems with each merged file
         for fname in fnames:

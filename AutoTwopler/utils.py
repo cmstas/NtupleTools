@@ -60,15 +60,35 @@ def read_samples(filename="instructions.txt"):
             if line[0] == "#": continue
             parts = line.strip().split()
             if len(parts) < 5: continue
-            dataset, gtag, xsec, kfact, efact = parts[:5]
-            sample = { "dataset": dataset, "gtag": gtag, "kfact": float(kfact), "efact": float(efact), "xsec": float(xsec) }
-            if len(parts) >= 6: sample["sparms"] = "".join(parts[5:]).split(",")
 
-            if dataset.endswith(".txt"):
-                d_parsed = parse_filelist(dataset)
-                if not d_parsed: continue
+            if parts[0].strip().lower() == "baby":
+                analysis, baby_tag, dataset, package, executable = parts[1:6]
+                sample = {
+                        "analysis": analysis,
+                        "dataset": dataset,
+                        "baby_tag": baby_tag,
+                        "package": package,
+                        "executable": executable,
+                        "type": "BABY",
+                        }
+                pass
+            else:
+                dataset, gtag, xsec, kfact, efact = parts[:5]
+                sample = {
+                        "dataset": dataset,
+                        "gtag": gtag,
+                        "kfact": float(kfact),
+                        "efact": float(efact),
+                        "xsec": float(xsec),
+                        "type": "CMS3",
+                        }
+                if len(parts) >= 6: sample["sparms"] = "".join(parts[5:]).split(",")
 
-                for key in d_parsed: sample[key] = d_parsed[key]
+                if dataset.endswith(".txt"):
+                    d_parsed = parse_filelist(dataset)
+                    if not d_parsed: continue
+
+                    for key in d_parsed: sample[key] = d_parsed[key]
 
             samples.append(sample)
     return samples
@@ -338,16 +358,21 @@ def send_email(dataset):
 
     cmd("echo '%s' | mail -s '%s' %s" % (body, subject, email))
 
+def get_shortname_from_dataset(dataset):
+    return dataset.split("/")[1]+"_"+dataset.split("/")[2]
+
 
 if __name__=='__main__':
 
-    if proxy_hours_left() < 5:
-        print "Proxy near end of lifetime, renewing."
-        proxy_renew()
-    else:
-        print "Proxy looks good"
+    # if proxy_hours_left() < 5:
+    #     print "Proxy near end of lifetime, renewing."
+    #     proxy_renew()
+    # else:
+    #     print "Proxy looks good"
+    # print get_proxy_file()
 
-    print get_proxy_file()
+    from pprint import pprint
+    pprint(read_samples())
 
     # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/workflow?workflow=160415_063140:namin_crab_tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asym")
     # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/workflow?workflow=160415_063546:namin_crab_ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v")
