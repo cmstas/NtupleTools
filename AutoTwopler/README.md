@@ -16,6 +16,36 @@
 8. Sit quack and relax
 9. When you see done samples on the dashboard, you can enter your username in the Twiki section, select the appropriate Twiki, and hit "Update Twiki with done samples" to automagically fill in the Twiki entries
 
+## Babymaking
+Babies can be made using the AutoTwopler as well. These instructions will be updated (and the procedure streamlined) in the future. The inputs to the 
+babymaking process are an executable script, a package tar file, a dataset name, an analysis name ("SS", "MT2", etc.), and a baby tag version ("v0.1", "v1.2-fix", etc.).
+
+### Package and executable
+For examples of these, visit `http://uaf-6.t2.ucsd.edu/~namin/dump/baby_ducks.sh` and `http://uaf-6.t2.ucsd.edu/~namin/dump/package.tar.gz`. The package file will be untarred
+once on the compute node, so make sure it has all your dependences including JECs, SFs, etc. The executable will be fed with basic information like the dataset, filename, tags, merged file number, and others (see example for variable names).
+The content between the BEGIN and END markers is provided by the user and must properly handle the input that is injected by the AutoTwopler before and after it. In order to be compatible with the content injected afterwards (the `lcg-cp` command),
+the script _MUST_ make sure the output root file is named `output.root`! At a minimum, the bare user-provided executable must take a variable `$FILENAME` containing the CMS3 file to run on and produce an output ROOT file named `output.root`.
+
+### Instructions syntax
+In the instructions file, an example line might look like
+`BABY FA v1.01 /ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/package.tar.gz /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/condor_executable.sh`
+
+Note here that the first token must be `BABY` to tell the AutoTwopler the type of job. The next token is the analysis code (FA stands for Fake Analysis, but 'SS' would go here, for example).
+The next token is simply a user-constructed tag for the baby-making campaign. Next is the dataset. Finally, you must provide the full path to the package tarfile and executable script.
+
+With these input parameters, the output baby files will be located in `/hadoop/cms/store/user/namin/AutoTwopler_babies/FA_v1.01/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/`.
+
+### Helpful commands
+Inside the `scripts/` directory, there is a `dis_client.py` script that makes querying the Twiki easy. For example, in order to get a list of datasets associated with a particular tag, you can do
+`python dis_client.py -t snt "*,cms3tag=CMS3_V08-00-01 | grep dataset_name". 
+
+Or, for a particular Twiki page, you can do `python dis_client.py -t snt "*,twiki_name=Run2Samples25ns80X | grep dataset_name".` 
+
+
+Finally, using the `location` key (which gives the hadoop directory of the merged files for a given CMS3 sample), we can find out how many merged files
+exist for a given campaign. If we run baby making scripts on merged files 1-to-1, then this number is how many jobs we will farm out. Do
+`for i in $(dis_client.py -t snt "*,twiki_name=Run2Samples25ns80X | grep location"); do ls -1 $i/*.root | wc -l; done | awk '{s+=$1} END {print s}'`.
+
 ## Misc
 ### Ntupling private samples (assuming they are accessible via xrootd)
 - Prepare a text file (must end with `.txt`) with the list of files. There are two required parts: a "fake dataset" name which will follow the same parsing of regular datasets, and (of course) the list of files. An optional third piece of information lets you control the file splitting in case there are many files with few events. Structure the file as follows
