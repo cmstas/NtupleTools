@@ -214,51 +214,39 @@ function addInstructions(type) {
 }
 
 
-function getDetails(sample) {
-    var stat = sample["status"];
-
-    var buff = "";
-
-    if(stat == "crab") {
-        var crab = sample["crab"];
-        var breakdown = crab["breakdown"];
-        buff += "<br><span class='bad'>failed: " + breakdown["failed"] + "</span>";
-        buff += "<br>cooloff: " + breakdown["cooloff"];
-        buff += "<br>idle: " + breakdown["idle"];
-        buff += "<br>unsubmitted: " + breakdown["unsubmitted"];
-        buff += "<br>running: " + breakdown["running"];
-        buff += "<br>transferring: " + breakdown["transferring"];
-        buff += "<br>transferred: " + breakdown["transferred"];
-        buff += "<br><span class='good'>finished: " + breakdown["finished"] + "</span>";
-    }
-    return buff;
-}
-
 function getProgress(sample) {
+    var type = sample["type"];
     var stat = sample["status"];
     var done = 0;
     var tot = 1;
 
-    if (stat == "new") return 0.0;
-    else if (stat == "crab") {
+    if (type == "CMS3") {
+        if (stat == "new") return 0.0;
+        else if (stat == "crab") {
 
-        if("breakdown" in sample["crab"]) {
-            done = sample["crab"]["breakdown"]["finished"];
-            tot = sample["crab"]["njobs"];
-            if(tot < 1) tot = 1;
-        }
-        return 0.0 + 65.0*(done/tot);
+            if("breakdown" in sample["crab"]) {
+                done = sample["crab"]["breakdown"]["finished"];
+                tot = sample["crab"]["njobs"];
+                if(tot < 1) tot = 1;
+            }
+            return 0.0 + 65.0*(done/tot);
 
-    } else if (stat == "postprocessing") {
+        } else if (stat == "postprocessing") {
 
-        if("postprocessing" in sample) {
-            done = sample["postprocessing"]["done"];
-            tot = sample["postprocessing"]["total"];
-        }
-        return 68.0 + 30.0*(done/tot);
+            if("postprocessing" in sample) {
+                done = sample["postprocessing"]["done"];
+                tot = sample["postprocessing"]["total"];
+            }
+            return 68.0 + 30.0*(done/tot);
 
-    } else if (stat == "done") return 100;
-    else return -1.0;
+        } else if (stat == "done") return 100;
+        else return -1.0;
+
+    } else if(type == "BABY") {
+        done = sample["baby"]["done"];
+        total = sample["baby"]["total"];
+        return 1.0*done/tot;
+    }
 
 }
 
@@ -319,7 +307,7 @@ function setUpDOM(data) {
         var sample = data["samples"][i];
         var toappend = "";
         toappend += "<br>";
-        toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">"+sample["dataset"]+"</a>";
+        toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">["+sample["type"]+"] "+sample["dataset"]+"</a>";
         toappend += "<div class='pbar' id='pbar_"+i+"'>";
         toappend +=      "<span id='pbartextleft_"+i+"' class='pbartextleft'></span>";
         toappend +=      "<span id='pbartextright_"+i+"' class='pbartextright'></span>";
@@ -369,10 +357,15 @@ function fillDOM(data) {
         $("#pbartextleft_"+i).html(""); 
 
         if(adminMode) {
-            $("#pbartextleft_"+i).html( "<a href='#/' onClick='doSendAction(\"kill\","+i+")' title='kill job (not enabled)'> &#9762; </a>  " +  
-                                        "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")' title='skip tail CRAB jobs'> &#9986; </a> " +
-                                        "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")' title='re-postprocess'> &#128296; </a> " +
-                                        "<a href='#/' onClick='doSendAction(\"email_done\","+i+")' title='send email when done'> &#9993; </a> " );
+            var buff = "";
+            buff += "<a href='#/' onClick='doSendAction(\"kill\","+i+")' title='kill job (not enabled)'> &#9762; </a>  ";
+            if(sample["type"] == "CMS3") {
+                buff += "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")' title='skip tail CRAB jobs'> &#9986; </a> ";
+                buff += "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")' title='re-postprocess'> &#128296; </a> ";
+            }
+            buff += "<a href='#/' onClick='doSendAction(\"email_done\","+i+")' title='send email when done'> &#9993; </a> ";
+
+            $("#pbartextleft_"+i).html(buff);
         }
 
         var jsStr = syntaxHighlight(JSON.stringify(sample, undefined, 4));
@@ -397,32 +390,6 @@ function fillDOM(data) {
         $("#details_"+i).html("<pre>" + jsStr + "</pre>");
 
     }
-
-    var totJobs = 0;
-    var finishedJobs = 0;
-    var idleJobs = 0;
-    var transferringJobs = 0;
-    var runningJobs = 0;
-    var finishedJobs = 0;
-    for(var i = 0; i < data["samples"].length; i++) {
-        var samp = data["samples"][i];
-        if(("crab" in samp) && ("breakdown" in samp["crab"])) {
-            totJobs += samp["crab"]["njobs"];
-            finishedJobs += samp["crab"]["breakdown"]["finished"];
-            runningJobs += samp["crab"]["breakdown"]["running"];
-            idleJobs += samp["crab"]["breakdown"]["idle"];
-            transferringJobs += samp["crab"]["breakdown"]["transferring"];
-        }
-
-    }
-    $("#summary").html("");
-    $("#summary").append("<ul>");
-    $("#summary").append("<li> running jobs: " + runningJobs);
-    $("#summary").append("<li> idle jobs: " + idleJobs);
-    $("#summary").append("<li> transferring jobs: " + transferringJobs);
-    $("#summary").append("<li> finished jobs: " + finishedJobs);
-    $("#summary").append("<li> total jobs: " + totJobs);
-    $("#summary").append("</ul>");
 
     var buff = "";
     if("log" in data) {
