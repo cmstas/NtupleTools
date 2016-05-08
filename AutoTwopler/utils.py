@@ -305,7 +305,7 @@ def get_actions(actions_fname="actions.txt", dataset_name=None):
 
     return actions
 
-def consume_actions(dataset_name, actions_fname="actions.txt"):
+def consume_actions(dataset_name, action, actions_fname="actions.txt"):
     if not os.path.isfile(actions_fname): return
 
     lines = []
@@ -316,9 +316,9 @@ def consume_actions(dataset_name, actions_fname="actions.txt"):
         for line in lines:
             if ":" not in line: continue
             dataset = line.split(":")[0].strip()
-            action = line.split(":")[1].strip()
+            actj = line.split(":")[1].strip()
 
-            if dataset == dataset_name: 
+            if dataset == dataset_name and act == action:
                 print ">>> Consumed action for %s: %s" % (dataset, action)
                 continue
 

@@ -59,7 +59,8 @@ for i in range(5000):
 
             # grab actions from a text file and act on them, consuming (removing) them if successful
             for dataset_name, action in u.get_actions(dataset_name=s["dataset"]):
-                if s.handle_action(action): u.consume_actions(dataset_name=s["dataset"])
+                if s.handle_action(action):
+                    u.consume_actions(dataset_name=s["dataset"],action=action)
 
             if not s.pass_tsa_prechecks(): continue
 
