@@ -316,7 +316,7 @@ def consume_actions(dataset_name, action, actions_fname="actions.txt"):
         for line in lines:
             if ":" not in line: continue
             dataset = line.split(":")[0].strip()
-            actj = line.split(":")[1].strip()
+            act = line.split(":")[1].strip()
 
             if dataset == dataset_name and act == action:
                 print ">>> Consumed action for %s: %s" % (dataset, action)
