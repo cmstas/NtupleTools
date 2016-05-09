@@ -93,11 +93,11 @@ function drawChart() {
 
     var data_table = [ [
         'Time',
-        'Finished',
-        'Transfer',
-        'Running',
-        'Failed',
-        'Idle',
+        'CRAB: Finished',
+        'CRAB: Transfer',
+        'CRAB: Running',
+        'CRAB: Failed',
+        'CRAB: Idle',
     ] ];
     // console.log(alldata["time_stats"]);
     
@@ -309,7 +309,13 @@ function setUpDOM(data) {
         var sample = data["samples"][i];
         var toappend = "";
         toappend += "<br>";
-        toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">["+sample["type"]+"] "+sample["dataset"]+"</a>";
+        toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">";
+        if(sample["type"] == "BABY") {
+            toappend += "<span style='color: purple'>["+sample["baby"]["analysis"]+" "+sample["baby"]["baby_tag"]+"]</span> ";
+        } else if (sample["type"] == "CMS3") {
+            toappend += "<span style='color: purple'>[CMS3]</span> ";
+        }
+        toappend += sample["dataset"]+"</a>";
         toappend += "<div class='pbar' id='pbar_"+i+"'>";
         toappend +=      "<span id='pbartextleft_"+i+"' class='pbartextleft'></span>";
         toappend +=      "<span id='pbartextright_"+i+"' class='pbartextright'></span>";
