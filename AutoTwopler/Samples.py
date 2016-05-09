@@ -168,9 +168,7 @@ class Sample:
         if "jobs_left" in new_dict["crab"]:
             del new_dict["crab"]["jobs_left"]
 
-        if self.sample["type"] == "CMS3":
-            del new_dict["baby"]
-        elif self.sample["type"] == "BABY":
+        if self.sample["type"] == "BABY":
             for key in ["xsec", "specialdir", "sparms", "pset", "postprocessing", "nevents_unmerged", "nevents_merged", "nevents_DAS", \
                         "kfact", "isdata", "gtag", "finaldir", "efact", "cmsswver", "cms3tag", "checks"]:
                 if key in new_dict: del new_dict[key]
@@ -1145,14 +1143,14 @@ class Sample:
                 self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
 
-        self.sample["baby"]["idle"] = self.sample["baby"]["total"] - self.sample["baby"]["running"]
+        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"]
 
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
 
     def submit_baby_jobs(self):
         filenames = self.sample["baby"]["input_filenames"]
-        extra1 = "1000"
+        extra1 = ""
         extra2 = ""
         extra3 = ""
 
@@ -1244,6 +1242,7 @@ class Sample:
                 self.do_log("error submitting baby job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
 
+        self.sample["baby"]["idle"] = self.sample["baby"]["total"] - self.sample["baby"]["running"]
         self.sample["status"] = "condor"
 
     
