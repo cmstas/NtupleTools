@@ -2,7 +2,7 @@
 
 #### Quickstart
   0. Edit /nfs-7/userdata/dataTuple/${USER}/input.txt to have a list of datasets to process
-  1. `./dataTupleLauncher.sh -t cms3 -b /nfs-7/userdata/dataTuple/${USER}/`
+  1. `./dataTupleLauncher.sh -t cms3 -b /nfs-7/userdata/dataTuple/<firstname>/`
 
 ####General Outline
   + User updates samples we want to check here: /nfs-7/userdata/dataTuple/input.txt
