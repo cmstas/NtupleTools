@@ -311,7 +311,7 @@ function setUpDOM(data) {
         toappend += "<br>";
         toappend += "<a href='#/' class='thick' onClick=\"$('#details_"+i+"').slideToggle(100)\">";
         if(sample["type"] == "BABY") {
-            toappend += "<span style='color: purple'>["+sample["baby"]["analysis"]+" "+sample["baby"]["baby_tag"]+"]</span> ";
+            toappend += "<span style='color: purple'>[&#128700; "+sample["baby"]["analysis"]+" "+sample["baby"]["baby_tag"]+"]</span> ";
         } else if (sample["type"] == "CMS3") {
             toappend += "<span style='color: purple'>[CMS3]</span> ";
         }
