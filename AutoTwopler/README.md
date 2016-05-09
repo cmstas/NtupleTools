@@ -28,7 +28,9 @@ the script _MUST_ make sure the output root file is named `output.root`! At a mi
 
 ### Instructions syntax
 In the instructions file, an example line might look like
-```BABY FA v1.01 /ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/package.tar.gz /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/condor_executable.sh```
+```
+BABY FA v1.01 /ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/package.tar.gz /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/condor_executable.sh
+```
 
 Note here that the first token must be `BABY` to tell the AutoTwopler the type of job. The next token is the analysis code (FA stands for Fake Analysis, but 'SS' would go here, for example).
 The next token is simply a user-constructed tag for the baby-making campaign. Next is the dataset. Finally, you must provide the full path to the package tarfile and executable script.
@@ -37,7 +39,7 @@ With these input parameters, the output baby files will be located in `/hadoop/c
 
 ### Helpful commands
 Inside the `scripts/` directory, there is a `dis_client.py` script that makes querying the Twiki easy. For example, in order to get a list of datasets associated with a particular tag, you can do
-`python dis_client.py -t snt "*,cms3tag=CMS3_V08-00-01 | grep dataset_name". 
+`python dis_client.py -t snt "*,cms3tag=CMS3_V08-00-01 | grep dataset_name"`. 
 
 Or, for a particular Twiki page, you can do `python dis_client.py -t snt "*,twiki_name=Run2Samples25ns80X | grep dataset_name".` 
 
