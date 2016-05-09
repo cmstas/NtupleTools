@@ -365,8 +365,17 @@ class Sample:
         self.sample["ijob_to_miniaod"] = {}
 
         # delete any residual merged files
-        merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
-        u.cmd("rm %s" % merged_wildcard)
+        try:
+            merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
+            self.do_log("removing residual merged files: %s" % merged_wildcard)
+            u.cmd("rm %s" % merged_wildcard)
+        except:
+            pass
+
+        running_list, running_ID_list = self.get_condor_submitted()
+        if len(running_ID_list) > 0:
+            self.do_log("removing residual condor jobs for merged indices: %s" % ", ".join(map(str,running_list)))
+            u.cmd( "condor_rm %s" % " ".join(map(str,running_ID_list)) )
 
         consume_action = self.force_skip_tail()
         return consume_action
@@ -1102,8 +1111,10 @@ class Sample:
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
             # only ~2% of jobs take more than 5 hours
-            longrunning_set, longrunning_ID_set = self.get_condor_submitted(running_at_least_hours=5.0)
-            if len(longrunning_set) > 0:
+            longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=5.0)
+            if len(longrunning_list) > 0:
+                longrunning_set = set(longrunning_list)
+                longrunning_ID_set = set(longrunning_ID_list)
                 self.do_log("The following merged file indices have been merging for more than 5 hours: %s" % ", ".join(map(str,longrunning_set)))
                 self.do_log("Killing and resubmitting condor IDs: %s" % ", ".join(map(str,longrunning_ID_set)))
 

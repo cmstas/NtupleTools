@@ -93,11 +93,11 @@ function drawChart() {
 
     var data_table = [ [
         'Time',
-        'CRAB: Finished',
-        'CRAB: Transfer',
-        'CRAB: Running',
-        'CRAB: Failed',
-        'CRAB: Idle',
+        'Finished',
+        'Transfer',
+        'Running',
+        'Failed',
+        'Idle',
     ] ];
     // console.log(alldata["time_stats"]);
     
