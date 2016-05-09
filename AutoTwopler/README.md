@@ -70,13 +70,6 @@ files_per_job: 4
 - "SUBMITFAILED: Impossible to retrieve proxy...": delete `~/.globus/proxy_for_${USER}.file` and rerun `run.py`. This time you will be prompted for a password. Submission should go smoothly from there. If that doesn't work try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib. Again, if you get the same thing, try doing the `voms-proxy-destroy` again.  Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
 
 ## TODO:
-- [ ] Support for CMS3 to babies
 - [ ] Integrate DIS querying
-- [ ] Be able to nuke and resubmit job from dashboard
-- [ ] Have Condor submission possibility for certain jobs that misbehave
 - [ ] Make tester class
-- [ ] Deal with CRAB HTTP exceptions elegantly
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
-- [ ] Parallelize sweepRooting (sweepRooting goes at 0.3Hz whereas finding miniaod is at 10Hz)
-- [ ] Calculate eff_luminosity and cut down tail job threshold if it's large enough
-- [ ] Figure out what's causing proxy issues

@@ -832,17 +832,21 @@ class Sample:
         for ilogfile,logfile in enumerate(self.misc["logfiles"]):
             # print logfile
             if ".tar.gz" in logfile:
-                with  tarfile.open(logfile, "r:gz") as tar:
-                    for member in tar:
-                        if "FrameworkJobReport" not in member.name: continue
-                        jobnum = int(member.name.split("-")[1].split(".xml")[0])
-                        fh = tar.extractfile(member)
-                        lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
-                        miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
-                        temp[jobnum] = miniaod
-                        self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
-                        fh.close()
-                        break
+                try: # WTF sometimes logfiles get corrupted and aren't gzip format anymore?!
+                    with  tarfile.open(logfile, "r:gz") as tar:
+                        for member in tar:
+                            if "FrameworkJobReport" not in member.name: continue
+                            jobnum = int(member.name.split("-")[1].split(".xml")[0])
+                            fh = tar.extractfile(member)
+                            lines = [line for line in fh.readlines() if "<PFN>" in line and "/store/" in line]
+                            miniaod = list(set(map(lambda x: "/store/"+x.split("</PFN>")[0].split("/store/")[1].split("?",1)[0], lines)))
+                            temp[jobnum] = miniaod
+                            self.do_log("job %i miniaod found [found %i of %i]" % (jobnum,ilogfile+1,nlogfiles))
+                            fh.close()
+                            break
+                except:
+                    self.do_log("WTF. CRAB gave us a corrupted logfile that isn't in the gzip format?! %s" % logfile)
+
             elif ".txt" in logfile:
                 # parse the recovered txt files if .tar.gz didn't stageout
                 with open(logfile, "r") as fh:

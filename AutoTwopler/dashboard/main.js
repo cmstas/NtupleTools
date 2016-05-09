@@ -386,7 +386,7 @@ function fillDOM(data) {
         }
         
         // bold the output directory and event counts if it's done
-        if(("finaldir" in sample) && (sample["status"] == "done")) {
+        if(("finaldir" in sample || "finaldir" in sample["baby"]) && (sample["status"] == "done")) {
             jsStr = jsStr.replace("\"finaldir\":</span> <span class=\"string\">", "\"finaldir\":</span> <span class=\"string bold\">");
             jsStr = jsStr.replace("\"nevents_DAS\":</span> <span class=\"number\">", "\"nevents_DAS\":</span> <span class=\"number bold\">");
             jsStr = jsStr.replace("\"nevents_unmerged\":</span> <span class=\"number\">", "\"nevents_unmerged\":</span> <span class=\"number bold\">");
