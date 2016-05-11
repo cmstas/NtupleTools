@@ -50,6 +50,7 @@ class Sample:
         self.misc["last_saved"] = None # when was the last time we backed up this sample data
         self.misc["can_skip_tail"] = False
         self.misc["email_when_done"] = params.EMAIL_WHEN_DONE
+        self.misc["update_dis_when_done"] = True
 
         self.sample = {
                 "type": type,
@@ -1283,6 +1284,32 @@ class Sample:
         if self.misc["email_when_done"]:
             u.send_email(self.sample["dataset"])
             self.misc["email_when_done"] = False
+
+    def do_update_dis(self):
+        if self.misc["update_dis_when_done"]:
+
+            d = copy.deepcopy(self.sample)
+            query_str = "dataset_name=%s,sample_type=%s,cms3tag=%s,gtag=%s,location=%s,nevents_in=%i,nevents_out=%i,xsec=%s,kfactor=%s,filter_eff=%s" \
+               % (d["dataset"], d["type"], d["cms3tag"], d["gtag"], d["finaldir"], d["nevents_DAS"], d["nevents_merged"], str(d["xsec"]), str(d["kfact"]), str(d["efact"]))
+
+            response = {}
+            try:
+                succeeded = False
+                response = dis.query(query_str, typ='update_snt')
+                response = response["response"]["payload"]
+                if "updated" in response and str(response["updated"]).lower() == "true": succeeded = True
+            except:
+                self.do_log("WARNING: failed to update sample using DIS with query_str: %s" % query_str)
+                self.do_log("WARNING: got response: %s" % str(response))
+
+            if not succeeded: return
+
+            self.misc["update_dis_when_done"] = False
+
+
+    def do_done_stuff(self):
+        self.do_send_email()
+        self.do_update_dis()
 
 
     def copy_files(self):
