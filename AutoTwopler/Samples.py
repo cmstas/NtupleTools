@@ -1298,11 +1298,12 @@ class Sample:
                 response = dis.query(query_str, typ='update_snt')
                 response = response["response"]["payload"]
                 if "updated" in response and str(response["updated"]).lower() == "true": succeeded = True
-            except:
+            except: pass
+
+            if not succeeded:
                 self.do_log("WARNING: failed to update sample using DIS with query_str: %s" % query_str)
                 self.do_log("WARNING: got response: %s" % str(response))
-
-            if not succeeded: return
+                return
 
             self.misc["update_dis_when_done"] = False
 
