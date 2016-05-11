@@ -45,6 +45,7 @@ for i in range(5000):
     # for existing samples, try to update params (xsec, kfact, etc.)
     for samp in u.read_samples(instructions):
         if samp not in all_samples:
+            all_samples[all_samples.index(samp)].update_params(samp)
             s = Samples.Sample(**samp) 
             all_samples.append(s)
         else:
