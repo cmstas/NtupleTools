@@ -83,7 +83,7 @@ for i in range(5000):
                     else:
                         s.submit_merge_jobs()
                 elif stat == "done":
-                    s.do_send_email()
+                    s.do_done_stuff()
 
             elif typ == "BABY":
                 
@@ -98,7 +98,7 @@ for i in range(5000):
                         s.submit_baby_jobs()
 
                 elif stat == "done":
-                    s.do_send_email()
+                    s.do_done_stuff()
 
 
             s.save()
