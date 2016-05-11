@@ -331,6 +331,7 @@ class Sample:
             if param in d and d[param] and not(d[param] == self.sample[param]):
                 self.do_log("found a new value of %s: %s. (old value: %s). updating." \
                         % (param, d[param], self.sample[param]) )
+                self.sample[param] = d[param]
 
 
     def handle_action(self, action):
