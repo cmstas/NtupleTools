@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import Samples, params
 import utils as u
 import time
@@ -15,8 +17,10 @@ instructions = ""
 if len(sys.argv) > 1:
     instructions = sys.argv[1]
 else:
-    print ">>> python %s INSTRUCTIONS_FILE" % __file__
-    sys.exit()
+    print ">>> Note usage is: python %s INSTRUCTIONS_FILE" % __file__
+    print ">>> But going ahead and using instructions.txt for convenience"
+    instructions = "instructions.txt"
+    # sys.exit()
 
 if not os.path.isfile(instructions):
     print ">>> %s does not exist" % instructions
@@ -45,7 +49,6 @@ for i in range(5000):
     # for existing samples, try to update params (xsec, kfact, etc.)
     for samp in u.read_samples(instructions):
         if samp not in all_samples:
-            all_samples[all_samples.index(samp)].update_params(samp)
             s = Samples.Sample(**samp) 
             all_samples.append(s)
         else:
@@ -94,7 +97,7 @@ for i in range(5000):
 
                 elif stat == "condor":
                     if s.is_babymaking_done():
-                        s["status"] = "done"
+                        s.set_status("done")
                     else:
                         s.submit_baby_jobs()
 
@@ -120,5 +123,5 @@ for i in range(5000):
 
     sleep_time = 5 if i < 2 else 600
     logger.debug("sleeping for %i seconds..." % sleep_time)
-    u.smart_sleep(sleep_time, files_to_watch=["actions.txt", "instructions.txt"])
+    u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
 

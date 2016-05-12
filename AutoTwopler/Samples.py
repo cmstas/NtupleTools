@@ -188,6 +188,10 @@ class Sample:
         return self.sample["type"]
 
 
+    def set_status(self, status):
+        self.sample["status"] = status
+
+
     def do_log(self, text, typ='info'):
         # toprint = "[%s] [%s] %s" % (datetime.datetime.now().strftime("%H:%M:%S"), self.pfx, text)
         toprint = "[%s] %s" % (self.pfx, text)
@@ -217,7 +221,17 @@ class Sample:
                 d_tot = pickle.load(fhin)
 
             for key in d_tot["sample"].keys():
+
+                # if one of these values is already in the init'ed sample, then don't
+                # take the old value from the loaded dict. also should parallel update_params()
+                if key in ["xsec", "kfact", "efact", "sparms"] and key in d_tot["sample"]:
+                    if d_tot["sample"][key] and not(d_tot["sample"][key] == self.sample[key]):
+                        self.do_log("found a new value of %s: %s. (old value: %s). updating." \
+                                % (key, self.sample[key], d_tot["sample"][key]) )
+                        continue
+
                 self.sample[key] = d_tot["sample"][key]
+
             for key in d_tot["misc"].keys(): self.misc[key] = d_tot["misc"][key]
             last_saved = self.misc["last_saved"]
             if last_saved:
