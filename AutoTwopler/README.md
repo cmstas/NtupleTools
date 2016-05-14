@@ -69,6 +69,11 @@ files_per_job: 4
 - Did you submit a lot of jobs recently? It could be that storage space on schedds is clogged. See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_scheduler. In this case, you can use the "get_crabcache_info()" code block in `scripts/misc.py` to purge old crab task metadata if you're sure you won't ever need it again
 - "SUBMITFAILED: Impossible to retrieve proxy...": delete `~/.globus/proxy_for_${USER}.file` and rerun `run.py`. This time you will be prompted for a password. Submission should go smoothly from there. If that doesn't work try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib. Again, if you get the same thing, try doing the `voms-proxy-destroy` again.  Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
 
+### Changing xsec, kfactor, filteff
+- Has your sample started postprocessing yet? No? Good. Simply update the instructions file to have your new values and the AutoTwopler will pick up the new information
+- If the sample is done already, you can run `scripts/new_xsec.py` (after modifying the bottom part to have the right directories and xsecs). This will submit jobs to change branches via condor, and put the output
+into [input directory]/new_xsec. It is up to the user to verify that the xsec was done properly and event count remains the same. Then you can just delete the merged files and move in the new ones. Note that running the script multiple times will re-submit failed jobs, so re-run until all are done.
+
 ## TODO:
 - [ ] Make tester class
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
