@@ -1174,7 +1174,7 @@ class Sample:
                 self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
 
-        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"]
+        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"] - self.sample["postprocessing"]["done"]
 
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
