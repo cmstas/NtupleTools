@@ -918,7 +918,12 @@ class Sample:
             f.Close()
             return 1, -1, "WTF No tree in file"
 
-        n_entries = tree.GetEntries()
+        n_entries = 0
+        try: n_entries = tree.GetEntries()
+        except: 
+            self.do_log("WTF Can't do GetEntries()")
+            pass
+
         if n_entries == 0: 
             f.Close()
             return 1, -1, "No events in file"
