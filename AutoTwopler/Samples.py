@@ -912,7 +912,12 @@ class Sample:
             except: pass
             return 1, -1, "Could not open file"
 
-        tree = f.Get(treename)
+        try:
+            tree = f.Get(treename)
+        except:
+            f.Close()
+            return 1, -1, "WTF No tree in file"
+
         n_entries = tree.GetEntries()
         if n_entries == 0: 
             f.Close()
