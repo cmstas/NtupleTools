@@ -49,29 +49,49 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
     raw = resp.split("twikiTextareaRawView\">")[1].split("</textarea")[0]
 
     samples = []
-    columns = ["dataset", "filter_type", "nevents_in", "nevents_out", "xsec", "kfact", "efact", "gtag", "cms3tag", "location", "assigned", "comments"] 
-    for iline,line in enumerate(raw.split("\n")):
-        if line.count("|") is not 13 or "*Dataset*" in line: continue
+    # columns = ["dataset", "filter_type", "nevents_in", "nevents_out", "xsec", "kfact", "efact", "gtag", "cms3tag", "location", "assigned", "comments"] 
+    # columns_data = ["dataset", "nevents_out", "status", "gtag", "cms3tag", "unmerged_location", "location", "assigned", "comments"] 
 
-        line = line.strip()
-        dataset, filter_type, nevents_in, nevents_out, xsec, kfact, efact, gtag, cms3tag, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
-        sparms = ""
-        if "sparms:" in comments.lower():
-            try: sparms = comments.split("sParms:")[1].strip()
-            except: pass
-            if not sparms:
-                try: sparms = comments.split("sparms:")[1].strip()
+    is_data = "Run2_Data" in page
+
+    if is_data:
+
+        for iline,line in enumerate(raw.split("\n")):
+            if line.count("|") is not 10 or "Dataset*" in line: continue
+        
+            line = line.strip()
+            dataset, nevents_out, status, gtag, cms3tag, unmerged_location, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
+            nevents_in = nevents_out
+
+            samples.append( {
+                        "dataset": dataset, "gtag": gtag,  "nevents_in": nevents_in, "nevents_out": nevents_out, 
+                        "location": location, "cms3tag": cms3tag, "assigned": assigned, "comments": comments, 
+                        } )
+
+    else:
+
+        for iline,line in enumerate(raw.split("\n")):
+            if line.count("|") is not 13 or "Dataset*" in line: continue
+
+            line = line.strip()
+            dataset, filter_type, nevents_in, nevents_out, xsec, kfact, efact, gtag, cms3tag, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
+            sparms = ""
+            if "sparms:" in comments.lower():
+                try: sparms = comments.split("sParms:")[1].strip()
                 except: pass
+                if not sparms:
+                    try: sparms = comments.split("sparms:")[1].strip()
+                    except: pass
 
-        if not(assigned == assigned_to or assigned_to.lower() == "all"): continue
+            if not(assigned == assigned_to or assigned_to.lower() == "all"): continue
 
-        if get_unmade and not(location == ""): continue
+            if get_unmade and not(location == ""): continue
 
-        samples.append( {
-                    "dataset": dataset, "gtag": gtag, "xsec": xsec, "kfact": kfact, "efact": efact, "sparms": sparms, 
-                    "filter_type": filter_type, "nevents_in": nevents_in, "nevents_out": nevents_out, "location": location, 
-                    "cms3tag": cms3tag, "assigned": assigned, "comments": comments, 
-                    } )
+            samples.append( {
+                        "dataset": dataset, "gtag": gtag, "xsec": xsec, "kfact": kfact, "efact": efact, "sparms": sparms, 
+                        "filter_type": filter_type, "nevents_in": nevents_in, "nevents_out": nevents_out, "location": location, 
+                        "cms3tag": cms3tag, "assigned": assigned, "comments": comments, 
+                        } )
 
     return samples
 
