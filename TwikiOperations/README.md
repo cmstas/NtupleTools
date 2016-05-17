@@ -1,5 +1,16 @@
 #Twiki Operations
 
+### `cleaver.py`
+re-run each day to get new samples for a given campaign (specified at top) that were not in DAS the day before. This cuts out samples that we don't care about (extra dimensions, graviton crap, etc.)
+
+### `dis_client.py`
+multipurpose DIS query client
+
+### `exodus.py`
+makes a new twiki from old with new campaign string (params specified at top)
+
+### jhJ
+
 ###Twiki.py is the central script
   - /usr/bin/python twiki.py TWIKI_USERNAME --makeInstructions NAME_SAMPLES_ARE_ASSIGNED_TO will make your instructions.txt for the AutoTupler
   - /usr/bin/python twiki.py TWIKI_USERNAME --getUnmade will get all samples that are not finished in an instructions.txt file 
