@@ -38,7 +38,7 @@ def get_browser(page, username):
         sys.exit()
     return br
 
-def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
+def get_raw(page, username):
     br = get_browser(page, username)
     for link in br.links():
         if link.text.strip() == 'Raw View':
@@ -47,6 +47,10 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
 
     resp = br.response().read()
     raw = resp.split("twikiTextareaRawView\">")[1].split("</textarea")[0]
+    return raw
+
+def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
+    raw = get_raw(page, username)
 
     samples = []
     # columns = ["dataset", "filter_type", "nevents_in", "nevents_out", "xsec", "kfact", "efact", "gtag", "cms3tag", "location", "assigned", "comments"] 
