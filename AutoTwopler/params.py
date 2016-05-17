@@ -1,6 +1,7 @@
 DO_TEST = False # if True, put the final samples in a  /snt/test/ dir so we don't screw anything up
 DO_SKIP_TAIL = False # if True, skip crab jobs that are taking too long
 EMAIL_WHEN_DONE = False # if True, send email to user when each sample finishes (must have email in git config)
+FORSAKE_HEAVENLY_PROXY = False # if True, don't use autorenewable proxy, so user may need to put in password every now and then (hopefully not often...this is a backup option)
 dashboard_name = "AutoTwopler"
 log_file = "duck.log"
 

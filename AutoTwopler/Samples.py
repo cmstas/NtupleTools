@@ -38,6 +38,12 @@ class Sample:
 
         if params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
 
+        self.proxy_file_dict = {}
+        if not params.FORSAKE_HEAVENLY_PROXY:
+            self.proxy_file_dict = {"proxy": u.get_proxy_file()}
+        else:
+            print ">>> You have chosen to forsake your heavenly proxy. Be wary of prompts for your password."
+
 
         self.misc = {}
         self.misc["pfx_pset"] = 'pset' # where to hold the psets
@@ -521,7 +527,7 @@ class Sample:
 
     def crab_kill(self):
         try:
-            out = crabCommand('kill', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+            out = crabCommand('kill', dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
         except Exception as e:
             self.do_log("ERROR killing: "+str(e))
             return 0
@@ -566,16 +572,19 @@ class Sample:
         try:
             if not self.misc["crab_config"]: self.make_crab_config()
             self.make_pset()
-            # # out = crabCommand('submit', config = self.misc["crab_config"], proxy=u.get_proxy_file())
+            # # out = crabCommand('submit', config = self.misc["crab_config"], **self.proxy_file_dict)
             # gotta do this BS instead of the above because stupid crab didn't fix their issue
             # https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1191/1/1/1.html
             q = multiprocessing.Queue()
-            def submit(q,config,proxy):
-                out = crabCommand('submit', config=config, proxy=proxy)
+            def submit(q,config,proxy=None):
+                if not proxy:
+                    out = crabCommand('submit', config=config)
+                else:
+                    out = crabCommand('submit', config=config, proxy=proxy)
                 q.put(out)
 
             self.do_log("submitting jobs...")
-            p = multiprocessing.Process(target=submit, args=(q, self.misc["crab_config"], u.get_proxy_file()))
+            p = multiprocessing.Process(target=submit, args=(q, self.misc["crab_config"], self.proxy_file_dict.get("proxy",None)))
             p.start()
             p.join()
             out = q.get()
@@ -600,11 +609,11 @@ class Sample:
             except: pass
 
         try:
-            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), long=do_long)
+            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], long=do_long, **self.proxy_file_dict)
             if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
                 self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
                 self.do_log("falling back to regular old crab status, but I thought you'd like to know at least")
-                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
             self.crab_status_res = out
             return 1 # succeeded
         except Exception as e:
@@ -618,9 +627,9 @@ class Sample:
     def crab_resubmit(self, more_ram=False):
         try:
             if more_ram:
-                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file(), maxmemory="3000")
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], maxmemory="3000", **self.proxy_file_dict)
             else:
-                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], proxy=u.get_proxy_file())
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
             return out["status"] == "SUCCESS"
         except Exception as e:
             self.do_log("ERROR resubmitting "+str(e))
@@ -816,7 +825,7 @@ class Sample:
             if len(log_dont_have) > 0:
                 jobids = ",".join(map(str, log_dont_have))
                 self.do_log("all rootfiles exist, but not all logfiles are there (missing %s), so recovering with crab getlog --short" % jobids)
-                try: out = crabCommand('getlog', dir=self.sample["crab"]["taskdir"], short=True, proxy=u.get_proxy_file(), jobids=jobids)
+                try: out = crabCommand('getlog', dir=self.sample["crab"]["taskdir"], short=True, jobids=jobids, **self.proxy_file_dict)
                 except: pass
                 textlogs = glob.glob(self.sample["crab"]["taskdir"]+"/results/job_out*.txt") 
                 textlogs = [log for log in textlogs if int(log.split("job_out.")[1].split(".")[0]) in log_dont_have]

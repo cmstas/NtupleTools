@@ -67,7 +67,12 @@ files_per_job: 4
 
 ### CRAB fails to submit. What do I do?
 - Did you submit a lot of jobs recently? It could be that storage space on schedds is clogged. See https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_scheduler. In this case, you can use the "get_crabcache_info()" code block in `scripts/misc.py` to purge old crab task metadata if you're sure you won't ever need it again
-- "SUBMITFAILED: Impossible to retrieve proxy...": delete `~/.globus/proxy_for_${USER}.file` and rerun `run.py`. This time you will be prompted for a password. Submission should go smoothly from there. If that doesn't work try to do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib. Again, if you get the same thing, try doing the `voms-proxy-destroy` again.  Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations.
+- "SUBMITFAILED: Impossible to retrieve proxy...":
+   * First things first: since the job didn't actually submit, you will need to delete the appropriate crab task folder inside `crab/` before you're able to resubmit.
+   * Delete `~/.globus/proxy_for_${USER}.file` and rerun `run.py`. This time you will be prompted for a password. Submission should go smoothly from there. If problem persists, proceed to next bullet point.
+   * Edit `params.py` and set `FORSAKE_HEAVENLY_PROXY = True`. If problem persists, proceed to next bullet point.
+   * Do `voms-proxy-destroy` to kill your proxy and let the scripts automatically make one for you. If problem persists, proceed to next bullet point.
+   * If you have the same issue again, try to follow https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib. Again, if you get the same thing, try doing the `voms-proxy-destroy` again.  Repeat this alternating technique until you get lucky enough to pass the CRAB trials and tribulations. If problem persists, then I don't know what the hell to do.
 
 ### Changing xsec, kfactor, filteff
 - Has your sample started postprocessing yet? No? Good. Simply update the instructions file to have your new values and the AutoTwopler will pick up the new information
