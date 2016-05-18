@@ -6,6 +6,7 @@ import os, time, re
 #############
 # USER PARAMS
 #############
+twiki_username = "namin"
 old_twiki = "Run2Samples25ns80X"
 new_twiki = "Run2Samples25ns80XminiAODv2"
 campaign_string = "RunIISpring16MiniAODv2"
@@ -33,7 +34,7 @@ def get_xsec(ds):
 
 # make map from old dataset name --> old twiki line
 #               old dataset name --> sample type ("QCD", "SMS", etc.)
-old_raw = twiki.get_raw(username="namin", page=old_twiki)
+old_raw = twiki.get_raw(username=twiki_username, page=old_twiki)
 d_samples_to_type = {}
 d_dataset_to_twikiline = {}
 typ = None
