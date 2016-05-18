@@ -114,8 +114,8 @@ void doSinglePlots(vector <std::string> branches, bool isNew, TTree* tree){
 void test(){
 
   //Put in the files you want to compare here
-  string filename_new = "/home/users/namin/2016/80x/test/CMSSW_8_0_0_pre6/src/CMS3/NtupleMaker/test/ntuple_80X.root";
-  string filename_old = "/home/users/namin/2015/76x/test/CMSSW_7_6_1/src/CMS3/NtupleMaker/test/ntuple_76X.root";
+  string filename_new = "/home/users/namin/sandbox/80x/CMSSW_8_0_5_patch1/src/CMS3/NtupleMaker/test/ntuple.root";
+  string filename_old = "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/merged_ntuple_13.root";
 
   //Load files
   file_old = new TFile(filename_old.c_str());
@@ -193,6 +193,8 @@ void test(){
     TBranch *branch = tree_new->GetBranch(tree_new->GetAlias(commonBranches[i].c_str()));
     TString branchname(branch->GetName()); 
     bool isLorentz = branchname.Contains("p4") || branchname.Contains("MathLorentzVectors"); 
+
+    if(branchname.Contains("genweightsID")) continue;
 
     //Make plot
     tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 

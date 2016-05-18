@@ -4,10 +4,9 @@ This is a "core dump" of every branch in CMS3 for **TWO RELEASES**.  If you want
 
 ###Instructions:
 1. In compareNtuples.C, put the OLD and NEW samples on line 114-115. 
-2. "mkdir hists"
-3. "root -b do.C"
-4. ". process.sh" 
-5. Now overview.pdf has everything you need. 
+2. "root -b do.C"
+3. ". process.sh" 
+4. Now overview.pdf has everything you need. 
 
 ###Sample:
 For run-2, we have been using the following sample for validation:

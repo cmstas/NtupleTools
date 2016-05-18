@@ -286,6 +286,9 @@ class Sample:
 
 
         if "76X_mcRun2_" in ds: self.sample["specialdir"] = "run2_25ns_76MiniAODv2"
+        if "SSDL2016" in ds:
+            self.sample["pset"] = params.pset_mc
+            self.sample["specialdir"] = "run2_ss_synch"
 
         if self.specialdir_test:
             self.sample["specialdir"] = "test"
