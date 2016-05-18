@@ -6,7 +6,7 @@ import os, time, re
 #############
 # USER PARAMS
 #############
-twiki_username = "namin"
+twiki_username = "FrankGolf"
 old_twiki = "Run2Samples25ns80X"
 new_twiki = "Run2Samples25ns80XminiAODv2"
 campaign_string = "RunIISpring16MiniAODv2"
@@ -49,8 +49,8 @@ for line in old_raw.split("\n"):
         d_samples_to_type[dataset] = typ
         d_dataset_to_twikiline[dataset] = line
 
-old_samples = twiki.get_samples(username="namin", page=old_twiki, get_unmade=False, assigned_to="all")
-already_new_samples = twiki.get_samples(username="namin", page=new_twiki, get_unmade=False, assigned_to="all")
+old_samples = twiki.get_samples(username=twiki_username, page=old_twiki, get_unmade=False, assigned_to="all")
+already_new_samples = twiki.get_samples(username=twiki_username, page=new_twiki, get_unmade=False, assigned_to="all")
 
 old_datasets = [s["dataset"] for s in old_samples if "dataset" in s]
 new_datasets = dis_client.query("/*/*%s*/MINIAODSIM" % campaign_string)["response"]["payload"]
