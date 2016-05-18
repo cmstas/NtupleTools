@@ -6,6 +6,7 @@ import os, time, re
 #############
 # USER PARAMS
 #############
+twiki_username = "namin"
 old_twiki = "Run2Samples25ns80X"
 new_twiki = "Run2Samples25ns80XminiAODv2"
 campaign_string = "RunIISpring16MiniAODv2"
@@ -33,7 +34,7 @@ def get_xsec(ds):
 
 # make map from old dataset name --> old twiki line
 #               old dataset name --> sample type ("QCD", "SMS", etc.)
-old_raw = twiki.get_raw(username="namin", page=old_twiki)
+old_raw = twiki.get_raw(username=twiki_username, page=old_twiki)
 d_samples_to_type = {}
 d_dataset_to_twikiline = {}
 typ = None
@@ -97,10 +98,16 @@ for typ in types:
 
         if do_xsec_check:
             new_xsec = get_xsec(new)
-            if (xsec - new_xsec)/xsec > 0.03:
+            if abs(xsec - new_xsec)/xsec > 0.03:
                 print_bad( "===> OLD and NEW xsecs (%f, %f) do not match for OLD and NEW datasets %s, %s" % (xsec, new_xsec, d_new_to_old[new], new) )
-                print_bad( "===> Will use NEW xsec, but please check manually" )
-                xsec = new_xsec
+
+                if abs(new_xsec-1) < 0.0001:
+                    print_bad(" ===> New xsec is 1, so let's trust the OLD (SNT) xsec" )
+                    print_bad( "===> Will use OLD xsec, but please check manually" )
+                    xsec = xsec
+                else:
+                    print_bad( "===> Will use NEW xsec, but please check manually" )
+                    xsec = new_xsec
                 # continue
 
         parts[1] = new
