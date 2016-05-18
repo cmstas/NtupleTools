@@ -9,7 +9,7 @@ pset_data = "DataProduction2015_NoFilter_PAT_cfg.py"
 pset_mc_fastsim = "MCProduction2015_FastSim_NoFilter_cfg.py"
 pset_mc = "MCProduction2015_NoFilter_cfg.py"
 
-campaign = "74X"
+campaign = "80X_miniaodv2"
 
 if campaign == "74X":
     scram_arch="slc6_amd64_gcc491"
@@ -27,5 +27,11 @@ elif campaign == "80X":
     scram_arch="slc6_amd64_gcc493"
     cms3tag="CMS3_V08-00-01"
     cmssw_ver="CMSSW_8_0_3_patch1"
+    jecs = 'Spring16_25nsV1_MC.db'
+
+elif campaign == "80X_miniaodv2":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-05"
+    cmssw_ver="CMSSW_8_0_5_patch1"
     jecs = 'Spring16_25nsV1_MC.db'
 
