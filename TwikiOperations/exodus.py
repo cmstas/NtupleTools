@@ -98,10 +98,16 @@ for typ in types:
 
         if do_xsec_check:
             new_xsec = get_xsec(new)
-            if (xsec - new_xsec)/xsec > 0.03:
+            if abs(xsec - new_xsec)/xsec > 0.03:
                 print_bad( "===> OLD and NEW xsecs (%f, %f) do not match for OLD and NEW datasets %s, %s" % (xsec, new_xsec, d_new_to_old[new], new) )
-                print_bad( "===> Will use NEW xsec, but please check manually" )
-                xsec = new_xsec
+
+                if abs(new_xsec-1) < 0.0001:
+                    print_bad(" ===> New xsec is 1, so let's trust the OLD (SNT) xsec" )
+                    print_bad( "===> Will use OLD xsec, but please check manually" )
+                    xsec = xsec
+                else:
+                    print_bad( "===> Will use NEW xsec, but please check manually" )
+                    xsec = new_xsec
                 # continue
 
         parts[1] = new
