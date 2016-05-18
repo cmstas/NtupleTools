@@ -26,7 +26,8 @@ if __name__ == "__main__":
     datasets = []
     cut_strs = ["RelVal", "Radion", "/GG_", "/RS", "X53", "Grav", "Tstar", "Bstar", "LQ", "Wprime", \
                 "Zprime", "Bprime", "Tprime", "_FlatPt", "-gun", "DarkMatter", "DM", "ChargedHiggs", \
-                "DisplacedSUSY", "GGJets", "GluGlu", "NNPDF", "LFV", "ToGG", "WToTauNu_M-", "WToMuNu_M-", "WToENu_M-"]
+                "DisplacedSUSY", "GGJets", "GluGlu", "NNPDF", "LFV", "ToGG", "WToTauNu_M-", "WToMuNu_M-", \
+                "WToENu_M-", "XXTo4J"]
     for dataset in all_datasets:
         for cut_str in cut_strs:
             if cut_str in dataset: break
