@@ -7,11 +7,12 @@ import os, time, re
 # USER PARAMS
 #############
 twiki_username = "FrankGolf"
+if os.getenv("USER") == "namin": twiki_username = "namin"
 old_twiki = "Run2Samples25ns80X"
 new_twiki = "Run2Samples25ns80XminiAODv2"
 campaign_string = "RunIISpring16MiniAODv2"
-new_gtag = "GTAGFIXME"
-new_cms3tag = "CMS3TAGFIXME"
+new_gtag = "80X_mcRun2_asymptotic_2016_miniAODv2_v0"
+new_cms3tag = "CMS3_V08-00-05"
 new_assigned = "Frank"
 do_xsec_check = True # MAKE SURE ALL XSEC MATCH OR ELSE VERY BAD
 #################
@@ -69,8 +70,13 @@ for old in old_datasets:
         match_old = re.search("_ext([0-9]{1,2})", old)
         match_new = re.search("_ext([0-9]{1,2})", new)
         if match_old:
+            # if old is _ext, then make sure new matches, or else skip
             if not match_new: continue
             if match_new and match_new.group(0) != match_old.group(0): continue
+        else:
+            # if old is not ext, then don't match a new ext to it
+            if match_new: continue
+
 
         matches.append(new)
 
