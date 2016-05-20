@@ -16,6 +16,9 @@ cat $BASEPATH/input.txt > listOfDatasets.txt
 echo "Last updated: `date` <BR><BR>" > $OUT
 echo "" >> $OUT
 
+echo "Golden luminosity summary: <a href='lumiSummary.txt'>TXT</a><br><br>" > $OUT
+echo "" >> $OUT
+
 echo "User running the cron job: $USER <BR><BR>" >> $OUT
 echo "" >> $OUT
 
@@ -52,11 +55,13 @@ do
   if [ -e runningList.txt ]; then NJOBSRUNNING=`cat runningList.txt | grep $TOGREP | wc -l`; fi
   if [ -e idleList.txt ]; then NJOBSIDLE=`cat idleList.txt | grep $TOGREP | wc -l`; fi
   if [ -e heldList.txt ]; then NJOBSHELD=`cat heldList.txt | grep $TOGREP | wc -l`; fi
-  echo "Dataset: ${DATASET}-${VERSION} <BR>" >> $OUT
+  if [ -e donePP.txt ]; then NMERGEDDONE=`cat donePP.txt | grep $DATASET | grep $VERSION | wc -l`; fi
+  echo "Dataset: <b>${DATASET}-${VERSION}</b> <BR>" >> $OUT
   echo "Number of files in dataset: $NTOTAL <BR>" >> $OUT
   echo "Number of files processed: $NCOMPLETED <BR>" >> $OUT
   echo "Number of jobs running: $NJOBSRUNNING <BR>" >> $OUT
   echo "Number of jobs idle: $NJOBSIDLE <BR>" >> $OUT
+  echo "Number of merged jobs done: $NMERGEDDONE <BR>" >> $OUT
   echo "Lumis completed: <A HREF=\"http://uaf-7.t2.ucsd.edu/~$USER/json_$i.txt\">JSON</A><BR>" >> $OUT
   echo "<BR>" >> $OUT
 done < $BASEPATH/input.txt
