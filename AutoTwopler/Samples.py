@@ -521,6 +521,8 @@ class Sample:
             if len(sparms) > 0:
                 sparms = list(set(map(lambda x: x.strip(), sparms)))
                 sparms = ['"%s"' % sp for sp in sparms]
+                if params.campaign == "80X_miniaodv2":
+                    newlines.append('process.sParmMaker.sparm_inputTag       = cms.InputTag("source")\n')
                 newlines.append('process.sParmMaker.vsparms = cms.untracked.vstring(' + ",".join(sparms) + ')\n')
                 newlines.append('process.p.insert( -1, process.sParmMakerSequence )\n')
 
