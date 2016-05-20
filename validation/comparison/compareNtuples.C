@@ -9,6 +9,7 @@ ofstream myfile;
 TFile *file_old;
 TFile *file_new;
 int plotNum;
+int max_events = 10000;
 
 struct trifecta { string plotName; int plotNumber; float chi2; };
 
@@ -85,7 +86,7 @@ void doSinglePlots(vector <std::string> branches, bool isNew, TTree* tree){
     //Table of contents
     myfile << "\\subsection*{" << alias << "}\\addcontentsline{toc}{subsection}{" << alias << "}" << endl;
 
-    tree->Draw(Form("%s%s>>hist", branches[i].c_str(), isLorentz ? ".Pt()" : "")); 
+    tree->Draw(Form("%s%s>>hist", branches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
     TH1F *hist = (TH1F*)gDirectory->Get("hist");
     if(hist==NULL){
       cout << "********** Branch " << branches.at(i) << " exists, but is undrawable for some reason. Skipping this branch" << endl;
@@ -194,11 +195,9 @@ void test(){
     TString branchname(branch->GetName()); 
     bool isLorentz = branchname.Contains("p4") || branchname.Contains("MathLorentzVectors"); 
 
-    if(branchname.Contains("genweightsID")) continue;
-
     //Make plot
-    tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
-    tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
+    tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
+    tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
 
     //Retrieve plot (this will use default binning)
     TH1F *hist_old = (TH1F*)gDirectory->Get("hist_old");
@@ -219,8 +218,8 @@ void test(){
       delete hist_new;
       hist_old = new TH1F("hist_old", "hist_old", nbins, min, max); 
       hist_new = new TH1F("hist_new", "hist_new", nbins, min, max); 
-      tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
-      tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
+      tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
+      tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
     }
 
     //If it's being fucking stupid and putting everything in 1 bin, redraw yet again.  Lowest & Highest bins shouldn't be empty
@@ -245,8 +244,8 @@ void test(){
       delete hist_new;
       hist_old = new TH1F("hist_old", "hist_old", nbins, min, max); 
       hist_new = new TH1F("hist_new", "hist_new", nbins, min, max); 
-      tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
-      tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : "")); 
+      tree_old->Draw(Form("%s%s>>hist_old", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
+      tree_new->Draw(Form("%s%s>>hist_new", commonBranches[i].c_str(), isLorentz ? ".Pt()" : ""), "", "", max_events); 
 
       //Decide if we fixed the problem or if we need to try again
       niter++;
