@@ -1,0 +1,6 @@
+# lines beginning with '#' are ignored
+# dataset xsec kfact efact [sparms]
+/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM 74X_mcRun2_asymptotic_v2 0.123 1 1
+/TTTT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM 74X_mcRun2_asymptotic_v2 0.0234 1 1
+/SMS-T1tttt_mGluino-975_mLSP-600to750_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-FastAsympt25ns_74X_mcRun2_asymptotic_v2-v1/MINIAODSIM 74X_mcRun2_asymptotic_v2 1.0 1 1 mGluino,mLSP
+BABY FA v1.02 /ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/package.tar.gz /home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby/test/condor_executable.sh
