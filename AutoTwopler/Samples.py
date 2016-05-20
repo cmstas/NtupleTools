@@ -279,6 +279,7 @@ class Sample:
 
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
+        elif "RunIISpring16MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
             self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
