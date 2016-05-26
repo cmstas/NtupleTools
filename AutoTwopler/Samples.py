@@ -1385,6 +1385,7 @@ class Sample:
         # then we can eliminate uber-transient issues? (or run thrice if first two don't agree)
 
         # main loop to store any and all problems with each merged file
+        self.do_log("started looping over merged files to check for validity")
         for fname in fnames:
             failed, nevents_actual, problem = self.check_merged_rootfile(fname, tot_events)
 
@@ -1397,6 +1398,8 @@ class Sample:
             fname_to_info[fname]["nevents_actual"] = nevents_actual
             fname_to_info[fname]["nevents_expected"] = nevents_expected
             fname_to_info[fname]["problem"] = problem
+
+        self.do_log("finished looping over merged files to check for validity")
 
         # first loop over merged files
         # if any merged file has difference between actual and expected events, resubmit it

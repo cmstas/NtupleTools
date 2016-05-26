@@ -41,7 +41,7 @@ if os.path.isfile(data_json):
 all_samples = []
 for i in range(5000):
 
-    if u.proxy_hours_left() < 60: u.proxy_renew()
+    if u.proxy_hours_left() < 60 and not params.FORSAKE_HEAVENLY_PROXY: u.proxy_renew()
 
     data = { "samples": [], "last_updated": None, "time_stats": time_stats }
 
