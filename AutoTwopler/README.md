@@ -79,6 +79,10 @@ files_per_job: 4
 - If the sample is done already, you can run `scripts/new_xsec.py` (after modifying the bottom part to have the right directories and xsecs). This will submit jobs to change branches via condor, and put the output
 into [input directory]/new_xsec. It is up to the user to verify that the xsec was done properly and event count remains the same. Then you can just delete the merged files and move in the new ones. Note that running the script multiple times will re-submit failed jobs, so re-run until all are done.
 
+### Doctor, doctor, help!
+- `python doctor.py` checks some basic things like writing to T2_US_UCSD using crab, xrootd, CMS3 branches, etc.
+- Ensure that the first sample in the `instructions.txt` file is a FullSim MC sample
+
 ## TODO:
 - [ ] Make tester class
 - [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
