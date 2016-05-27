@@ -625,9 +625,9 @@ class Sample:
         except Exception as e:
             self.do_log("ERROR getting status: "+str(e))
             if do_long:
-                self.do_log("try executing: crab status %s --proxy=%s --json" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
+                self.do_log("try executing: crab status %s  --json" % (self.sample["crab"]["taskdir"]))
             else:
-                self.do_log("try executing: crab status %s --proxy=%s" % (self.sample["crab"]["taskdir"],u.get_proxy_file()))
+                self.do_log("try executing: crab status %s"  % (self.sample["crab"]["taskdir"]))
             return 0 # failed
 
     def crab_resubmit(self, more_ram=False):
