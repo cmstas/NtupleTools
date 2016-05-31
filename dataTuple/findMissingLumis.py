@@ -6,6 +6,8 @@
 
 # every now and then, must do
 #        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi -u /pb  --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt > lumiList.txt
+# or for all of them *NOTE*
+#        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi --begin 273000 --byls -u /pb > lumiList.txt
 # to be able to make a (run,lumi) --> int. lumi. map
 import  sys
 try:
@@ -54,7 +56,8 @@ def getDatasetFileLumis(dataset):
 
 datasets = []
 lumisCompleted = []
-goldenJson = "Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
+# goldenJson = "Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
+goldenJson = "Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
 if(len(sys.argv) > 1):
     goldenJson = sys.argv[1]
     print "Using JSON:",goldenJson
@@ -113,6 +116,8 @@ def getLumiFromLL(d):
 
 goldenIntLumi = getLumiFromLL(goldenLumis)
         
+allCMS3Lumis = LumiList(compactList={})
+
 for pd in primaryDatasets:
     cms3Lumis = LumiList(compactList={})
     fileLumis = {}
@@ -124,7 +129,10 @@ for pd in primaryDatasets:
         print "-"*5, dataset, "-"*5
 
         # Add to total json of what we have in CMS3 for this PD
-        cms3Lumis += LumiList(compactList=json.loads(urllib2.urlopen(lumiLink).read()))
+        j = json.loads(urllib2.urlopen(lumiLink).read())
+        cms3Lumis += LumiList(compactList=j)
+
+        allCMS3Lumis += LumiList(compactList=j)
 
         # Add to total json of what we DAS says there is in miniaod for this PD (key is miniaod file name, val is json)
         fileLumis.update(getDatasetFileLumis(dataset))
@@ -133,8 +141,9 @@ for pd in primaryDatasets:
     inGoldenButNotCMS3 = goldenLumis - cms3Lumis
     inGoldenButNotCMS3IntLumi = getLumiFromLL(inGoldenButNotCMS3)
 
-    cms3LumisIntLumi = getLumiFromLL(cms3Lumis)
-    print "We have %.2f/pb in CMS3 (%.1f%% of golden)" % (cms3LumisIntLumi, 100.0*cms3LumisIntLumi/goldenIntLumi)
+    cms3LumisIntLumi = getLumiFromLL(cms3Lumis - (cms3Lumis - goldenLumis))
+    print "We have %.2f/pb in CMS3" % (getLumiFromLL(cms3Lumis))
+    print "We have %.2f/pb in Golden&CMS3 (%.1f%% of golden)" % (cms3LumisIntLumi, 100.0*cms3LumisIntLumi/goldenIntLumi)
     print "This is what is in the Golden JSON, but not the CMS3 merged: (%.2f/pb)" % getLumiFromLL(inGoldenButNotCMS3)
     print inGoldenButNotCMS3
     print
@@ -157,3 +166,4 @@ for pd in primaryDatasets:
             print " "*10,"File has lumis ", fileLumi,"and CMS3 is missing all of them"
 
     print "\n"*2
+

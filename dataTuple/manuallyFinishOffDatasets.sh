@@ -13,6 +13,12 @@ if [ "$name" == "" ]; then echo "problems!"; exit 1; fi
 BASEPATH="/nfs-7/userdata/dataTuple/$name"
 
 #Get list of datasets
+# taskNames="
+# Run2016B_HTMHT_MINIAOD_PromptReco-v1
+# Run2016B_JetHT_MINIAOD_PromptReco-v1
+# Run2016B_MET_MINIAOD_PromptReco-v1
+# "
+# for taskName in $taskNames
 for taskName in `ls $BASEPATH/mergedLists`
 do
   #Verify that we need to do anything

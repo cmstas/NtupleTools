@@ -9,6 +9,7 @@ then
 fi
 
 OUT=$BASEPATH/dataTupleMonitor.html
+LUMISUMMARY=/home/users/$USER/dataTuple/NtupleTools/dataTuple/lumiSummary.txt
 
 # sed 's./. .g' $BASEPATH/input.txt | awk '{print $1}' > listOfDatasets.txt #replace "/" by " " and then print out the first column
 cat $BASEPATH/input.txt > listOfDatasets.txt
@@ -16,7 +17,7 @@ cat $BASEPATH/input.txt > listOfDatasets.txt
 echo "Last updated: `date` <BR><BR>" > $OUT
 echo "" >> $OUT
 
-echo "Golden luminosity summary: <a href='lumiSummary.txt'>TXT</a><br><br>" > $OUT
+echo "Golden luminosity summary: <a href=\"$(basename $LUMISUMMARY)\">TXT</a><br><br>" > $OUT
 echo "" >> $OUT
 
 echo "User running the cron job: $USER <BR><BR>" >> $OUT
@@ -52,6 +53,7 @@ do
   if [ "$USER" == "namin" ]; then name="nick"; fi
   if [ "$USER" == "mderdzinski" ]; then name="mark"; fi
   cp /nfs-7/userdata/dataTuple/$name/json_lists/full_JSON_${ERA}_${DATASET}_MINIAOD_PromptReco-$VERSION.txt /home/users/$USER/public_html/json_$i.txt
+  cp $LUMISUMMARY /home/users/$USER/public_html/$(basename $LUMISUMMARY)
   if [ -e runningList.txt ]; then NJOBSRUNNING=`cat runningList.txt | grep $TOGREP | wc -l`; fi
   if [ -e idleList.txt ]; then NJOBSIDLE=`cat idleList.txt | grep $TOGREP | wc -l`; fi
   if [ -e heldList.txt ]; then NJOBSHELD=`cat heldList.txt | grep $TOGREP | wc -l`; fi
