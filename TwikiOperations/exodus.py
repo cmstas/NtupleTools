@@ -7,7 +7,6 @@ import os, time, re
 # USER PARAMS
 #############
 twiki_username = "FrankGolf"
-if os.getenv("USER") == "namin": twiki_username = "namin"
 old_twiki = "Run2Samples25ns80X"
 new_twiki = "Run2Samples25ns80XminiAODv2"
 campaign_string = "RunIISpring16MiniAODv2"
@@ -15,6 +14,9 @@ new_gtag = "80X_mcRun2_asymptotic_2016_miniAODv2_v0"
 new_cms3tag = "CMS3_V08-00-05"
 new_assigned = "Frank"
 do_xsec_check = True # MAKE SURE ALL XSEC MATCH OR ELSE VERY BAD
+if os.getenv("USER") == "namin":
+    twiki_username = "namin"
+    new_assigned = "Nick"
 #################
 # END USER PARAMS
 #################
@@ -23,11 +25,15 @@ def print_good(text): print '\033[92m'+text+'\033[0m'
 def print_warn(text): print '\033[93m'+text+'\033[0m'
 def print_bad(text): print '\033[91m'+text+'\033[0m'
 
-def get_xsec(ds):
+def get_xsec_efact(ds):
     xsec = -1
-    try: xsec = dis_client.query(ds, typ="mcm")["response"]["payload"]["cross_section"]
+    efact = 1
+    try: 
+        payload = dis_client.query(ds, typ="mcm")["response"]["payload"]
+        xsec = payload["cross_section"]
+        efact = payload["filter_efficiency"]
     except: pass
-    return xsec
+    return xsec, efact
 
 # OLD samples: on old twiki
 # NEW samples: new campaign from DAS
@@ -51,7 +57,7 @@ for line in old_raw.split("\n"):
         d_dataset_to_twikiline[dataset] = line
 
 old_samples = twiki.get_samples(username=twiki_username, page=old_twiki, get_unmade=False, assigned_to="all")
-already_new_samples = twiki.get_samples(username=twiki_username, page=new_twiki, get_unmade=False, assigned_to="all")
+already_new_samples = twiki.get_samples(username=twiki_username, page=new_twiki, get_unmade=True, assigned_to="all")
 
 old_datasets = [s["dataset"] for s in old_samples if "dataset" in s]
 new_datasets = dis_client.query("/*/*%s*/MINIAODSIM" % campaign_string)["response"]["payload"]
@@ -101,9 +107,11 @@ for typ in types:
         # | /SMS-T1bbbb_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAODSIM | !NoFilter | 52465 | 52465 | 0.0141903 | 1 | 1 | 80X_mcRun2_asymptotic_2016_v3 | CMS3_V08-00-01 | /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/SMS-T1bbbb_mGluino-1500_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/ | Sicheng | sParms: mGluino, mLSP |
 
         xsec = float(parts[5])
+        kfact = float(parts[6])
+        efact = float(parts[7])
 
         if do_xsec_check:
-            new_xsec = get_xsec(new)
+            new_xsec, new_efact = get_xsec_efact(new)
             if abs(xsec - new_xsec)/xsec > 0.03:
                 print_bad( "===> OLD and NEW xsecs (%f, %f) do not match for OLD and NEW datasets %s, %s" % (xsec, new_xsec, d_new_to_old[new], new) )
 
@@ -111,15 +119,21 @@ for typ in types:
                     print_bad(" ===> New xsec is 1, so let's trust the OLD (SNT) xsec" )
                     print_bad( "===> Will use OLD xsec, but please check manually" )
                     xsec = xsec
+                    efact = efact
+                    kfact = kfact
                 else:
                     print_bad( "===> Will use NEW xsec, but please check manually" )
                     xsec = new_xsec
+                    efact = new_efact
+                    kfact = 1
                 # continue
 
         parts[1] = new
         parts[3] = ""
         parts[4] = ""
         parts[5] = str(xsec)
+        parts[6] = str(kfact)
+        parts[7] = str(efact)
         parts[8] = new_gtag
         parts[9] = new_cms3tag
         parts[10] = ""
