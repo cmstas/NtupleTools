@@ -57,7 +57,7 @@ for line in old_raw.split("\n"):
         d_dataset_to_twikiline[dataset] = line
 
 old_samples = twiki.get_samples(username=twiki_username, page=old_twiki, get_unmade=False, assigned_to="all")
-already_new_samples = twiki.get_samples(username=twiki_username, page=new_twiki, get_unmade=True, assigned_to="all")
+already_new_samples = twiki.get_samples(username=twiki_username, page=new_twiki, get_unmade=False, assigned_to="all")
 
 old_datasets = [s["dataset"] for s in old_samples if "dataset" in s]
 new_datasets = dis_client.query("/*/*%s*/MINIAODSIM" % campaign_string)["response"]["payload"]
@@ -71,6 +71,7 @@ for old in old_datasets:
     matches = []
     for new in new_datasets:
         if old.split("/")[1] != new.split("/")[1]: continue
+        if "RAWAODSIM" in old or "RAWAODSIM" in new: continue
 
         ext = None
         match_old = re.search("_ext([0-9]{1,2})", old)
@@ -117,15 +118,15 @@ for typ in types:
 
                 if abs(new_xsec-1) < 0.0001:
                     print_bad(" ===> New xsec is 1, so let's trust the OLD (SNT) xsec" )
-                    print_bad( "===> Will use OLD xsec, but please check manually" )
-                    xsec = xsec
-                    efact = efact
-                    kfact = kfact
-                else:
-                    print_bad( "===> Will use NEW xsec, but please check manually" )
-                    xsec = new_xsec
-                    efact = new_efact
-                    kfact = 1
+                print_bad( "===> Will use OLD xsec, but please check manually" )
+                xsec = xsec
+                efact = efact
+                kfact = kfact
+                # else:
+                #     print_bad( "===> Will use NEW xsec, but please check manually" )
+                #     xsec = new_xsec
+                #     efact = new_efact
+                #     kfact = 1
                 # continue
 
         parts[1] = new
