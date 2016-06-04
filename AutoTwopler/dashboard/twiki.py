@@ -57,7 +57,6 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
     if is_data:
 
         for iline,line in enumerate(raw.split("\n")):
-            print line.count("|")
             if line.count("|") not in [10,11] or "Dataset*" in line: continue
         
             line = line.strip()
