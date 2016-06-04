@@ -38,7 +38,7 @@ def get_browser(page, username):
         sys.exit()
     return br
 
-def get_raw(page, username):
+def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
     br = get_browser(page, username)
     for link in br.links():
         if link.text.strip() == 'Raw View':
@@ -47,10 +47,6 @@ def get_raw(page, username):
 
     resp = br.response().read()
     raw = resp.split("twikiTextareaRawView\">")[1].split("</textarea")[0]
-    return raw
-
-def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
-    raw = get_raw(page, username)
 
     samples = []
     # columns = ["dataset", "filter_type", "nevents_in", "nevents_out", "xsec", "kfact", "efact", "gtag", "cms3tag", "location", "assigned", "comments"] 
@@ -61,10 +57,15 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
     if is_data:
 
         for iline,line in enumerate(raw.split("\n")):
-            if line.count("|") is not 10 or "Dataset*" in line: continue
+            print line.count("|")
+            if line.count("|") not in [10,11] or "Dataset*" in line: continue
         
             line = line.strip()
-            dataset, nevents_out, status, gtag, cms3tag, unmerged_location, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
+            if line.count("|") == 10:
+                dataset, nevents_out, status, gtag, cms3tag, unmerged_location, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
+            elif line.count("|") == 11:
+                dataset, nevents_out, nevents_DAS, status, gtag, cms3tag, unmerged_location, location, assigned, comments = map(lambda x: x.strip(), line.split("|")[1:-1])
+
             nevents_in = nevents_out
 
             samples.append( {
