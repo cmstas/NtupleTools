@@ -1,1 +1,1 @@
-to start doing development, run `. setup.sh` to check out CORE and build things. The package and executable files will then be inside `test/`. From here, follow the instructions in the main README for this repository about baby making.
+to start doing development, run `. setup.sh` to check out CORE and build things. Then once things run fine, do `. make_tar.sh`. The package and executable files will then be inside `test/`. From here, follow the instructions in the main README for this repository about baby making.

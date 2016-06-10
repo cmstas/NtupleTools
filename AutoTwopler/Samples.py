@@ -145,8 +145,14 @@ class Sample:
     
 
     def __eq__(self, other):
-        return "dataset" in other and other["dataset"] == self.sample["dataset"] \
-           and "type" in other and other["type"] == self.sample["type"]
+        if self.sample["type"] == "CMS3":
+            return "dataset" in other and other["dataset"] == self.sample["dataset"] \
+               and "type" in other and other["type"] == self.sample["type"]
+        else:
+            return "dataset" in other and other["dataset"] == self.sample["dataset"] \
+               and "type" in other and other["type"] == self.sample["type"] \
+               and "baby" in self.sample and "baby_tag" in self.sample["baby"] \
+               and other["baby_tag"] == self.sample["baby"]["baby_tag"]
 
 
     def __str__(self):
@@ -302,7 +308,8 @@ class Sample:
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
-        if not os.path.isdir(self.sample["crab"]["taskdir"]): os.makedirs(self.sample["crab"]["taskdir"])
+        taskdir = self.sample["crab"]["taskdir"]+"/"+self.sample["baby"]["baby_tag"]
+        if not os.path.isdir(taskdir): os.makedirs(taskdir)
 
         user_executable = self.sample["baby"]["user_executable"]
         user_package = self.sample["baby"]["user_package"]
