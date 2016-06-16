@@ -198,16 +198,19 @@ if __name__ == "__main__":
             # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",5.678,1.23),
             # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",147.4,1.23),
             # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",40.99,1.23),
-            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",18610,1.0)
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",18610,1.0)
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8_RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",43.92,0.000269,1.0)
 
         ]
 
     # for in_dir,xsec in samples:
     #     print("rm -f {0}/*.root ; mv {0}/new_xsec/*.root {0}/".format(in_dir))
 
-    for in_dir,xsec,kfact in samples:
+    for in_dir,xsec,kfact,efact in samples:
         print("Considering sample %s" % in_dir)
         print("with xsec %f" % xsec)
+        print("     kfact %f" % kfact)
+        print("     efact %f" % efact)
         metadata_fname = in_dir + "/metadata.json"
 
         with open(metadata_fname, "r") as fhin:
@@ -215,7 +218,7 @@ if __name__ == "__main__":
             nevents = sum([x[0] for x in metadata["ijob_to_nevents"].values()])
             nevents_effective = sum([x[1] for x in metadata["ijob_to_nevents"].values()])
 
-            efact = metadata["efact"]
+            # efact = metadata["efact"]
 
             nevents_chain = get_events_in_chain(in_dir + "/*.root")
             if nevents_chain != nevents: continue
@@ -246,6 +249,13 @@ if __name__ == "__main__":
                     new_nevents = get_events_in_chain(in_dir + "/new_xsec/*.root")
                     if new_nevents == nevents_chain:
                         print("rm -f {0}/*.root ; mv {0}/new_xsec/*.root {0}/".format(in_dir))
+                        metadata["xsec"] = xsec
+                        metadata["kfact"] = kfact
+                        metadata["efact"] = efact
+                        with open(in_dir+"/new_xsec/metadata.json", "w") as fhout:
+                            json.dump(metadata, fhout, sort_keys = True, indent = 4)
+                            print("made new metadata.json!")
+
                     else:
                         print("ERROR, nevents don't match (new,old) = (%i,%i)" % (new_nevents, nevents_chain))
 
