@@ -1,5 +1,5 @@
 import dis_client
-import sys, os, time
+import sys, os, time, re
 from multiprocessing.dummy import Pool as ThreadPool 
 
 
@@ -28,11 +28,27 @@ if __name__ == "__main__":
                 "Zprime", "Bprime", "Tprime", "_FlatPt", "-gun", "DarkMatter", "DM", "ChargedHiggs", \
                 "DisplacedSUSY", "GGJets", "GluGlu", "NNPDF", "LFV", "ToGG", "WToTauNu_M-", "WToMuNu_M-", \
                 "WToENu_M-", "XXTo4J", "HToZATo", "SMS-T2bH", "VBFHToTauTau", "VBF_HToMuMu", "VBF_HToZZTo4L" \
-                "WJetsToQQ", "RAWAODSIM","RECODEBUG"]
+                "WJetsToQQ", "RAWAODSIM", "RECODEBUG", "BlackHole", "NMSSM", "Qstar", "RPV"]
     for dataset in all_datasets:
+        isBad = False
         for cut_str in cut_strs:
             if cut_str in dataset: break
-        else: datasets.append(dataset)
+        else: isBad = True
+
+        if isBad: continue
+
+        # now check more complicated things
+        isHiggs = "HJetTo" in dataset or "HTo" in dataset
+
+        match = re.search("_M([0-9]+)_", dataset)
+        try: mass = int(match.group(1))
+        except: mass = None
+
+        isBadMass = False
+        if mass and mass != 125: isBadMass = True
+        isBad = isHiggs and isBadMass
+
+        if not isBad: datasets.append(dataset)
 
     print "After removing stupid samples, %i datasets remain" % len(datasets)
 
