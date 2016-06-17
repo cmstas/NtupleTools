@@ -267,6 +267,9 @@ class Sample:
         elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds:
             self.sample["pset"] = params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
+        elif "Spring16Fast" in ds:
+            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["specialdir"] = "run2_25ns_80MiniAODv2_fastsim"
         elif "RunIISpring15FSPremix" in ds:
             self.sample["pset"] = params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
@@ -279,7 +282,9 @@ class Sample:
 
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
-        elif "RunIISpring16MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
+        elif "RunIISpring16MiniAODv2" in ds:
+            self.sample["pset"] = params.pset_mc
+            self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
             self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
@@ -583,17 +588,26 @@ class Sample:
             # https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1191/1/1/1.html
             q = multiprocessing.Queue()
             def submit(q,config,proxy=None):
-                if not proxy:
-                    out = crabCommand('submit', config=config)
-                else:
-                    out = crabCommand('submit', config=config, proxy=proxy)
-                q.put(out)
+                try:
+                    if not proxy:
+                        out = crabCommand('submit', config=config)
+                    else:
+                        out = crabCommand('submit', config=config, proxy=proxy)
+                    q.put(out)
+                except Exception as e:
+                    self.do_log("ERROR with crab submit (will try again later): "+str(e))
+                    print "printing e"
+                    print e
+                    print "printed e"
 
             self.do_log("submitting jobs...")
             p = multiprocessing.Process(target=submit, args=(q, self.misc["crab_config"], self.proxy_file_dict.get("proxy",None)))
             p.start()
             p.join()
             out = q.get()
+
+            if not out:
+                return 0
 
             dtstr = out["uniquerequestname"].split(":")[0]
             self.sample["crab"]["uniquerequestname"] = out["uniquerequestname"]
