@@ -109,7 +109,6 @@ class Sample:
 
         # HANDLE BABY STUFF
         if self.baby:
-            self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]
             self.sample["type"] = "BABY"
             self.sample["baby"] = {
                 "baby_tag": baby_tag,
@@ -122,6 +121,7 @@ class Sample:
                 "input_filenames": [],
                 "imerged": [],
             }
+            self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
 
 
@@ -145,8 +145,14 @@ class Sample:
     
 
     def __eq__(self, other):
-        return "dataset" in other and other["dataset"] == self.sample["dataset"] \
-           and "type" in other and other["type"] == self.sample["type"]
+        if self.sample["type"] == "CMS3":
+            return "dataset" in other and other["dataset"] == self.sample["dataset"] \
+               and "type" in other and other["type"] == self.sample["type"]
+        else:
+            return "dataset" in other and other["dataset"] == self.sample["dataset"] \
+               and "type" in other and other["type"] == self.sample["type"] \
+               and "baby" in self.sample and "baby_tag" in self.sample["baby"] \
+               and other["baby_tag"] == self.sample["baby"]["baby_tag"]
 
 
     def __str__(self):
@@ -302,7 +308,8 @@ class Sample:
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
-        if not os.path.isdir(self.sample["crab"]["taskdir"]): os.makedirs(self.sample["crab"]["taskdir"])
+        taskdir = self.sample["crab"]["taskdir"]+"/"+self.sample["baby"]["baby_tag"]
+        if not os.path.isdir(taskdir): os.makedirs(taskdir)
 
         user_executable = self.sample["baby"]["user_executable"]
         user_package = self.sample["baby"]["user_package"]
@@ -434,6 +441,18 @@ class Sample:
         filenames = glob.glob("%s/merged_ntuple_*.root" % finaldir)
 
         return filenames
+
+
+    def check_new_merged_for_babies(self):
+        self.sample["baby"]["input_filenames"] = self.get_snt_merged_files()
+        old_imerged = self.sample["baby"]["imerged"]
+        new_imerged = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
+        self.sample["baby"]["imerged"] = new_imerged
+
+        n_new = len(set(new_imerged) - set(old_imerged))
+        if n_new > 0:
+            self.do_log("found %i more merged files, so will start running on those next" % n_new)
+            self.sample["status"] = "condor"
 
     def make_crab_config(self):
         if self.misc["crab_config"] is not None: 
@@ -1297,6 +1316,7 @@ class Sample:
             else:
                 self.do_log("error submitting baby job for merged_ntuple_%i.root" % imerged)
                 error = submit_output
+                print error
 
         self.sample["baby"]["idle"] = self.sample["baby"]["total"] - self.sample["baby"]["running"]
         self.sample["status"] = "condor"
