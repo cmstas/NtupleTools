@@ -122,17 +122,96 @@ def submit_merge_jobs(in_dir, imerged_set, nevents, nevents_effective, xsec, kfa
     if len(error) > 0:
         print("submit error: %s" % error)
 
+def check_merged_rootfile(fname, total_events, treename="Events"):
+    f = TFile.Open(fname,"READ")
+    imerged = int(fname.split(".root")[0].split("_")[-1])
+
+    if not f or f.IsZombie():
+        try: f.Close()
+        except: pass
+        return 1, -1, "Could not open file"
+
+    try:
+        tree = f.Get(treename)
+    except:
+        f.Close()
+        return 1, -1, "WTF No tree in file"
+
+    n_entries = 0
+    try: n_entries = tree.GetEntries()
+    except: 
+        self.do_log("WTF Can't do GetEntries()")
+        pass
+
+    if n_entries == 0: 
+        f.Close()
+        return 1, -1, "No events in file"
+
+    scale1fb_max = abs(tree.GetMaximum("evt_scale1fb"))
+    scale1fb_min = abs(tree.GetMinimum("evt_scale1fb"))
+
+    if (scale1fb_max - scale1fb_min)/scale1fb_max > 1e-6:
+        f.Close()
+        return 1, n_entries, "Inconsistent scale1fb. abs(min): %f, abs(max): %f" % (scale1fb_min, scale1fb_max)
+
+    kfactor = tree.GetMaximum("evt_kfactor")
+    filteff = tree.GetMaximum("evt_filt_eff")
+    xsec = tree.GetMaximum("evt_xsec_incl")
+    nevents_branch = int(tree.GetMaximum("evt_nEvts"))
+    nevents_eff_branch = int(tree.GetMaximum("evt_nEvts_effective"))
+    recalc_scale1fb = 1000.*xsec*filteff*kfactor / nevents_eff_branch
+
+    if nevents_branch != total_events:
+        f.Close()
+        return 1, n_entries, "evt_nEvts (%i) differs from total merged event count (%i)" % (nevents_branch, total_events)
+
+    if (recalc_scale1fb - scale1fb_min)/scale1fb_min > 1e-6:
+        f.Close()
+        return 1, n_entries, "Inconsistent scale1fb. In file: %f, Calculated: %f" % (scale1fb_min, recalc_scale1fb)
+
+    f.Close()
+    return 0, n_entries, ""
+
 if __name__ == "__main__":
     samples = [
-            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/ZJetsToNuNu_HT-600To800_13TeV-madgraph_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",3.279),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/ZJetsToNuNu_HT-800To1200_13TeV-madgraph_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",1.514),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",0.368),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",0.00812),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W1JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",              9493.0,    1.238, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W2JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",              3120.0,    1.231, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W3JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",               942.3,    1.231, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W4JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",               524.2,    1.144, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W2JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",    3120.0,    1.231, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",     942.3,    1.231, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W4JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",     524.2,    1.144, 1.0),
+            # dis_client.py -t snt "/QCD*HT*,cms3tag=*V08* | grep dataset_name,xsec,filter_eff,kfactor" -p | grep -v GenJets | grep -v BGen | grep -v Enriched
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             1712000, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                  347700, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             347700, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",        347700, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",   347700, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                  32100, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             32100, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",   32100, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                 6831, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",            6831, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",       6831, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",  6831, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                1207, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",           1207, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/", 1207, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v2/V08-00-05/",      1207, 1.0, 1.0), 
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",           119.9, 1.0, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/", 119.9, 1.0, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                119.9, 1.0, 1.0),
+            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v3/V08-00-05/",      119.9, 1.0, 1.0),
         ]
 
-    for in_dir,xsec in samples:
+    # for in_dir,xsec in samples:
+    #     print("rm -f {0}/*.root ; mv {0}/new_xsec/*.root {0}/".format(in_dir))
+
+    for in_dir,xsec,kfact,efact in samples:
         print("Considering sample %s" % in_dir)
         print("with xsec %f" % xsec)
+        print("     kfact %f" % kfact)
+        print("     efact %f" % efact)
         metadata_fname = in_dir + "/metadata.json"
 
         with open(metadata_fname, "r") as fhin:
@@ -140,19 +219,50 @@ if __name__ == "__main__":
             nevents = sum([x[0] for x in metadata["ijob_to_nevents"].values()])
             nevents_effective = sum([x[1] for x in metadata["ijob_to_nevents"].values()])
 
-            kfact = metadata["kfact"]
-            efact = metadata["efact"]
+            # efact = metadata["efact"]
 
             nevents_chain = get_events_in_chain(in_dir + "/*.root")
+            # nevents_chain = nevents
             if nevents_chain != nevents: continue
 
             imerged_set = set(map(int,metadata["imerged_to_ijob"].keys()))
 
-            print("Total: %i" % len(imerged_set))
-            print("Done: %i" % len(get_merged_done(in_dir)))
+            total = len(imerged_set)
+            done = len(get_merged_done(in_dir)-get_condor_submitted(in_dir))
+            print("Done: %i / %i" % (done,total))
 
-            submit_merge_jobs(in_dir=in_dir, imerged_set=imerged_set, nevents=nevents_chain, nevents_effective=nevents_effective, \
-                               xsec=xsec, kfactor=kfact, efactor=efact)
+            if total != done:
+
+                submit_merge_jobs(in_dir=in_dir, imerged_set=imerged_set, nevents=nevents, nevents_effective=nevents_effective, \
+                                   xsec=xsec, kfactor=kfact, efactor=efact)
+
+            else:
+
+                from glob import glob
+                nbad = 0
+                for fname in glob(in_dir+"/new_xsec/*.root"):
+                    isbad, nentries, prob = check_merged_rootfile(fname, nevents)
+                    if isbad:
+                        nbad += 1
+                        print("% IS BAD: %s" % (fname, isbad))
+
+
+                if isbad == 0:
+                    new_nevents = get_events_in_chain(in_dir + "/new_xsec/*.root")
+                    if new_nevents == nevents:
+                        print("rm -f {0}/*.root ; mv {0}/new_xsec/*.root {0}/".format(in_dir))
+                        metadata["xsec"] = xsec
+                        metadata["kfact"] = kfact
+                        metadata["efact"] = efact
+                        with open("tmp.json", "w") as fhout:
+                            json.dump(metadata, fhout, sort_keys = True, indent = 4)
+                        u.cmd("cp tmp.json %s" % in_dir+"/new_xsec/metadata.json")
+                        print("made new metadata.json!")
+
+                    else:
+                        print("ERROR, nevents don't match (new,old) = (%i,%i)" % (new_nevents, nevents))
+
+
 
 
 
