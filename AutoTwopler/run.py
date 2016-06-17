@@ -103,6 +103,7 @@ for i in range(5000):
 
                 elif stat == "done":
                     s.do_done_stuff()
+                    s.check_new_merged_for_babies()
 
 
             s.save()
