@@ -293,7 +293,7 @@ class Sample:
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
-            self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
+            self.do_log("can't match patterns in dataset name to figure out where in .../snt/ to put it. using /snt/run2/. move it later")
             self.sample["specialdir"] = "run2"
 
 
@@ -302,8 +302,10 @@ class Sample:
             self.sample["pset"] = params.pset_mc
             self.sample["specialdir"] = "run2_ss_synch"
 
-        if self.specialdir_test:
+        if self.specialdir_test or "/Good" in ds:
+            self.do_log("I think this is for a corrupted file, so will put in snt/test!")
             self.sample["specialdir"] = "test"
+            self.sample["pset"] = params.pset_mc
 
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])

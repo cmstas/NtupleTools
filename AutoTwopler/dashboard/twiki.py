@@ -104,7 +104,7 @@ def get_samples(assigned_to, username, get_unmade=True, page="Autotupletest"):
     return samples
 
 
-def update_samples(samples, username, page="Autotupletest"):
+def update_samples(samples, username, page="Autotupletest", update_done=False, dryrun=False):
     br = get_browser(page, username)
     for link in br.links():
         if link.text.strip() == 'Raw Edit':
@@ -123,16 +123,29 @@ def update_samples(samples, username, page="Autotupletest"):
             sample_twiki  = OrderedDict( zip(columns, parts) )
 
             for sample in samples:
-                if "status" in sample and not(sample["status"] == "done"): continue
+                if not update_done and ("status" in sample and not(sample["status"] == "done")): continue
 
                 # find matching sample (dataset, cms3tag must match), then fill in events and location
-                if sample_twiki["dataset"] == sample["dataset"] and sample_twiki["cms3tag"] == sample["cms3tag"] and sample_twiki["location"] == "":
-                    sample_twiki["location"] = sample["finaldir"]
-                    sample_twiki["nevents_in"] = sample["nevents_DAS"]
-                    sample_twiki["nevents_out"] = sample["nevents_merged"]
-                    line = "| %s |" % " | ".join(map(str,sample_twiki.values()))
+                if sample_twiki["dataset"] == sample["dataset"] and sample_twiki["cms3tag"] == sample["cms3tag"] and (update_done or sample_twiki["location"] == ""):
                     print "Found updatable entry for %s: %s" % (sample["cms3tag"], sample["dataset"])
+                    if dryrun:
+                        for key in ["xsec","kfact","efact"]:
+                            old = sample_twiki.get(key, None)
+                            new = sample.get(key, None)
+                            if old is None or new is None: continue
+                            if old != new:
+                                print "\t%s: %s --> %s" % (key, str(old), str(new))
+                        print
+
                     num_updatable += 1
+
+                    sample_twiki["location"] = sample.get("finaldir", sample_twiki["location"])
+                    sample_twiki["nevents_in"] = sample.get("nevents_DAS", sample_twiki["nevents_in"])
+                    sample_twiki["nevents_out"] = sample.get("nevents_merged", sample_twiki["nevents_out"])
+                    sample_twiki["xsec"] = sample.get("xsec", sample_twiki["xsec"])
+                    sample_twiki["kfact"] = sample.get("kfact", sample_twiki["kfact"])
+                    sample_twiki["efact"] = sample.get("efact", sample_twiki["efact"])
+                    line = "| %s |" % " | ".join(map(str,sample_twiki.values()))
                     break
 
         lines_out.append(line)
@@ -144,7 +157,7 @@ def update_samples(samples, username, page="Autotupletest"):
     if num_updatable == 0:
         print "Didn't find any updatable entries in %s" % url
 
-    if len(tosubmit) > 0.95*len(raw) and num_updatable > 0:
+    if len(tosubmit) > 0.95*len(raw) and num_updatable > 0 and not dryrun:
         br.form['text'] = "\n".join(lines_out)
         print "Updated Twiki at %s" % url.replace("/edit/","/view/")
         br.submit()
@@ -159,5 +172,5 @@ if __name__=='__main__':
               "nevents_merged": 312261,
               "status": "done",
             }]
-    # update_samples(samples, username="namin", page="Autotupletest")
-    print get_samples(assigned_to="Nick", username="namin", get_unmade=False, page="")
+    update_samples(samples, username="namin", page="Autotupletest")
+    # print get_samples(assigned_to="Nick", username="namin", get_unmade=False, page="")
