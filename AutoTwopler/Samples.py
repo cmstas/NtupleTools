@@ -264,8 +264,12 @@ class Sample:
         # if len(self.sample["sparms"]) > 0: self.sample["pset"] = params.pset_mc_fastsim
         if "FSPremix" in ds: self.sample["pset"] = params.pset_mc_fastsim
         if "FastAsympt" in ds: self.sample["pset"] = params.pset_mc_fastsim
-        if "/Run2015" in ds: self.sample["pset"] = params.pset_data
-        if "/Run2016" in ds: self.sample["pset"] = params.pset_data
+        if "/Run2015" in ds: 
+            self.sample["isdata"] = True
+            self.sample["pset"] = params.pset_data
+        if "/Run2016" in ds:
+            self.sample["isdata"] = True
+            self.sample["pset"] = params.pset_data
         if self.sample["isdata"]: self.sample["pset"] = params.pset_data
 
         # figure out specialdir automatically
@@ -939,7 +943,10 @@ class Sample:
             self.do_log("WARNING: %s has 0 entries" % fname)
             return (True, 0, 0, 0)
 
-        pos_weight = tree.GetEntries("genps_weight>=0")
+        if self.sample["isdata"]:
+            pos_weight = tree.GetEntries()
+        else:
+            pos_weight = tree.GetEntries("genps_weight>=0")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 
