@@ -2,6 +2,7 @@ import json
 
 
 # THIS ONLY MAKES THE FILELIST TO USE WITH THE AUTOTWOPLER. YOU WILL STILL NEED TO COPY THE MERGED FILE OUT OF THE FINAL HADOOP AREA (SAME AS DATASSET, BUT WITH Immaculate_<imerged#> IN FRONT OF IT
+# XXX NOTE XXX: You will need to use the new_xsec script to use the proper nevents, nevens eff or else scale1fb will be wrong for this file
 
 corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/merged_ntuple_38.root"]
 
@@ -15,14 +16,9 @@ for cf in corrupt_files:
         ijob_to_nevents = metadata["ijob_to_nevents"]
         dataset = metadata["dataset"]
 
-        # print metadata["cms3tag"]
-        # print metadata["gtag"]
-        # print metadata["xsec"]
-        # print metadata["kfact"]
-        # print metadata["efact"]
-        # print ",".join(metadata["sparms"])
-
-        new_dataset = "/Immaculate_"+str(imerged)+"_"+dataset[1:]
+        _, pd, rest, tier = dataset.split("/")
+        new_dataset = "/Good"+str(imerged)+"_"+pd
+        new_dataset += "/"+rest[:91-len(new_dataset)]+"/USER"
         ijobs = imerged_to_ijob[str(imerged)]
 
         miniaods = sum([ijob_to_miniaod[str(ijob)] for ijob in ijobs],[])
