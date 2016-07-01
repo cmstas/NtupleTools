@@ -45,7 +45,7 @@ do
   DATASET=`echo $line | tr '/' ' ' | awk '{print $1}'` 
   VERSION=`echo $line | tr '/' ' ' | awk '{print $2}' | tr '-' ' ' | awk '{print $3}'`
   ERA=`echo $line | tr '/' ' ' | awk '{print $2}' | tr '-' ' ' | awk '{print $1}'`
-  TOGREP="${DATASET}[\/A-Za-z\-]*${VERSION}"
+  TOGREP="${ERA}/${DATASET}[\/A-Za-z\-]*${VERSION}"
   NTOTAL=`cat masterList.txt | grep $TOGREP | wc -l`
   NCOMPLETED=`cat $BASEPATH/completedList.txt | grep $TOGREP | wc -l`
   name="alex"

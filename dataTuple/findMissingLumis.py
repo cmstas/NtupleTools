@@ -30,6 +30,8 @@ def listToRanges(a):
          ranges.append([first,second])
     return ranges
 
+def getChunks(v,n=990): return [ v[i:i+n] for i in range(0, len(v), n) ]
+
 def getDatasetFileLumis(dataset):
     url="https://cmsweb.cern.ch/dbs/prod/global/DBSReader"
     api=DbsApi(url=url)
@@ -38,15 +40,19 @@ def getDatasetFileLumis(dataset):
     files = api.listFiles(dataset=dataset)
     files = [f.get('logical_file_name','') for f in files]
 
-    info = api.listFileLumiArray(logical_file_name=files)
+    # chunk into size less than 1000 or else DBS complains
+    fileChunks = getChunks(files)
 
-    # print info[0]
-    for file in info:
-        fname = file['logical_file_name']
-        dRunLumis[fname] = {}
-        run, lumis = str(file['run_num']), file['lumi_section_num']
-        if run not in dRunLumis[fname]: dRunLumis[fname][run] = []
-        dRunLumis[fname][run].extend(lumis)
+    for fileChunk in fileChunks:
+
+        info = api.listFileLumiArray(logical_file_name=fileChunk)
+
+        for f in info:
+            fname = f['logical_file_name']
+            dRunLumis[fname] = {}
+            run, lumis = str(f['run_num']), f['lumi_section_num']
+            if run not in dRunLumis[fname]: dRunLumis[fname][run] = []
+            dRunLumis[fname][run].extend(lumis)
 
     for fname in dRunLumis.keys():
         for run in dRunLumis[fname].keys():
@@ -57,7 +63,12 @@ def getDatasetFileLumis(dataset):
 datasets = []
 lumisCompleted = []
 # goldenJson = "Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
-goldenJson = "Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt" 0.804/fb
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt" # 2.07/fb
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt" # 2.66/fb
+goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt" # 3.99/fb
+print goldenJson
 if(len(sys.argv) > 1):
     goldenJson = sys.argv[1]
     print "Using JSON:",goldenJson
@@ -83,28 +94,29 @@ for dataset, link in zip(datasets, lumisCompleted):
 goldenLumis = LumiList(compactList=json.loads(open(goldenJson,"r").read()))
 
 primaryDatasets = [
+"SingleMuon",
+"SinglePhoton",
+"SingleElectron",
 "DoubleEG",
 "DoubleMuon",
+"MuonEG",
 "HTMHT",
 "JetHT",
 "MET",
-"MuonEG",
-"SingleElectron",
-"SingleMuon",
-"SinglePhoton",
 ]
 
 # parse lumiMap
 dLumiMap =  {}
-with open("lumiList.txt", "r") as fhin:
+with open("lumis_skim.csv", "r") as fhin:
     for line in fhin:
         line = line.strip()
-        if "STABLE" not in line: continue
-        parts = line.split("|")
-        run = int(parts[1].split(":")[0])
-        ls = int(parts[2].split(":")[0])
-        recordedPB = float(parts[7])
-        dLumiMap[(run,ls)] = recordedPB
+        try:
+            run,ls,ts,deliv,recorded = line.split(",")
+            run = int(run)
+            ls = int(ls)
+            recordedPB = float(recorded)
+            dLumiMap[(run,ls)] = recordedPB
+        except: pass
 
 def getLumiFromLL(d):
     totLumi = 0.0
@@ -141,10 +153,11 @@ for pd in primaryDatasets:
     inGoldenButNotCMS3 = goldenLumis - cms3Lumis
     inGoldenButNotCMS3IntLumi = getLumiFromLL(inGoldenButNotCMS3)
 
-    cms3LumisIntLumi = getLumiFromLL(cms3Lumis - (cms3Lumis - goldenLumis))
+    # cms3LumisIntLumi = getLumiFromLL(cms3Lumis - (cms3Lumis - goldenLumis))
+    cms3LumisIntLumi = getLumiFromLL(cms3Lumis & goldenLumis)
     print "We have %.2f/pb in CMS3" % (getLumiFromLL(cms3Lumis))
     print "We have %.2f/pb in Golden&CMS3 (%.1f%% of golden)" % (cms3LumisIntLumi, 100.0*cms3LumisIntLumi/goldenIntLumi)
-    print "This is what is in the Golden JSON, but not the CMS3 merged: (%.2f/pb)" % getLumiFromLL(inGoldenButNotCMS3)
+    print "This is what is in the Golden JSON, but not the CMS3 merged (%.2f/pb):" % getLumiFromLL(inGoldenButNotCMS3)
     print inGoldenButNotCMS3
     print
 

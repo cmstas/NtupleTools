@@ -43,10 +43,10 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-04
+CMS3tag=CMS3_V08-00-07
 
 #Set the global tag to use
-GTAG=80X_dataRun2_Prompt_v8
+GTAG=80X_dataRun2_Prompt_v9
 #for reminiAOD data, change this to 74X_dataRun2_reMiniAOD_v0
 
 #State the maxmimum number of events
@@ -73,7 +73,7 @@ fi
 source /code/osgcode/cmssoft/cmsset_default.sh
 export SCRAM_ARCH=slc6_amd64_gcc530
 pushd .
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_6
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_12
 eval `scramv1 runtime -sh`
 popd
 
@@ -367,9 +367,13 @@ if [ -d $BASEPATH/mergedLists ]; then
     for dir in $( ls -d $BASEPATH/mergedLists/*/ )
     do
 	task=`basename $dir`
-	echo "checking PP for $task"
-	. checkPP.sh $task $JOBTYPE $CMS3tag
-	echo "done checking PP for $task"
+    # only check the mergedLists for stuff in input.txt!
+    datasetName=$(echo $task | tr '_' ' ' | awk '{print "/"$2"/"$1"-"$4"/"$3}')
+    if grep $datasetName $BASEPATH/input.txt; then
+        echo "checking PP for $task"
+        . checkPP.sh $task $JOBTYPE $CMS3tag
+        echo "done checking PP for $task"
+    fi
    done
 fi
 
