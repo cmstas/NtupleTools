@@ -333,7 +333,7 @@ class Sample:
         # thus, if we rapidfire submit jobs, they will all end up seeing the last version of the executable
         # ie, they might all output to output_N.root where N is the last imerged value. so all the variables below
         # make the submission file independent of file number (stuff like imerged is computed on the fly)
-        copy_cmd = "lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
+        copy_cmd = "gfal-copy -p -f -t 4200 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
         with open(self.sample["baby"]["executable_script"], "w") as fhout:
             fhout.write("#!/bin/bash\n\n")
             fhout.write("DATASET=$1\n")

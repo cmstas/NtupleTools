@@ -88,7 +88,7 @@ then
   if [ -e $OUTPUT_FILE_NAME ]
   then
     echo "Sending output file $OUTPUT_FILE_NAME"
-    lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/${OUTPUT_FILE_NAME} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/${OUTPUT_FILE_NAME}
+    gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT_FILE_NAME} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/${OUTPUT_FILE_NAME}
   else
     echo "Output file $OUTPUT_FILE_NAME does not exist!"
   fi
@@ -101,7 +101,7 @@ if [ -e $FJR_NAME ]
 then
   echo "Sending FrameworkJobReport $FJR_NAME.tar.gz"
   tar -czvf $FJR_NAME.tar.gz $FJR_NAME
-  lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/$FJR_NAME.tar.gz srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/FJR/$FJR_NAME.tar.gz
+  gfal-copy -p -f -t 4200 --verbose file://`pwd`/$FJR_NAME.tar.gz srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/FJR/$FJR_NAME.tar.gz
 else
   echo "No FrameworkJobReport created!"
 fi
