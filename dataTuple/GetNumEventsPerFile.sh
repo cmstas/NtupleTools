@@ -15,8 +15,20 @@ else
   readarray -t samples < $BASEPATH/input.txt
   for i in "${samples[@]}"
   do
-    input_from_das=`./das_client.py --query="file dataset= $i | grep file.name, file.nevents" --limit=0` #need to use --limit=0 to pick up all files!
-    echo "$input_from_das" | grep "status: fail"
+
+    ########################################
+    ################# DAS ##################
+    ########################################
+    # input_from_das=`./das_client.py --query="file dataset= $i | grep file.name, file.nevents" --limit=0` #need to use --limit=0 to pick up all files!
+    # echo "$input_from_das" | grep "status: fail"
+
+
+    ########################################
+    ################# DIS ##################
+    ########################################
+    input_from_das=`./dis_client.py -t files "$i | grep name,nevents" --table --detail | grep "store"`
+    echo "$input_from_das" | grep "failure"
+
     if [ $? == 0 ]
     then 
       echo "failed" >> nQueryAttempts.txt
