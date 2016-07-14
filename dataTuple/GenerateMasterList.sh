@@ -22,7 +22,7 @@ do
   ########################################
   ################# DIS ##################
   ########################################
-  input_from_das=`dis_client.py -t files --detail "$i | grep name"`
+  input_from_das=`./dis_client.py -t files --detail "$i | grep name"`
   echo "$input_from_das" | grep "failure"
 
 
