@@ -1,14 +1,7 @@
 #!/usr/bin/env python
 # instructions: call as 
-#     python findMissingLumis.py [json] ["datasetpattern"] 
-# example: python findMissingLumis.py Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt
+#     python findMissingLumis.py
 # https://twiki.cern.ch/twiki/bin/view/CMS/DBS3APIInstructions
-
-# every now and then, must do
-#        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi -u /pb  --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt > lumiList.txt
-# or for all of them *NOTE*
-#        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi --begin 273000 --byls -u /pb > lumiList.txt
-# to be able to make a (run,lumi) --> int. lumi. map
 import  sys
 try:
     from dbs.apis.dbsClient import DbsApi
@@ -110,47 +103,47 @@ dLinks = {
         "SingleMuon": [
             ("/SingleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v1.txt"),
             ("/SingleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v2.txt"),
-            ("/SingleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_SingleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016C_SingleMuon_MINIAOD_PromptReco-v2.txt"),
             ],
         "SinglePhoton": [
             ("/SinglePhoton/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v1.txt"),
             ("/SinglePhoton/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
-            ("/SinglePhoton/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
+            ("/SinglePhoton/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016C_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
             ],
         "SingleElectron": [
             ("/SingleElectron/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v1.txt"),
             ("/SingleElectron/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v2.txt"),
-            ("/SingleElectron/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_SingleElectron_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleElectron/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016C_SingleElectron_MINIAOD_PromptReco-v2.txt"),
             ],
         "MuonEG": [
             ("/MuonEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v1.txt"),
             ("/MuonEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v2.txt"),
-            ("/MuonEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_MuonEG_MINIAOD_PromptReco-v2.txt"),
+            ("/MuonEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016C_MuonEG_MINIAOD_PromptReco-v2.txt"),
             ],
         "DoubleEG": [
             ("/DoubleEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v1.txt"),
             ("/DoubleEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v2.txt"),
-            ("/DoubleEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_DoubleEG_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016C_DoubleEG_MINIAOD_PromptReco-v2.txt"),
             ],
         "DoubleMuon": [
             ("/DoubleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v1.txt"),
             ("/DoubleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
-            ("/DoubleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016C_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
             ],
         "HTMHT": [
             ("/HTMHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v1.txt"),
             ("/HTMHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v2.txt"),
-            ("/HTMHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_HTMHT_MINIAOD_PromptReco-v2.txt"),
+            ("/HTMHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016C_HTMHT_MINIAOD_PromptReco-v2.txt"),
             ],
         "JetHT": [
             ("/JetHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v1.txt"),
             ("/JetHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v2.txt"),
-            ("/JetHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_JetHT_MINIAOD_PromptReco-v2.txt"),
+            ("/JetHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016C_JetHT_MINIAOD_PromptReco-v2.txt"),
             ],
         "MET": [
             ("/MET/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v1.txt"),
             ("/MET/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v2.txt"),
-            ("/MET/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016C_MET_MINIAOD_PromptReco-v2.txt"),
+            ("/MET/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016C_MET_MINIAOD_PromptReco-v2.txt"),
             ],
         }
 
