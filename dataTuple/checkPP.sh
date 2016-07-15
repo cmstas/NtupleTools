@@ -71,9 +71,9 @@ counter="1"
 
 while [ -e $BASEPATH/mergedLists/$taskname/metaData_$counter.txt ]
 do
-  echo "checking $BASEPATH/mergedLists/$taskname/metaData_$counter.txt"
+  # echo "checking $BASEPATH/mergedLists/$taskname/metaData_$counter.txt"
   mergeFile="$mergedDir/merged_ntuple_$counter.root"
-  echo "mergeFile is $mergeFile"
+  # echo "mergeFile is $mergeFile"
   
   #grep donePP.txt to see if PP already finished and mv'ed to hadoop
   grep "$mergeFile" donePP.txt > /dev/null
