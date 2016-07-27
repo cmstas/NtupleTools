@@ -920,7 +920,7 @@ class Sample:
                     miniaod = list(set(map(lambda x: "/store/"+x.split("/store/")[1].split(".root")[0]+".root", lines)))
                     temp[jobnum] = miniaod
 
-        self.sample["ijob_to_miniaod"][jobnum] = temp
+        self.sample["ijob_to_miniaod"] = temp
 
     def get_rootfile_info(self, fname):
         # returns: is bad, nevents, nevents effective, file size in GB
