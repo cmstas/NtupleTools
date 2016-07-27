@@ -3,6 +3,7 @@ from Configuration.EventContent.EventContent_cff   import *
 
 import CMS3.NtupleMaker.configProcessName as configProcessName
 configProcessName.name="PAT"
+configProcessName.name2="RECO"
 configProcessName.isFastSim=False
 
 # CMS3

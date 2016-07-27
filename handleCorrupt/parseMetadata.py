@@ -1,4 +1,4 @@
-import os, sys, commands
+import os, sys, commands, json
 import datetime, re, glob
 from pprint import pprint
 
@@ -59,7 +59,7 @@ def find_corrupt():
 
     return corrupt_files
 
-def parse_metadata(fname, merged_file_num):
+def parse_metadata_old(fname, merged_file_num):
     with open(fname,"r") as fh: lines = fh.readlines()
 
     d_merged_nevents = {}
@@ -95,7 +95,34 @@ def parse_metadata(fname, merged_file_num):
     d_parsed = {"sample_name":sample_name, "xsec":xsec, "kfact":kfact, "efact":efact, "cms3tag":cms3tag, \
                 "gtag":gtag, "sparms":sparms, "unmerged_dir":unmerged_dir, "merged_nevents":merged_nevents, \
                 "unmerged_indices":unmerged_indices, "miniaod":miniaod}
-    pprint(d_parsed)
+    return d_parsed
+
+def parse_metadata(fname, merged_file_num):
+    data = {}
+    with open(fname,"r") as fh: data = json.load(fh)
+
+    d_parsed = {}
+    d_parsed["sample_name"] = data["dataset"]
+    d_parsed["xsec"] = data["xsec"]
+    d_parsed["kfact"] = data["kfact"]
+    d_parsed["efact"] = data["efact"]
+    d_parsed["cms3tag"] = data["cms3tag"]
+    d_parsed["gtag"] = data["gtag"]
+    d_parsed["sparms"] = data["sparms"]
+
+    d_parsed["unmerged_dir"] = data["crab"]["outputdir"]
+    d_parsed["merged_nevents"] = data["nevents_merged"]
+
+    d_parsed["unmerged_indices"] = data["imerged_to_ijob"][str(merged_file_num)]
+    d_parsed["miniaod"] = []
+    ijob_to_miniaod = data["ijob_to_miniaod"]
+    if len(data["ijob_to_miniaod"].keys()) == 1: # then it's buggy (so do workaround): see /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/metadata.json
+        ijob_to_miniaod = data["ijob_to_miniaod"][data["ijob_to_miniaod"].keys()[0]]
+
+    for idx in data["imerged_to_ijob"][str(merged_file_num)]:
+        if str(idx) in ijob_to_miniaod:
+            d_parsed["miniaod"].append( (int(idx),ijob_to_miniaod[str(idx)][0]) )
+
     return d_parsed
 
 def get_events(unmerged_indices, unmerged_dir):
@@ -149,8 +176,8 @@ def make_mergelist(shortname, output_dir, mergemetadata_fname):
 def submit_condor_jobs(d_parsed, merged_file_num, output_dir):
         sparms = d_parsed["sparms"]
         if len(sparms) == 0: pset = "pset_mc.py"
-        elif "," in sparms and len(sparms.split(",")) == 2: pset = "pset_mc_2sparms.py"
-        elif "," in sparms and len(sparms.split(",")) == 3: pset = "pset_mc_3sparms.py"
+        elif len(sparms.split(",")) == 2: pset = "pset_mc_2sparms.py"
+        elif len(sparms.split(",")) == 3: pset = "pset_mc_3sparms.py"
 
         status, condorq = commands.getstatusoutput("condor_q %s -l | grep Args" % os.getenv("USER"))
 
@@ -182,11 +209,15 @@ def submit_mergejobs(shortname, merged_file_num):
 
 
 if __name__ == '__main__':
-    corrupt_files = find_corrupt() # FIXME uncomment when finished testing
-    # corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_MiniAODv2/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/V07-04-12/merged_ntuple_2.root"]
+    # corrupt_files = find_corrupt() # FIXME uncomment when finished testing
+    corrupt_files = [
+            "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/merged_ntuple_44.root",
+             "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/merged_ntuple_9.root",
+             ]
+
     for cf in corrupt_files:
         pfx = "[%s...]" % (cf.split("/")[7][:25])
-        metadata_fname = cf.split("/merged_")[0] + "/metadata.txt"
+        metadata_fname = cf.split("/merged_")[0] + "/metadata.json"
         # metadata_fname = "tempMetaData.txt" # FIXME want to use actual file, not testing, so delete this
         if not os.path.exists(metadata_fname): continue # no metadata, so useless to try to figure out stuff
 
