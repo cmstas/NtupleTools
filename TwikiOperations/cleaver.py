@@ -28,12 +28,13 @@ if __name__ == "__main__":
                 "Zprime", "Bprime", "Tprime", "_FlatPt", "-gun", "DarkMatter", "DM", "ChargedHiggs", \
                 "DisplacedSUSY", "GGJets", "GluGlu", "NNPDF", "LFV", "ToGG", "WToTauNu_M-", "WToMuNu_M-", \
                 "WToENu_M-", "XXTo4J", "HToZATo", "SMS-T2bH", "VBFHToTauTau", "VBF_HToMuMu", "VBF_HToZZTo4L" \
-                "WJetsToQQ", "RAWAODSIM", "RECODEBUG", "BlackHole", "NMSSM", "Qstar", "RPV"]
+                "WJetsToQQ", "RAWAODSIM", "RECODEBUG", "BlackHole", "NMSSM", "Qstar", "RPV", "Upsilon"]
     for dataset in all_datasets:
         isBad = False
         for cut_str in cut_strs:
-            if cut_str in dataset: break
-        else: isBad = True
+            if cut_str in dataset:
+                isBad = True
+                break
 
         if isBad: continue
 
@@ -65,6 +66,10 @@ if __name__ == "__main__":
 
     datasets = list(set(datasets) - set(old_datasets))
     print "After further removing samples we've previously considered in the past, we are down to %i datasets" % len(datasets)
+
+    # for thing in datasets:
+    #     print thing
+    # sys.exit()
 
     statuses = []
     if datasets:

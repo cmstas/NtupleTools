@@ -264,8 +264,12 @@ class Sample:
         # if len(self.sample["sparms"]) > 0: self.sample["pset"] = params.pset_mc_fastsim
         if "FSPremix" in ds: self.sample["pset"] = params.pset_mc_fastsim
         if "FastAsympt" in ds: self.sample["pset"] = params.pset_mc_fastsim
-        if "/Run2015" in ds: self.sample["pset"] = params.pset_data
-        if "/Run2016" in ds: self.sample["pset"] = params.pset_data
+        if "/Run2015" in ds: 
+            self.sample["isdata"] = True
+            self.sample["pset"] = params.pset_data
+        if "/Run2016" in ds:
+            self.sample["isdata"] = True
+            self.sample["pset"] = params.pset_data
         if self.sample["isdata"]: self.sample["pset"] = params.pset_data
 
         # figure out specialdir automatically
@@ -293,7 +297,7 @@ class Sample:
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
-            self.do_log("can't match patterns in dataset name to figure out where in ../snt/ to put it. using /snt/run2/. move it later")
+            self.do_log("can't match patterns in dataset name to figure out where in .../snt/ to put it. using /snt/run2/. move it later")
             self.sample["specialdir"] = "run2"
 
 
@@ -302,8 +306,10 @@ class Sample:
             self.sample["pset"] = params.pset_mc
             self.sample["specialdir"] = "run2_ss_synch"
 
-        if self.specialdir_test:
+        if self.specialdir_test or "/Good" in ds:
+            self.do_log("I think this is for a corrupted file, so will put in snt/test!")
             self.sample["specialdir"] = "test"
+            self.sample["pset"] = params.pset_mc
 
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
@@ -327,7 +333,7 @@ class Sample:
         # thus, if we rapidfire submit jobs, they will all end up seeing the last version of the executable
         # ie, they might all output to output_N.root where N is the last imerged value. so all the variables below
         # make the submission file independent of file number (stuff like imerged is computed on the fly)
-        copy_cmd = "lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
+        copy_cmd = "gfal-copy -p -f -t 4200 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
         with open(self.sample["baby"]["executable_script"], "w") as fhout:
             fhout.write("#!/bin/bash\n\n")
             fhout.write("DATASET=$1\n")
@@ -937,7 +943,10 @@ class Sample:
             self.do_log("WARNING: %s has 0 entries" % fname)
             return (True, 0, 0, 0)
 
-        pos_weight = tree.GetEntries("genps_weight>=0")
+        if self.sample["isdata"]:
+            pos_weight = tree.GetEntries()
+        else:
+            pos_weight = tree.GetEntries("genps_weight>=0")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 

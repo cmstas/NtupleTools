@@ -43,10 +43,10 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-04
+CMS3tag=CMS3_V08-00-08
 
 #Set the global tag to use
-GTAG=80X_dataRun2_Prompt_v8
+GTAG=80X_dataRun2_Prompt_v9
 #for reminiAOD data, change this to 74X_dataRun2_reMiniAOD_v0
 
 #State the maxmimum number of events
@@ -73,7 +73,9 @@ fi
 source /code/osgcode/cmssoft/cmsset_default.sh
 export SCRAM_ARCH=slc6_amd64_gcc530
 pushd .
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_6
+# cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_12
+# note, patches are in a different folder, run `scram list -a CMSSW | grep 8_0_13_patch1` to check
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_13_patch1/src/
 eval `scramv1 runtime -sh`
 popd
 
@@ -316,14 +318,14 @@ then
     if [ "$isOnSubmitList" -eq "1"  ] 
     then
       echo "nTries: $nTries" 
-      if [ "$nTries" -gt "10" ] && [ "$nTries" -lt "130" ]
+      if [ "$nTries" -gt "10" ] && [ "$nTries" -lt "60" ]
       then
         currentLine_escaped=`echo $currentLine | sed 's,/,\\\/,g'`
         sed -i "/$currentLine_escaped/d" submitList.txt
         let "nTries=$nTries+1"
         echo "$currentLine $jobid $currentTime $nTries 0" >> submitList.txt
         continue
-      elif [ "$nTries" -eq "135" ] 
+      elif [ "$nTries" -eq "70" ] 
       then
         echo "DataTupleError!  File $currentLine has failed many times." | /bin/mail -r "namin@physics.ucsb.edu" -s "[dataTuple] error report" "namin@physics.ucsb.edu, mark.derdzinski@gmail.com" 
         echo "$currentLine" >> failureList.txt
@@ -367,9 +369,13 @@ if [ -d $BASEPATH/mergedLists ]; then
     for dir in $( ls -d $BASEPATH/mergedLists/*/ )
     do
 	task=`basename $dir`
-	echo "checking PP for $task"
-	. checkPP.sh $task $JOBTYPE $CMS3tag
-	echo "done checking PP for $task"
+    # only check the mergedLists for stuff in input.txt!
+    datasetName=$(echo $task | tr '_' ' ' | awk '{print "/"$2"/"$1"-"$4"/"$3}')
+    if grep $datasetName $BASEPATH/input.txt; then
+        echo "checking PP for $task"
+        . checkPP.sh $task $JOBTYPE $CMS3tag
+        echo "done checking PP for $task"
+    fi
    done
 fi
 

@@ -1,14 +1,7 @@
 #!/usr/bin/env python
 # instructions: call as 
-#     python findMissingLumis.py [json] ["datasetpattern"] 
-# example: python findMissingLumis.py Cert_246908-258159_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt
+#     python findMissingLumis.py
 # https://twiki.cern.ch/twiki/bin/view/CMS/DBS3APIInstructions
-
-# every now and then, must do
-#        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi -u /pb  --byls -i /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt > lumiList.txt
-# or for all of them *NOTE*
-#        ssh namin@lxplus.cern.ch /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi --begin 273000 --byls -u /pb > lumiList.txt
-# to be able to make a (run,lumi) --> int. lumi. map
 import  sys
 try:
     from dbs.apis.dbsClient import DbsApi
@@ -30,6 +23,8 @@ def listToRanges(a):
          ranges.append([first,second])
     return ranges
 
+def getChunks(v,n=990): return [ v[i:i+n] for i in range(0, len(v), n) ]
+
 def getDatasetFileLumis(dataset):
     url="https://cmsweb.cern.ch/dbs/prod/global/DBSReader"
     api=DbsApi(url=url)
@@ -38,73 +33,25 @@ def getDatasetFileLumis(dataset):
     files = api.listFiles(dataset=dataset)
     files = [f.get('logical_file_name','') for f in files]
 
-    info = api.listFileLumiArray(logical_file_name=files)
+    # chunk into size less than 1000 or else DBS complains
+    fileChunks = getChunks(files)
 
-    # print info[0]
-    for file in info:
-        fname = file['logical_file_name']
-        dRunLumis[fname] = {}
-        run, lumis = str(file['run_num']), file['lumi_section_num']
-        if run not in dRunLumis[fname]: dRunLumis[fname][run] = []
-        dRunLumis[fname][run].extend(lumis)
+    for fileChunk in fileChunks:
+
+        info = api.listFileLumiArray(logical_file_name=fileChunk)
+
+        for f in info:
+            fname = f['logical_file_name']
+            dRunLumis[fname] = {}
+            run, lumis = str(f['run_num']), f['lumi_section_num']
+            if run not in dRunLumis[fname]: dRunLumis[fname][run] = []
+            dRunLumis[fname][run].extend(lumis)
 
     for fname in dRunLumis.keys():
         for run in dRunLumis[fname].keys():
             dRunLumis[fname][run] = listToRanges(dRunLumis[fname][run])
 
     return dRunLumis
-
-datasets = []
-lumisCompleted = []
-# goldenJson = "Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
-goldenJson = "Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
-if(len(sys.argv) > 1):
-    goldenJson = sys.argv[1]
-    print "Using JSON:",goldenJson
-datasetPattern = "/%s/Run2016B-PromptReco-%s/MINIAOD"
-# if(len(sys.argv) > 2):
-#     datasetPattern = sys.argv[2]
-#     print "Using dataset pattern:",datasetPattern
-
-for user in ['mderdzinski','namin']:
-    html = urllib2.urlopen("http://uaf-7.t2.ucsd.edu/~%s/dataTupleMonitor.html" % user).readlines()
-    for line in html:
-        if ('Dataset: ' in line):
-            datasets.append(line.split(":")[-1].replace("<BR>","").replace("<b>","").replace("</b>","").strip())
-        elif ('Lumis completed: ' in line):
-            lumisCompleted.append(line.split("HREF=\"")[-1].split("\">")[0].strip())
-
-dLumiLinks = {}
-for dataset, link in zip(datasets, lumisCompleted):
-    dLumiLinks[dataset] = link
-
-# print dLumiLinks
-
-goldenLumis = LumiList(compactList=json.loads(open(goldenJson,"r").read()))
-
-primaryDatasets = [
-"DoubleEG",
-"DoubleMuon",
-"HTMHT",
-"JetHT",
-"MET",
-"MuonEG",
-"SingleElectron",
-"SingleMuon",
-"SinglePhoton",
-]
-
-# parse lumiMap
-dLumiMap =  {}
-with open("lumiList.txt", "r") as fhin:
-    for line in fhin:
-        line = line.strip()
-        if "STABLE" not in line: continue
-        parts = line.split("|")
-        run = int(parts[1].split(":")[0])
-        ls = int(parts[2].split(":")[0])
-        recordedPB = float(parts[7])
-        dLumiMap[(run,ls)] = recordedPB
 
 def getLumiFromLL(d):
     totLumi = 0.0
@@ -114,22 +61,112 @@ def getLumiFromLL(d):
         totLumi += dLumiMap[(run,ls)]
     return totLumi
 
+datasets = []
+lumisCompleted = []
+# goldenJson = "Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt" 0.804/fb
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt" # 2.07/fb
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt" # 2.66/fb
+# goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt" # 3.99/fb
+# goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 5.76/fb
+# goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON.txt" # 6.26/fb
+goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt" # 7.65/fb no L1T certification
+
+# if(len(sys.argv) > 1):
+#     goldenJson = sys.argv[1]
+#     print "Using JSON:",goldenJson
+
+goldenLumis = LumiList(compactList=json.loads(open(goldenJson,"r").read()))
+
+
+
+# parse lumiMap
+dLumiMap =  {}
+with open("lumis/lumis_skim.csv", "r") as fhin:
+    for line in fhin:
+        line = line.strip()
+        try:
+            run,ls,ts,deliv,recorded = line.split(",")
+            run = int(run)
+            ls = int(ls)
+            recordedPB = float(recorded)
+            dLumiMap[(run,ls)] = recordedPB
+        except: pass
+
+
 goldenIntLumi = getLumiFromLL(goldenLumis)
-        
+print "Using %s with %.2f/pb" % (goldenJson, goldenIntLumi)
+
+
+dLinks = {
+        "SingleMuon": [
+            ("/SingleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v1.txt"),
+            ("/SingleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016C_SingleMuon_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "SinglePhoton": [
+            ("/SinglePhoton/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v1.txt"),
+            ("/SinglePhoton/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
+            ("/SinglePhoton/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016C_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "SingleElectron": [
+            ("/SingleElectron/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v1.txt"),
+            ("/SingleElectron/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleElectron/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016C_SingleElectron_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "MuonEG": [
+            ("/MuonEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v1.txt"),
+            ("/MuonEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v2.txt"),
+            ("/MuonEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016C_MuonEG_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "DoubleEG": [
+            ("/DoubleEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v1.txt"),
+            ("/DoubleEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016C_DoubleEG_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "DoubleMuon": [
+            ("/DoubleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v1.txt"),
+            ("/DoubleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016C_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "HTMHT": [
+            ("/HTMHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v1.txt"),
+            ("/HTMHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v2.txt"),
+            ("/HTMHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016C_HTMHT_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "JetHT": [
+            ("/JetHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v1.txt"),
+            ("/JetHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v2.txt"),
+            ("/JetHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016C_JetHT_MINIAOD_PromptReco-v2.txt"),
+            ],
+        "MET": [
+            ("/MET/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v1.txt"),
+            ("/MET/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v2.txt"),
+            ("/MET/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016C_MET_MINIAOD_PromptReco-v2.txt"),
+            ],
+        }
+
+
+
 allCMS3Lumis = LumiList(compactList={})
 
-for pd in primaryDatasets:
+for pd in dLinks.keys():
     cms3Lumis = LumiList(compactList={})
     fileLumis = {}
-    for v in ["v1","v2"]:
-        pdv = pd+"-"+v
-        dataset = datasetPattern % (pd, v)
-        lumiLink = dLumiLinks[pdv]
+    for dataset,link in dLinks[pd]:
+
+
+        # Add to total json of what we have in CMS3 for this PD
+        try:
+            with open(link, "r") as fhin:
+                j = json.load(fhin)
+        except:
+            print "Error trying to read %s, %s" % (dataset, link)
+            continue
 
         print "-"*5, dataset, "-"*5
 
-        # Add to total json of what we have in CMS3 for this PD
-        j = json.loads(urllib2.urlopen(lumiLink).read())
         cms3Lumis += LumiList(compactList=j)
 
         allCMS3Lumis += LumiList(compactList=j)
@@ -141,10 +178,11 @@ for pd in primaryDatasets:
     inGoldenButNotCMS3 = goldenLumis - cms3Lumis
     inGoldenButNotCMS3IntLumi = getLumiFromLL(inGoldenButNotCMS3)
 
-    cms3LumisIntLumi = getLumiFromLL(cms3Lumis - (cms3Lumis - goldenLumis))
+    # cms3LumisIntLumi = getLumiFromLL(cms3Lumis - (cms3Lumis - goldenLumis))
+    cms3LumisIntLumi = getLumiFromLL(cms3Lumis & goldenLumis)
     print "We have %.2f/pb in CMS3" % (getLumiFromLL(cms3Lumis))
     print "We have %.2f/pb in Golden&CMS3 (%.1f%% of golden)" % (cms3LumisIntLumi, 100.0*cms3LumisIntLumi/goldenIntLumi)
-    print "This is what is in the Golden JSON, but not the CMS3 merged: (%.2f/pb)" % getLumiFromLL(inGoldenButNotCMS3)
+    print "This is what is in the Golden JSON, but not the CMS3 merged (%.2f/pb):" % getLumiFromLL(inGoldenButNotCMS3)
     print inGoldenButNotCMS3
     print
 

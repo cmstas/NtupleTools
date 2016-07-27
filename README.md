@@ -5,6 +5,9 @@ This repository is used to facilitate running the NtupleMaker directory at scale
 ###AutoTupler
   - Uses crab to run the NtupleMaker.  Need to know the published dataset name
 
+###AutoTwopler
+  - Uses crab to run the NtupleMaker. MkII of the AutoTupler (hence the "Two" in AutoTwopler. Get it?).
+
 ###CMS3withCondor
   - Uses condor to run the NtupleMaker.  Need to know the name and location of the MINIAOD file (check DAS), starting with /store....
   - Necessary if data has not been published (produced centrally)

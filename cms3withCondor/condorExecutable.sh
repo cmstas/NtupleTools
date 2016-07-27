@@ -30,7 +30,9 @@ export PATH=$PWD:$PATH
 export PYTHONPATH=$PWD/python:$PYTHONPATH:python/
 
 #Set environment
-pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_6/src/
+# note, non-patches are in a different folder, run `scram list -a CMSSW | grep 8_0_13` to check
+# pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_12/src/ 
+pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_13_patch1/src/
 eval `scramv1 runtime -sh`
 echo "should be in cvmfs: $PWD"
 popd
@@ -40,9 +42,9 @@ echo "libCMS3 = $libCMS3"
 
 if [ -e $libCMS3 ]
 then
-  scramv1 project CMSSW CMSSW_8_0_6
-  mv $libCMS3 CMSSW_8_0_6/
-  cd CMSSW_8_0_6
+  scramv1 project CMSSW CMSSW_8_0_13_patch1
+  mv $libCMS3 CMSSW_8_0_13_patch1/
+  cd CMSSW_8_0_13_patch1
   tar -xzvf $libCMS3
   scram b -j 8
   eval `scramv1 runtime -sh`
@@ -88,7 +90,7 @@ then
   if [ -e $OUTPUT_FILE_NAME ]
   then
     echo "Sending output file $OUTPUT_FILE_NAME"
-    lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/${OUTPUT_FILE_NAME} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/${OUTPUT_FILE_NAME}
+    gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUT_FILE_NAME} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/${OUTPUT_FILE_NAME}
   else
     echo "Output file $OUTPUT_FILE_NAME does not exist!"
   fi
@@ -101,7 +103,7 @@ if [ -e $FJR_NAME ]
 then
   echo "Sending FrameworkJobReport $FJR_NAME.tar.gz"
   tar -czvf $FJR_NAME.tar.gz $FJR_NAME
-  lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/$FJR_NAME.tar.gz srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/FJR/$FJR_NAME.tar.gz
+  gfal-copy -p -f -t 4200 --verbose file://`pwd`/$FJR_NAME.tar.gz srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUT_DIR}/FJR/$FJR_NAME.tar.gz
 else
   echo "No FrameworkJobReport created!"
 fi

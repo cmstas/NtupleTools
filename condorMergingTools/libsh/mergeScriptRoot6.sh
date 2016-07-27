@@ -194,7 +194,7 @@ localFile=`pwd`/${outFileName}
 if [ $didAddBranches == 0 ]; then
 
 	echo -e "copying file now from : \n$localFile \nto:\n$outputDir/$outFileName"
-	lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:`pwd`/${outFileName} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outputDir/${outFileName}
+	gfal-copy -p -f -t 4200 --verbose file:`pwd`/${outFileName} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outputDir/${outFileName}
 	stageout_error=$?
 
 	if [ $stageout_error != 0 ]; then
