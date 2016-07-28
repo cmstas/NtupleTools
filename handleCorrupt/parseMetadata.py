@@ -115,6 +115,9 @@ def parse_metadata(fname, merged_file_num):
 
     d_parsed["unmerged_indices"] = data["imerged_to_ijob"][str(merged_file_num)]
     d_parsed["miniaod"] = []
+
+    d_parsed["nevents_eff"] = sum([v[1] for v in data["ijob_to_nevents"].values()])
+
     ijob_to_miniaod = data["ijob_to_miniaod"]
     if len(data["ijob_to_miniaod"].keys()) == 1: # then it's buggy (so do workaround): see /hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/metadata.json
         ijob_to_miniaod = data["ijob_to_miniaod"][data["ijob_to_miniaod"].keys()[0]]
@@ -125,16 +128,16 @@ def parse_metadata(fname, merged_file_num):
 
     return d_parsed
 
-def get_events(unmerged_indices, unmerged_dir):
-    tot_events, tot_effevents = 0, 0
-    for ifile in unmerged_indices:
-        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",false)' | grep nevents" % (unmerged_dir, ifile))
-        events = int(macroData.split("=")[-1])
-        status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",true)' | grep nevents" % (unmerged_dir, ifile))
-        effevents = int(macroData.split("=")[-1])
-        tot_events += events
-        tot_effevents += effevents
-    return tot_events, tot_effevents
+# def get_events(unmerged_indices, unmerged_dir):
+#     tot_events, tot_effevents = 0, 0
+#     for ifile in unmerged_indices:
+#         status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",false)' | grep nevents" % (unmerged_dir, ifile))
+#         events = int(macroData.split("=")[-1])
+#         status, macroData = commands.getstatusoutput("root -l -b -q -n 'libC/counts.C(\"%s\",true)' | grep nevents" % (unmerged_dir, ifile))
+#         effevents = int(macroData.split("=")[-1])
+#         tot_events += events
+#         tot_effevents += effevents
+#     return tot_events, tot_effevents
 
 def all_unmerged_exists(unmerged_indices, output_dir):
     have_unmerged, where = False, None
@@ -251,7 +254,8 @@ if __name__ == '__main__':
         os.system("mkdir -p %s/mergeLists/" % shortname)
 
         print pfx, "getting event counts"
-        tot_events, tot_effevents = get_events(d_parsed["unmerged_indices"], d_parsed["unmerged_dir"]) # FIXME uncomment when finished testing
+        # tot_events, tot_effevents = get_events(d_parsed["unmerged_indices"], d_parsed["unmerged_dir"])
+        tot_events, tot_effevents = d_parsed["merged_nevents"], d_parsed["nevents_eff"] # FIXME uncomment when finished testing
         # tot_events, tot_effevents = 999, 999
 
         if unmerged_location == "original":
