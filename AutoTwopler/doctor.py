@@ -45,7 +45,7 @@ print
 
 # Find the smallest MINIAOD file
 filelist = dis.query(dataset_name, detail=True, typ="files")
-filelist = filelist["response"]["payload"]["files"]
+filelist = filelist["response"]["payload"]
 filelist = sorted(filelist, key=lambda x: x.get("sizeGB", 999.0))
 smallest_filename = filelist[0]["name"]
 print BLUE, "Smallest file", ENDC
