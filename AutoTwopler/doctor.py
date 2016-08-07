@@ -56,7 +56,7 @@ print
 # Use xrootd to get that file
 ntuple_name = "input.root"
 print BLUE, "Using xrootd to download the file", ENDC
-# os.system("xrdcp -f root://xrootd.unl.edu/%s %s" % (smallest_filename, ntuple_name))
+os.system("xrdcp -f root://xrootd.unl.edu/%s %s" % (smallest_filename, ntuple_name))
 if os.path.isfile(ntuple_name): print "Success!"
 else: print "ERROR: failed to download using xrootd"
 print
