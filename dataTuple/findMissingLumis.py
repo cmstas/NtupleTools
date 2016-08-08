@@ -71,7 +71,9 @@ lumisCompleted = []
 # goldenJson = "/home/users/namin/dataTuple/NtupleTools/dataTuple/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt" # 3.99/fb
 # goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 5.76/fb
 # goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON.txt" # 6.26/fb
-goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt" # 7.65/fb no L1T certification
+# goldenJson = "/home/users/namin/dataTuple/2016C/NtupleTools/dataTuple/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt" # 7.65/fb no L1T certification
+# goldenJson = "/home/users/namin/dataTuple/2016D/NtupleTools/dataTuple/Cert_271036-276384_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 9.24/fb no L1T certification
+goldenJson = "/home/users/namin/dataTuple/2016D/NtupleTools/dataTuple/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 12.9/fb ICHEP no L1T certification
 
 # if(len(sys.argv) > 1):
 #     goldenJson = sys.argv[1]
@@ -104,46 +106,55 @@ dLinks = {
             ("/SingleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v1.txt"),
             ("/SingleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016B_SingleMuon_MINIAOD_PromptReco-v2.txt"),
             ("/SingleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016C_SingleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleMuon/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleMuon/full_JSON_Run2016D_SingleMuon_MINIAOD_PromptReco-v2.txt"),
             ],
         "SinglePhoton": [
             ("/SinglePhoton/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v1.txt"),
             ("/SinglePhoton/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016B_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
             ("/SinglePhoton/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016C_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
+            ("/SinglePhoton/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SinglePhoton/full_JSON_Run2016D_SinglePhoton_MINIAOD_PromptReco-v2.txt"),
             ],
         "SingleElectron": [
             ("/SingleElectron/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v1.txt"),
             ("/SingleElectron/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016B_SingleElectron_MINIAOD_PromptReco-v2.txt"),
             ("/SingleElectron/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016C_SingleElectron_MINIAOD_PromptReco-v2.txt"),
+            ("/SingleElectron/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/SingleElectron/full_JSON_Run2016D_SingleElectron_MINIAOD_PromptReco-v2.txt"),
             ],
         "MuonEG": [
             ("/MuonEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v1.txt"),
             ("/MuonEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016B_MuonEG_MINIAOD_PromptReco-v2.txt"),
             ("/MuonEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016C_MuonEG_MINIAOD_PromptReco-v2.txt"),
+            ("/MuonEG/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MuonEG/full_JSON_Run2016D_MuonEG_MINIAOD_PromptReco-v2.txt"),
             ],
         "DoubleEG": [
             ("/DoubleEG/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v1.txt"),
             ("/DoubleEG/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016B_DoubleEG_MINIAOD_PromptReco-v2.txt"),
             ("/DoubleEG/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleEG/full_JSON_Run2016C_DoubleEG_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleEG/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016D_DoubleEG_MINIAOD_PromptReco-v2.txt"),
             ],
         "DoubleMuon": [
             ("/DoubleMuon/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v1.txt"),
             ("/DoubleMuon/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016B_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
             ("/DoubleMuon/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/DoubleMuon/full_JSON_Run2016C_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
+            ("/DoubleMuon/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016D_DoubleMuon_MINIAOD_PromptReco-v2.txt"),
             ],
         "HTMHT": [
             ("/HTMHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v1.txt"),
             ("/HTMHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016B_HTMHT_MINIAOD_PromptReco-v2.txt"),
             ("/HTMHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/HTMHT/full_JSON_Run2016C_HTMHT_MINIAOD_PromptReco-v2.txt"),
+            ("/HTMHT/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016D_HTMHT_MINIAOD_PromptReco-v2.txt"),
             ],
         "JetHT": [
             ("/JetHT/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v1.txt"),
             ("/JetHT/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016B_JetHT_MINIAOD_PromptReco-v2.txt"),
             ("/JetHT/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/JetHT/full_JSON_Run2016C_JetHT_MINIAOD_PromptReco-v2.txt"),
+            ("/JetHT/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016D_JetHT_MINIAOD_PromptReco-v2.txt"),
             ],
         "MET": [
             ("/MET/Run2016B-PromptReco-v1/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v1.txt"),
             ("/MET/Run2016B-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016B_MET_MINIAOD_PromptReco-v2.txt"),
             ("/MET/Run2016C-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/final_jsons/MET/full_JSON_Run2016C_MET_MINIAOD_PromptReco-v2.txt"),
+            ("/MET/Run2016D-PromptReco-v2/MINIAOD",  "/nfs-7/userdata/dataTuple/nick/json_lists/full_JSON_Run2016D_MET_MINIAOD_PromptReco-v2.txt"),
             ],
         }
 
