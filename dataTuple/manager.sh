@@ -43,7 +43,7 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-14
+CMS3tag=CMS3_V08-00-10
 
 #Set the global tag to use
 GTAG=80X_dataRun2_Prompt_v10
