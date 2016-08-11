@@ -5,10 +5,8 @@ import glob
 
 
 fnames=[
-"/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_PromptReco-v2/merged/V08-00-06//merged_ntuple_209.root",
-"/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_PromptReco-v2/merged/V08-00-06//merged_ntuple_714.root",
-"/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_PromptReco-v2/merged/V08-00-06//merged_ntuple_749.root",
-"/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleEG_MINIAOD_PromptReco-v2/merged/V08-00-06//merged_ntuple_91.root",
+        "/hadoop/cms/store/group/snt/run2_data/Run2016B_DoubleMuon_MINIAOD_PromptReco-v2/merged/V08-00-06/merged_ntuple_289.root",
+        "/hadoop/cms/store/group/snt/run2_data/Run2016B_SinglePhoton_MINIAOD_PromptReco-v2/merged/V08-00-06/merged_ntuple_150.root",
         ]
 
 
@@ -46,10 +44,10 @@ for fname in fnames:
 
     buff = ""
     buff += "############ DONE ###############\n"
-    buff += "After verifying event counts, which should be %i, you can execute the following 3 lines:\n" % nevents
+    buff += "# After verifying event counts, which should be %i, you can execute the following 3 lines:\n" % nevents
     buff += "    new=%s/merged_ntuple_%i.root\n" % (output_folder,imerged)
     buff += "    old=%s\n" % fname
-    buff += "    rm $old; mv $new $old;\n"
+    buff += "    rm -f $old; mv $new $old;\n"
     buff += "############ DONE ###############\n"
 
     print buff
