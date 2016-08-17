@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
            TH1F* h_pfmet = new TH1F("h_pfmet", "h_pfmet", 1000, 0, 1000);
            tree->Draw("evt_pfmet >> h_pfmet");
            float avg_pfmet = h_pfmet->GetMean(1);
-           if ((nEntries > 2) && (avg_pfmet < 0.1 || avg_pfmet > 10000)){
+           if ((nEntries > 2) && (avg_pfmet < 0.001 || avg_pfmet > 10000)){
              //std::cout << "bad!" << std::endl;
              ++nbad;
              continue;
