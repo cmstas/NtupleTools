@@ -9,7 +9,7 @@ then
 fi
 
 OUT=$BASEPATH/dataTupleMonitor.html
-LUMISUMMARY=/home/users/$USER/dataTuple/NtupleTools/dataTuple/lumiSummary.txt
+LUMISUMMARY=$PWD/lumiSummary.txt
 
 # sed 's./. .g' $BASEPATH/input.txt | awk '{print $1}' > listOfDatasets.txt #replace "/" by " " and then print out the first column
 cat $BASEPATH/input.txt > listOfDatasets.txt
@@ -39,6 +39,15 @@ i=0
 echo "<HTML>" >> $OUT
 echo "<body>" >> $OUT
 
+#username hack
+name="alex"
+if [ "$USER" == "jgran" ]; then name="jason"; fi
+if [ "$USER" == "namin" ]; then name="nick"; fi
+if [ "$USER" == "mderdzinski" ]; then name="mark"; fi
+
+#cp lumi summary
+cp $LUMISUMMARY /home/users/$USER/public_html/$(basename $LUMISUMMARY)
+
 while read line
 do
   i=$(( $i + 1 ))
@@ -48,12 +57,7 @@ do
   TOGREP="${ERA}/${DATASET}[\/A-Za-z\-]*${VERSION}"
   NTOTAL=`cat masterList.txt | grep $TOGREP | wc -l`
   NCOMPLETED=`cat $BASEPATH/completedList.txt | grep $TOGREP | wc -l`
-  name="alex"
-  if [ "$USER" == "jgran" ]; then name="jason"; fi
-  if [ "$USER" == "namin" ]; then name="nick"; fi
-  if [ "$USER" == "mderdzinski" ]; then name="mark"; fi
   cp /nfs-7/userdata/dataTuple/$name/json_lists/full_JSON_${ERA}_${DATASET}_MINIAOD_PromptReco-$VERSION.txt /home/users/$USER/public_html/json_$i.txt
-  cp $LUMISUMMARY /home/users/$USER/public_html/$(basename $LUMISUMMARY)
   if [ -e runningList.txt ]; then NJOBSRUNNING=`cat runningList.txt | grep $TOGREP | wc -l`; fi
   if [ -e idleList.txt ]; then NJOBSIDLE=`cat idleList.txt | grep $TOGREP | wc -l`; fi
   if [ -e heldList.txt ]; then NJOBSHELD=`cat heldList.txt | grep $TOGREP | wc -l`; fi
