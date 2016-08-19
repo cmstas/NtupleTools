@@ -83,7 +83,7 @@ echo "Outputting file to $outputDir from worker node."
 localFile=`pwd`/${outFileName}
 
 echo -e "copying file now from : \n$(pwd)/merged_ntuple.root \nto:\n$outputDir/$outFileName"
-lcg-cp -b -D srmv2 --vo cms -t 2400 --verbose file:`pwd`/merged_ntuple.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outputDir/${outFileName}
+gfal-copy -p -f -t 4200 file:`pwd`/merged_ntuple.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outputDir/${outFileName}
 stageout_error=$?
 
 if [ $stageout_error != 0 ]; then
