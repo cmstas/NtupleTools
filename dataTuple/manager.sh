@@ -43,7 +43,7 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-10
+CMS3tag=CMS3_V08-00-12
 
 #Set the global tag to use
 GTAG=80X_dataRun2_Prompt_v10
@@ -73,7 +73,7 @@ fi
 source /code/osgcode/cmssoft/cmsset_default.sh
 export SCRAM_ARCH=slc6_amd64_gcc530
 pushd .
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_14
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_17
 # note, patches are in a different folder, run `scram list -a CMSSW | grep 8_0_13_patch1` to check
 #cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_13_patch1/src/
 eval `scramv1 runtime -sh`
