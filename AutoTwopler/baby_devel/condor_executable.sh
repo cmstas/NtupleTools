@@ -5,7 +5,7 @@ fi
 
 OUTNAME="output.root"
 NEVENTS=-1
-if [ -z "$EXTRA1" ]; then NEVENTS=$EXTRA1; fi
+if [ ! -z "$EXTRA1" ]; then NEVENTS=$EXTRA1; fi
 
 # Set CMSSW environment
 export SCRAM_ARCH=slc6_amd64_gcc491
