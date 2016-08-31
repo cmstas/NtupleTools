@@ -327,7 +327,16 @@ class Sample:
 
         # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
         extra_vals = self.extra or []
+        nevts, output_names, exe_args = -1, ["output.root"], ""
+        if len(extra_vals) == 3:
+            nevts, output_names, exe_args = extra_vals
+            output_names = output_names.split(",")
+            nevts = int(nevts)
 
+        self.sample["baby"]["output_names"] = output_names
+
+        # copy the user package and move it here. at this point, we can just force the name to be package.tar.gz 
+        # since the user isn't the one extracting it on the WN
         u.cmd( "cp %s %s/%s/package.tar.gz" % (user_package, self.sample["basedir"], self.misc["pfx_babies"]) )
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
 
@@ -336,7 +345,13 @@ class Sample:
         # thus, if we rapidfire submit jobs, they will all end up seeing the last version of the executable
         # ie, they might all output to output_N.root where N is the last imerged value. so all the variables below
         # make the submission file independent of file number (stuff like imerged is computed on the fly)
-        copy_cmd = "gfal-copy -p -f -t 4200 --verbose file://`pwd`/output.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/output_${IMERGED}.root" % self.sample["baby"]["outputdir_pattern"]
+        copy_cmds = []
+        for output_name in output_names:
+            output_name_noext = output_name.rsplit(".",1)[0]
+            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root" \
+                    % (output_name, self.sample["baby"]["outputdir_pattern"], output_name_noext, output_name_noext)
+            copy_cmds.append(copy_cmd)
+
         with open(self.sample["baby"]["executable_script"], "w") as fhout:
             fhout.write("#!/bin/bash\n\n")
             fhout.write("DATASET=$1\n")
@@ -357,6 +372,7 @@ class Sample:
             fhout.write("echo extra2: $EXTRA2\n")
             fhout.write("echo extra3: $EXTRA3\n")
             fhout.write("echo imerged: $IMERGED\n\n")
+            fhout.write("echo Extracting package tar file\ntar -xzf package.tar.gz\n\n")
             fhout.write("echo Before executable\necho Date: $(date +%s)\nhostname\nls -l\n\n")
             fhout.write("# ----------------- BEGIN USER EXECUTABLE -----------------\n")
             with open(user_executable, "r") as fhin:
@@ -364,7 +380,8 @@ class Sample:
                     fhout.write(line)
             fhout.write("# ----------------- END USER EXECUTABLE -----------------\n\n\n")
             fhout.write("echo After executable\necho Date: $(date +%s)\nls -l\n\n")
-            fhout.write(copy_cmd + "\n\n")
+            for copy_cmd in copy_cmds:
+                fhout.write(copy_cmd + "\n\n")
             fhout.write("echo After copy\necho Date: $(date +%s)")
         
         self.sample["baby"]["input_filenames"] = self.get_snt_merged_files()
@@ -1090,10 +1107,27 @@ class Sample:
         merged_dir = ""
         if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
         elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
+
         if not os.path.isdir(merged_dir): return set()
-        files = os.listdir(merged_dir)
-        files = [f for f in files if f.endswith(".root")]
-        return set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
+
+        if self.sample["type"] == "CMS3":
+            files = os.listdir(merged_dir)
+            files = [f for f in files if f.endswith(".root")]
+            return set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
+        elif self.sample["type"] == "BABY":
+            output_names = self.sample["baby"]["output_names"]
+            # remember that the file names are merged_dir/{output_name_noext}/{output_name_noext}_{imerged}.root
+            d_output_name = {} # key is the output_name and value is a set of the done files
+            for output_name in output_names:
+                output_name_noext = output_name.rsplit(".",1)[0]
+                files = os.listdir(merged_dir+"/"+output_name_noext+"/")
+                files = [f for f in files if f.endswith(".root")]
+                d_output_name[output_name] = set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
+                # print output_name, d_output_name[output_name]
+            # done files are ones such that ALL output files are there, so we need to take the intersection of the sets
+            done_indices = set.intersection(*d_output_name.values())
+            return done_indices
+
 
 
     def pass_tsa_prechecks(self):
@@ -1129,7 +1163,9 @@ class Sample:
     def is_babymaking_done(self):
         # want 0 running condor jobs and all merged files in output area
         nmerged = len(self.sample["baby"]["imerged"])
+        # print nmerged, self.get_condor_submitted(), self.get_merged_done()
         done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
+        # print "done:", done
         if done:
             self.sample["baby"]["running"] = 0
             self.sample["baby"]["idle"] = 0
