@@ -63,6 +63,8 @@ def read_samples(filename="instructions.txt"):
 
             if parts[0].strip().lower() == "baby":
                 analysis, baby_tag, dataset, package, executable = parts[1:6]
+                if len(parts) > 6:
+                    extra = parts[6:]
                 sample = {
                         "analysis": analysis,
                         "dataset": dataset,
@@ -70,8 +72,9 @@ def read_samples(filename="instructions.txt"):
                         "package": package,
                         "executable": executable,
                         "type": "BABY",
+                        "extra": extra,
                         }
-                pass
+
             else:
                 dataset, gtag, xsec, kfact, efact = parts[:5]
                 sample = {
@@ -372,6 +375,7 @@ if __name__=='__main__':
     # print get_proxy_file()
 
     from pprint import pprint
+    # pprint(read_samples("john_instructions.txt"))
     pprint(read_samples())
 
     # print get_dbs_url("https://cmsweb.cern.ch/crabserver/prod/workflow?workflow=160415_063140:namin_crab_tZq_ll_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asym")

@@ -325,6 +325,9 @@ class Sample:
         user_executable = self.sample["baby"]["user_executable"]
         user_package = self.sample["baby"]["user_package"]
 
+        # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
+        extra_vals = self.extra or []
+
         u.cmd( "cp %s %s/%s/package.tar.gz" % (user_package, self.sample["basedir"], self.misc["pfx_babies"]) )
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
 
