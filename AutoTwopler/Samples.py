@@ -3,6 +3,7 @@ import datetime, tarfile, pprint
 import pickle, json, logging
 import multiprocessing
 import re, copy
+import random
 
 try:
     from WMCore.Configuration import Configuration
@@ -18,6 +19,12 @@ except:
 import params
 import utils as u
 import scripts.dis_client as dis
+
+
+FAKE_BABY_NJOBS = 15 # how many fake merged ntuples
+FAKE_BABY_MERGED = True # fake the initial merged ntuples to run over
+FAKE_BABY_SUBMIT = True # fake submission and checking on condor to see if they're running
+FAKE_BABY_MAKEPERITERATION = 3 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
 
 class Sample:
 
@@ -120,6 +127,11 @@ class Sample:
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "input_filenames": [],
                 "imerged": [],
+                "imerged_swept": [], # indices of jobs that we have sweepRooted
+                "running": 0,
+                "idle": 0,
+                "done": 0,
+                "sweepRooted": 0,
             }
             self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
@@ -465,6 +477,10 @@ class Sample:
 
     def get_snt_merged_files(self):
         filenames = []
+
+        if FAKE_BABY_MERGED: 
+            self.do_log("Will run over %i FAKE merged ntuples" % FAKE_BABY_NJOBS)
+            return ["/hadoop/cms/store/user/namin/fakedirectory/merged_ntuple_%i.root" % i for i in range(1,FAKE_BABY_NJOBS+1)]
 
         query_str = "%s | grep location" % self.sample["dataset"]
         response = dis.query(query_str, typ='snt')
@@ -1096,8 +1112,10 @@ class Sample:
                     # if the job is not running, then don't consider it regardless of time
                     continue
 
+
             merged_ids.append(int(merged_index))
             clusterIDs.append(int(clusterID))
+
 
         return merged_ids, clusterIDs
 
@@ -1161,10 +1179,15 @@ class Sample:
         return done
 
     def is_babymaking_done(self):
+        if FAKE_BABY_MAKEPERITERATION > 0 and FAKE_BABY_SUBMIT:
+            self.fake_baby_creation()
+
         # want 0 running condor jobs and all merged files in output area
         nmerged = len(self.sample["baby"]["imerged"])
-        # print nmerged, self.get_condor_submitted(), self.get_merged_done()
-        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
+        if FAKE_BABY_SUBMIT:
+            done = len(self.get_merged_done()) == nmerged and nmerged > 0
+        else:
+            done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
         # print "done:", done
         if done:
             self.sample["baby"]["running"] = 0
@@ -1172,6 +1195,37 @@ class Sample:
             self.sample["baby"]["done"] = self.sample["baby"]["total"]
 
         return done
+
+    def fake_baby_creation(self):
+        output_names = self.sample["baby"]["output_names"]
+        merged_dir = self.sample["baby"]["finaldir"]
+        # remember that the file names are merged_dir/{output_name_noext}/{output_name_noext}_{imerged}.root
+        d_output_name = {} # key is the output_name and value is a set of the done files
+        for output_name in output_names:
+            output_name_noext = output_name.rsplit(".",1)[0]
+            try: files = os.listdir(merged_dir+"/"+output_name_noext+"/")
+            except: files = []
+            files = [f for f in files if f.endswith(".root")]
+            d_output_name[output_name] = set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
+            # print output_name, d_output_name[output_name]
+        # done files are ones such that ALL output files are there, so we need to take the intersection of the sets
+        done_indices = set.intersection(*d_output_name.values())
+        notdone_indices = set(list(range(1,FAKE_BABY_NJOBS+1))) - done_indices
+        if len(notdone_indices) < FAKE_BABY_MAKEPERITERATION: return
+
+        indices_to_make = random.sample(notdone_indices, FAKE_BABY_MAKEPERITERATION)
+        for output_name in output_names:
+            output_name_noext = output_name.rsplit(".",1)[0]
+            thedir = merged_dir+"/"+output_name_noext
+            if not os.path.isdir(thedir): os.system("mkdir -p %s" % thedir)
+
+            for imerged in indices_to_make:
+                fname = "%s/%s_%i.root" % (thedir,output_name_noext,imerged)
+                os.system("touch %s" % fname)
+                # self.do_log("FAKE touched the FAKE baby file %s" % fname)
+                self.do_log("FAKE touched the FAKE baby file %s_%i.root" % (output_name_noext,imerged))
+
+
 
 
     def submit_merge_jobs(self):
@@ -1359,8 +1413,14 @@ class Sample:
 
         error = ""
         for filename in filenames:
+            
             imerged = int(filename.split(".root")[0].split("_")[-1])
             if imerged not in imerged_set: continue
+
+            if FAKE_BABY_SUBMIT:
+                if len(done_set) == 0:
+                    self.do_log("FAKE baby job for FAKE merged_ntuple_%i.root submitted successfully" % imerged)
+                continue
 
 
             condor_params["args"] = " ".join(map(str,\
@@ -1370,6 +1430,8 @@ class Sample:
             cfg = cfg_format.format(**condor_params)
             with open(submit_file, "w") as fhout:
                 fhout.write(cfg)
+
+
 
 
             submit_output = u.get("condor_submit %s" % submit_file)
