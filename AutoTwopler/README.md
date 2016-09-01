@@ -26,6 +26,9 @@ once on the compute node, so make sure it has all your dependences including JEC
 The content between the BEGIN and END markers is provided by the user and must properly handle the input that is injected by the AutoTwopler before and after it. In order to be compatible with the content injected afterwards (the `lcg-cp` command),
 the script _MUST_ make sure the output root file is named `output.root`! At a minimum, the bare user-provided executable must take a variable `$FILENAME` containing the CMS3 file to run on and produce an output ROOT file named `output.root`.
 
+### SweepRoot
+If a shell script for sweepRoot is specified inside of `params.py`, then this script will be copied over into the AutoTwopler directory and executed. It will be given one parameter: the filename. It must end in `exit 0` to indicate a good file, or anything else for a bad file (to be deleted automatically). If no script is specified (empty string), then all files will pass the "sweepRoot" step.
+
 ### Instructions syntax
 In the instructions file, an example line might look like
 ```

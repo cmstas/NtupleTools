@@ -99,11 +99,13 @@ for i in range(5000):
                     if s.is_babymaking_done():
                         s.set_status("done")
                     else:
+                        s.sweep_babies()
                         s.submit_baby_jobs()
 
                 elif stat == "done":
                     s.do_done_stuff()
-                    s.check_new_merged_for_babies()
+                    if params.open_datasets:
+                        s.check_new_merged_for_babies()
 
 
             s.save()
@@ -124,7 +126,8 @@ for i in range(5000):
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
-    sleep_time = 5 if i < 2 else 600
+    # sleep_time = 5 if i < 2 else 600
+    sleep_time = 5 if i < 10 else 600 # FIXME
     logger.debug("sleeping for %i seconds..." % sleep_time)
     u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
 

@@ -245,7 +245,7 @@ function getProgress(sample) {
         else return -1.0;
 
     } else if(type == "BABY") {
-        done = sample["baby"]["done"];
+        done = sample["baby"]["sweepRooted"];
         tot = sample["baby"]["total"];
         return 100.0*done/tot;
     }
