@@ -359,11 +359,13 @@ class Sample:
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
 
         # if the user specified a sweepRoot file in the params.py, then copy it over
-        if os.path.isfile(params.sweepRoot_script): 
-            new_loc = "%s/%s/sweepRoot.sh" % (self.sample["basedir"], self.misc["pfx_babies"])
-            self.sample["baby"]["sweepRoot_script"] = new_loc
-            u.cmd( "cp %s %s" % (params.sweepRoot_script, new_loc))
-            u.cmd( "chmod u+x %s" % (new_loc))
+        if(len(params.sweepRoot_scripts) > 0) and os.path.isfile(params.sweepRoot_scripts[0]): 
+            new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
+            self.sample["baby"]["sweepRoot_script"] = new_dir+"sweepRoot.sh"
+            for fname in params.sweepRoot_scripts:
+                u.cmd( "cp %s %s" % (fname, new_dir))
+            u.cmd( "cp %s %s/sweepRoot.sh" % (params.sweepRoot_scripts[0], new_dir))
+            u.cmd( "chmod u+x %s/sweepRoot.sh" % (new_dir))
 
 
         # make new executable file with copy command at bottom and variables at top

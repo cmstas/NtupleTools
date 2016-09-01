@@ -6,8 +6,8 @@ dashboard_name = "AutoTwopler"
 log_file = "duck.log"
 
 open_datasets = False # for babies, if we want the AutoTwopler to keep pulling in new merged files as they show up in hadoop, set this to True (this is useful for data, but if you're forcing a golden json, then there's kind of no point in setting this to True)
-sweepRoot_script = "" # put absolute path to a bash script which takes 1 argument (filename) and has "exit 0" for good file, and something else for bad files. leaving this blank will skip sweepRooting
-# sweepRoot_script = "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/sweepRoot.sh" # put absolute path to a bash script which takes 1 argument (filename) and has "exit 0" for good file, and something else for bad files. leaving this blank will skip sweepRooting
+sweepRoot_scripts = [] # put absolute path to a bash script which takes 1 argument (filename) and has "exit 0" for good file, and something else for bad files. leaving this as an empty list will skip sweepRooting. Since it is a list, you can put multiple files to copy over for use with sweepRooting (first element must still be the executable)
+# sweepRoot_scripts = ["/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/sweepRoot.sh", "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/sweepRoot.C"]
 
 pset_data = "DataProduction2015_NoFilter_PAT_cfg.py"
 pset_mc_fastsim = "MCProduction2015_FastSim_NoFilter_cfg.py"
