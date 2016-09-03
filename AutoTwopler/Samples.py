@@ -111,8 +111,11 @@ class Sample:
         if self.baby:
             self.sample["type"] = "BABY"
             self.sample["baby"] = {
+                "cmsswver" : params.cmssw_ver,
+                "scramarch" : params.scram_arch,
                 "baby_tag": baby_tag,
                 "analysis": analysis,
+                "dataset" : dataset,
                 "user_package": package,
                 "user_executable": executable,
                 "outputdir_pattern": "/hadoop/cms/store/user/%s/AutoTwopler_babies/${ANALYSIS}_${BABY_TAG}/${SHORTNAME}/" % os.getenv("USER"),
@@ -120,6 +123,7 @@ class Sample:
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "input_filenames": [],
                 "imerged": [],
+                "exe_args": [],
             }
             self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
@@ -223,7 +227,7 @@ class Sample:
                 pickle.dump(d_tot, fhout)
         except:
             self.do_log("couldn't save %s" % backup_file)
-        # self.do_log("successfully backed up to %s" % backup_file)
+       # self.do_log("successfully backed up to %s" % backup_file)
         # self.do_log("successfully backed up")
 
     def load(self):
@@ -328,12 +332,21 @@ class Sample:
         # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
         extra_vals = self.extra or []
         nevts, output_names, exe_args = -1, ["output.root"], ""
+        if len(extra_vals) == 2:
+            nevts, output_names = extra_vals
         if len(extra_vals) == 3:
             nevts, output_names, exe_args = extra_vals
-            output_names = output_names.split(",")
-            nevts = int(nevts)
+            
+        self.sample["baby"]["output_names_nosplit"] = output_names
+        self.sample["baby"]["exe_args_nosplit"] = exe_args
 
+        nevts = int(nevts)
+        output_names = output_names.split(",")
+        exe_args = exe_args.split(",")
+           
+        self.sample["baby"]["nevents"] = nevts
         self.sample["baby"]["output_names"] = output_names
+        self.sample["baby"]["exe_args"] = exe_args
 
         # copy the user package and move it here. at this point, we can just force the name to be package.tar.gz 
         # since the user isn't the one extracting it on the WN
@@ -354,31 +367,36 @@ class Sample:
 
         with open(self.sample["baby"]["executable_script"], "w") as fhout:
             fhout.write("#!/bin/bash\n\n")
-            fhout.write("DATASET=$1\n")
-            fhout.write("FILENAME=$2\n")
-            fhout.write("ANALYSIS=$3\n")
-            fhout.write("BABY_TAG=$4\n")
-            fhout.write("SHORTNAME=$5\n")
-            fhout.write("EXTRA1=$6\n")
-            fhout.write("EXTRA2=$7\n")
-            fhout.write("EXTRA3=$8\n")
+            fhout.write("CMSSW_VER=$1\n")
+            fhout.write("SCRAM_VER=$2\n")
+            fhout.write("DATASET=$3\n")
+            fhout.write("FILENAME=$4\n")
+            fhout.write("ANALYSIS=$5\n")
+            fhout.write("BABY_TAG=$6\n")
+            fhout.write("SHORTNAME=$7\n")
+            fhout.write("NEVENTS=$8\n")
+            fhout.write("OUTPUT_NAMES=$9\n")
+            fhout.write("EXE_ARGS=${10}\n")
             fhout.write("IMERGED=$(echo $FILENAME | sed 's/.*merged_ntuple_\\([0-9]\\+\\)\\.root/\\1/')\n\n")
+            fhout.write("echo cmssw_ver: $CMSSW_VER\n")
+            fhout.write("echo scram_ver: $SCRAM_VER\n")
             fhout.write("echo dataset: $DATASET\n")
             fhout.write("echo filename: $FILENAME\n")
             fhout.write("echo analysis: $ANALYSIS\n")
             fhout.write("echo baby_tag: $BABY_TAG\n")
             fhout.write("echo shortname: $SHORTNAME\n")
-            fhout.write("echo extra1: $EXTRA1\n")
-            fhout.write("echo extra2: $EXTRA2\n")
-            fhout.write("echo extra3: $EXTRA3\n")
-            fhout.write("echo imerged: $IMERGED\n\n")
+            fhout.write("echo nevents: $NEVENTS\n")
+            fhout.write("echo output_names: $OUTPUT_NAMES\n")
+            fhout.write("echo exe_args: $EXE_ARGS\n")
+            fhout.write("echo imerged: $IMERGED\n")
+            fhout.write("\n\n\n\n")
             fhout.write("echo Extracting package tar file\ntar -xzf package.tar.gz\n\n")
             fhout.write("echo Before executable\necho Date: $(date +%s)\nhostname\nls -l\n\n")
             fhout.write("# ----------------- BEGIN USER EXECUTABLE -----------------\n")
             with open(user_executable, "r") as fhin:
                 for line in fhin:
                     fhout.write(line)
-            fhout.write("# ----------------- END USER EXECUTABLE -----------------\n\n\n")
+            fhout.write("\n# ----------------- END USER EXECUTABLE -----------------\n\n\n")
             fhout.write("echo After executable\necho Date: $(date +%s)\nls -l\n\n")
             for copy_cmd in copy_cmds:
                 fhout.write(copy_cmd + "\n\n")
@@ -1287,16 +1305,16 @@ class Sample:
 
     def submit_baby_jobs(self):
         filenames = self.sample["baby"]["input_filenames"]
-        extra1 = ""
-        extra2 = ""
-        extra3 = ""
-
-        tag = self.sample["baby"]["baby_tag"]
         analysis = self.sample["baby"]["analysis"]
+        tag = self.sample["baby"]["baby_tag"]
+        shortname = self.sample["shortname"]
+        nevts = self.sample["baby"]["nevents"]
+        output_names = self.sample["baby"]["output_names_nosplit"]
+        exe_args = self.sample["baby"]["exe_args_nosplit"]
+        
         package = "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"])
         executable_script = "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"])
-        shortname = self.sample["shortname"]
-
+        
         path_fragment = "%s/%s/%s" % (analysis, tag, shortname)
         condor_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/%s.log" % (os.getenv("USER"),path_fragment,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
         std_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/std_logs/" % (os.getenv("USER"),path_fragment)
@@ -1364,7 +1382,7 @@ class Sample:
 
 
             condor_params["args"] = " ".join(map(str,\
-                    [self.sample["dataset"], filename, analysis, tag, shortname, extra1, extra2, extra3]\
+                    [self.sample["baby"]["cmsswver"], self.sample["baby"]["scramarch"], self.sample["dataset"], filename, analysis, tag, shortname, nevts, output_names, exe_args]\
                     ))
             
             cfg = cfg_format.format(**condor_params)
