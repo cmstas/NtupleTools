@@ -4,10 +4,12 @@ source /code/osgcode/cmssoft/cms/cmsset_default.sh
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
 
-export SCRAM_ARCH=$(python -c "import params; print params.scram_arch")
-export CMS3TAG=$(python -c "import params; print params.cms3tag")
-export CMSSW_VER=$(python -c "import params; print params.cmssw_ver")
-export DASHBASE=$(python -c "import params; print params.dashboard_name")
+THEVARS=$(python -c "import params; print '%s,%s,%s,%s' % (params.scram_arch,params.cms3tag,params.cmssw_ver,params.dashboard_name)")
+SCRAM_ARCH=$(echo $THEVARS | cut -d ',' -f1)
+CMS3TAG=$(echo $THEVARS | cut -d ',' -f2)
+CMSSW_VER=$(echo $THEVARS | cut -d ',' -f3)
+DASHBASE=$(echo $THEVARS | cut -d ',' -f4)
+
 export BASEDIR=`pwd`
 
 
