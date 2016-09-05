@@ -21,10 +21,11 @@ import utils as u
 import scripts.dis_client as dis
 
 
-# FAKE_BABY_NJOBS = 15 # how many fake merged ntuples
+# FAKE_BABY_NJOBS = 5 # how many fake merged ntuples
 # FAKE_BABY_MERGED = True # fake the initial merged ntuples to run over
 # FAKE_BABY_SUBMIT = True # fake submission and checking on condor to see if they're running
-# FAKE_BABY_MAKEPERITERATION = 3 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+# FAKE_BABY_MAKEPERITERATION = 5 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+
 FAKE_BABY_NJOBS = 0 # how many fake merged ntuples
 FAKE_BABY_MERGED = False # fake the initial merged ntuples to run over
 FAKE_BABY_SUBMIT = False # fake submission and checking on condor to see if they're running
@@ -131,6 +132,7 @@ class Sample:
                 "package": "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "sweepRoot_script": None,
+                "merging_script": None,
                 "input_filenames": [],
                 "imerged": [],
                 "imerged_swept": [], # indices of jobs that we have sweepRooted
@@ -337,7 +339,7 @@ class Sample:
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
-        taskdir = self.sample["crab"]["taskdir"]+"/"+self.sample["baby"]["baby_tag"]
+        taskdir = self.sample["crab"]["taskdir"]
         if not os.path.isdir(taskdir): os.makedirs(taskdir)
 
         user_executable = self.sample["baby"]["user_executable"]
@@ -366,6 +368,15 @@ class Sample:
                 u.cmd( "cp %s %s" % (fname, new_dir))
             u.cmd( "cp %s %s/sweepRoot.sh" % (params.sweepRoot_scripts[0], new_dir))
             u.cmd( "chmod u+x %s/sweepRoot.sh" % (new_dir))
+
+        # if the user specified a merge script in the params.py, then copy it over
+        if(len(params.merging_scripts) > 0) and os.path.isfile(params.merging_scripts[0]): 
+            new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
+            self.sample["baby"]["merging_script"] = new_dir+"merging_script.sh"
+            for fname in params.merging_scripts:
+                u.cmd( "cp %s %s" % (fname, new_dir))
+            u.cmd( "cp %s %s/merging_script.sh" % (params.merging_scripts[0], new_dir))
+            u.cmd( "chmod u+x %s/merging_script.sh" % (new_dir))
 
 
         # make new executable file with copy command at bottom and variables at top
@@ -1204,15 +1215,47 @@ class Sample:
         else:
             done = (len(self.get_condor_submitted()[0]) == 0) and (nmerged_done == nmerged) and (nmerged > 0) and (nswept == nmerged)
         # print "done:", done
-        if done:
-            self.sample["baby"]["running"] = 0
-            self.sample["baby"]["idle"] = 0
-            self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
-            self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
+        if not done: return False
 
+        merged = self.do_merge_babies()
+        self.sample["baby"]["running"] = 0
+        self.sample["baby"]["idle"] = 0
+        self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
+        self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
+
+        if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
+        else: 
+            self.sample["baby"]["merged_dir"] = params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
             self.do_log("This sample is now done.")
 
-        return done
+        return merged
+
+    def do_merge_babies(self):
+        script = self.sample["baby"]["merging_script"]
+        if not script: return True
+
+        def remove_ext(fname):
+            return fname.rsplit(".",1)[0]
+
+        baby = self.sample["baby"]
+        output_names = map(remove_ext, baby["output_names"])
+
+        shortname = self.sample["shortname"]
+        try: shortname = params.dataset_to_shortname(self.sample["dataset"])
+        except: pass
+        if not shortname.endswith(".root"): shortname += ".root"
+
+        # this will get passed to the bash script as the first and only argument. inside the script you can simply do "eval $1" to use the variables as they are called here
+        long_ass_args_string = "OUTPUT_NAMES=%s;BABY_DIR=%s;ANALYSIS=%s;BABY_TAG=%s;DATASET=%s;SHORTNAME=%s;OUTPUT_DIR=%s;" \
+                % (",".join(output_names),baby["finaldir"],baby["analysis"],baby["baby_tag"], \
+                   self.sample["dataset"], shortname, params.baby_merged_dir)
+
+        # need to cd into the script area because if the script references local macros, the paths won't be right
+        dirname = os.path.dirname(script)
+        scriptname = os.path.basename(script)
+        stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
+
+        return stat == 0 # 0 is good, anything else is bad
 
     def fake_baby_creation(self):
         output_names = self.sample["baby"]["output_names"]
@@ -1356,12 +1399,15 @@ class Sample:
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
 
-    def is_baby_good(self, fname):
+    def sweep_baby(self, fname):
 
         script = self.sample["baby"]["sweepRoot_script"]
         if script:
-            if not script.startswith("/"): script = "." + script
-            stat, out = u.cmd("%s %s" % (script,fname), returnStatus=True)
+
+            # need to cd into the script area because if the script references local macros, the paths won't be right
+            dirname = os.path.dirname(script)
+            scriptname = os.path.basename(script)
+            stat, out = u.cmd("cd %s; ./%s %s" % (dirname,scriptname,fname), returnStatus=True)
             return stat == 0 # 0 is good, anything else is bad
 
         return True
@@ -1383,7 +1429,7 @@ class Sample:
             # all output files must be good for this imerged to be good
             good = True
             for fname in fnames:
-                if not self.is_baby_good(fname):
+                if not self.sweep_baby(fname):
                     good = False
                     break
 

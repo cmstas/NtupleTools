@@ -126,8 +126,8 @@ for i in range(5000):
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
-    # sleep_time = 5 if i < 2 else 600
-    sleep_time = 5 if i < 10 else 600 # FIXME
+    sleep_time = 5 if i < 2 else 600
+    # sleep_time = 5 if i < 10 else 600 # FIXME
     logger.debug("sleeping for %i seconds..." % sleep_time)
     u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
 
