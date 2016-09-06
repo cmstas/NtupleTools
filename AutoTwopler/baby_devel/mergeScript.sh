@@ -17,8 +17,8 @@ echo "OUTPUT_NAMES=${OUTPUT_NAMES[*]}"
 
 for output_name in "${OUTPUT_NAMES[@]}"; do
 
-    out_folder=$OUTPUT_DIR/$ANALYSIS/$BABY_TAG/
-    out_file=${out_folder}/${output_name}/${SHORTNAME}
+    out_folder=$OUTPUT_DIR/$ANALYSIS/$BABY_TAG/${output_name}
+    out_file=${out_folder}/${SHORTNAME}
     in_folder=${BABY_DIR}/${output_name}
 
     mkdir -p $out_folder
