@@ -16,6 +16,14 @@
 8. Sit quack and relax
 9. When you see done samples on the dashboard, you can enter your username in the Twiki section, select the appropriate Twiki, and hit "Update Twiki with done samples" to automagically fill in the Twiki entries
 
+### Basic API usage
+```python
+import run
+import params as p
+p.merging_scripts = [] # or modify it however you want
+run.main(instructions="instructions.txt", p=params)
+```
+
 ## Babymaking
 Babies can be made using the AutoTwopler as well. These instructions will be updated (and the procedure streamlined) in the future. The inputs to the 
 babymaking process are an executable script, a package tar file, a dataset name, an analysis name ("SS", "MT2", etc.), and a baby tag version ("v0.1", "v1.2-fix", etc.).
