@@ -4,10 +4,13 @@ source /code/osgcode/cmssoft/cms/cmsset_default.sh
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
 
-export SCRAM_ARCH=$(python -c "import params; print params.scram_arch")
-export CMS3TAG=$(python -c "import params; print params.cms3tag")
-export CMSSW_VER=$(python -c "import params; print params.cmssw_ver")
-export DASHBASE=$(python -c "import params; print params.dashboard_name")
+# Why do I preface with ARGS: and then do a cut -d: -f2? If there are erroneous printouts in params, then this would screw up the parsing otherwise! Hooray for messiness.
+THEVARS=$(python -c "import params; print 'ARGS:%s,%s,%s,%s' % (params.scram_arch,params.cms3tag,params.cmssw_ver,params.dashboard_name)" | cut -d ":" -f2)
+SCRAM_ARCH=$(echo $THEVARS | cut -d ',' -f1)
+CMS3TAG=$(echo $THEVARS | cut -d ',' -f2)
+CMSSW_VER=$(echo $THEVARS | cut -d ',' -f3)
+DASHBASE=$(echo $THEVARS | cut -d ',' -f4)
+
 export BASEDIR=`pwd`
 
 

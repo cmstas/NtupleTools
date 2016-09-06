@@ -1,0 +1,15 @@
+*.gitignore
+temp*
+test*
+*.pkl
+*.pyc
+*.json
+*.pcm
+*.tar.gz
+*.root
+*.db
+*.out
+CMSSW_*/
+crab
+pset
+

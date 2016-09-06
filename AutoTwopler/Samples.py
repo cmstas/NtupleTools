@@ -3,6 +3,7 @@ import datetime, tarfile, pprint
 import pickle, json, logging
 import multiprocessing
 import re, copy
+import random
 
 try:
     from WMCore.Configuration import Configuration
@@ -18,6 +19,17 @@ except:
 import params
 import utils as u
 import scripts.dis_client as dis
+
+
+# FAKE_BABY_NJOBS = 5 # how many fake merged ntuples
+# FAKE_BABY_MERGED = True # fake the initial merged ntuples to run over
+# FAKE_BABY_SUBMIT = True # fake submission and checking on condor to see if they're running
+# FAKE_BABY_MAKEPERITERATION = 5 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+
+FAKE_BABY_NJOBS = 0 # how many fake merged ntuples
+FAKE_BABY_MERGED = False # fake the initial merged ntuples to run over
+FAKE_BABY_SUBMIT = False # fake submission and checking on condor to see if they're running
+FAKE_BABY_MAKEPERITERATION = 0 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
 
 class Sample:
 
@@ -120,10 +132,18 @@ class Sample:
                 "user_executable": executable,
                 "outputdir_pattern": "/hadoop/cms/store/user/%s/AutoTwopler_babies/${ANALYSIS}_${BABY_TAG}/${SHORTNAME}/" % os.getenv("USER"),
                 "have_set_inputs": False,
+                "package": "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
+                "sweepRoot_script": None,
+                "merging_script": None,
                 "input_filenames": [],
                 "imerged": [],
                 "exe_args": [],
+                "imerged_swept": [], # indices of jobs that we have sweepRooted
+                "running": 0,
+                "idle": 0,
+                "condor_done": 0,
+                "sweepRooted": 0,
             }
             self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
@@ -191,7 +211,7 @@ class Sample:
                 if key in new_dict: del new_dict[key]
             for key in ["datetime", "jobs_left_tail", "outputdir", "resubmissions"]:
                 if key in new_dict["crab"]: del new_dict["crab"][key]
-            for key in ["have_set_inputs", "imerged", "input_filenames", "outputdir_pattern"]:
+            for key in ["have_set_inputs", "imerged", "imerged_swept", "input_filenames", "outputdir_pattern"]:
                 if key in new_dict["baby"]: del new_dict["baby"][key]
         return new_dict
 
@@ -323,7 +343,7 @@ class Sample:
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
-        taskdir = self.sample["crab"]["taskdir"]+"/"+self.sample["baby"]["baby_tag"]
+        taskdir = self.sample["crab"]["taskdir"]
         if not os.path.isdir(taskdir): os.makedirs(taskdir)
 
         user_executable = self.sample["baby"]["user_executable"]
@@ -352,6 +372,25 @@ class Sample:
         # since the user isn't the one extracting it on the WN
         u.cmd( "cp %s %s/%s/package.tar.gz" % (user_package, self.sample["basedir"], self.misc["pfx_babies"]) )
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
+
+        # if the user specified a sweepRoot file in the params.py, then copy it over
+        if(len(params.sweepRoot_scripts) > 0) and os.path.isfile(params.sweepRoot_scripts[0]): 
+            new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
+            self.sample["baby"]["sweepRoot_script"] = new_dir+"sweepRoot.sh"
+            for fname in params.sweepRoot_scripts:
+                u.cmd( "cp %s %s" % (fname, new_dir))
+            u.cmd( "cp %s %s/sweepRoot.sh" % (params.sweepRoot_scripts[0], new_dir))
+            u.cmd( "chmod u+x %s/sweepRoot.sh" % (new_dir))
+
+        # if the user specified a merge script in the params.py, then copy it over
+        if(len(params.merging_scripts) > 0) and os.path.isfile(params.merging_scripts[0]): 
+            new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
+            self.sample["baby"]["merging_script"] = new_dir+"merging_script.sh"
+            for fname in params.merging_scripts:
+                u.cmd( "cp %s %s" % (fname, new_dir))
+            u.cmd( "cp %s %s/merging_script.sh" % (params.merging_scripts[0], new_dir))
+            u.cmd( "chmod u+x %s/merging_script.sh" % (new_dir))
+
 
         # make new executable file with copy command at bottom and variables at top
         # so um, one thing. it seems like condor doesn't immediately copy the executable when you submit the job
@@ -483,6 +522,10 @@ class Sample:
 
     def get_snt_merged_files(self):
         filenames = []
+
+        if FAKE_BABY_MERGED: 
+            self.do_log("Running over %i FAKE merged ntuples" % FAKE_BABY_NJOBS)
+            return ["/hadoop/cms/store/user/namin/fakedirectory/merged_ntuple_%i.root" % i for i in range(1,FAKE_BABY_NJOBS+1)]
 
         query_str = "%s | grep location" % self.sample["dataset"]
         response = dis.query(query_str, typ='snt')
@@ -1114,8 +1157,10 @@ class Sample:
                     # if the job is not running, then don't consider it regardless of time
                     continue
 
+
             merged_ids.append(int(merged_index))
             clusterIDs.append(int(clusterID))
+
 
         return merged_ids, clusterIDs
 
@@ -1181,15 +1226,84 @@ class Sample:
     def is_babymaking_done(self):
         # want 0 running condor jobs and all merged files in output area
         nmerged = len(self.sample["baby"]["imerged"])
-        # print nmerged, self.get_condor_submitted(), self.get_merged_done()
-        done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
+        nswept = self.sample["baby"]["sweepRooted"]
+        nmerged_done = len(self.get_merged_done())
+        if FAKE_BABY_SUBMIT:
+            done = (nmerged_done == nmerged) and (nmerged > 0) and (nswept == nmerged)
+        else:
+            done = (len(self.get_condor_submitted()[0]) == 0) and (nmerged_done == nmerged) and (nmerged > 0) and (nswept == nmerged)
         # print "done:", done
-        if done:
-            self.sample["baby"]["running"] = 0
-            self.sample["baby"]["idle"] = 0
-            self.sample["baby"]["done"] = self.sample["baby"]["total"]
+        if not done: return False
 
-        return done
+        merged = self.do_merge_babies()
+        self.sample["baby"]["running"] = 0
+        self.sample["baby"]["idle"] = 0
+        self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
+        self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
+
+        if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
+        else: 
+            self.sample["baby"]["merged_dir"] = params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
+            self.do_log("This sample is now done.")
+
+        return merged
+
+    def do_merge_babies(self):
+        script = self.sample["baby"]["merging_script"]
+        if not script: return True
+
+        def remove_ext(fname):
+            return fname.rsplit(".",1)[0]
+
+        baby = self.sample["baby"]
+        output_names = map(remove_ext, baby["output_names"])
+
+        shortname = self.sample["shortname"]
+        try: shortname = params.dataset_to_shortname(self.sample["dataset"])
+        except: pass
+        if not shortname.endswith(".root"): shortname += ".root"
+
+        # this will get passed to the bash script as the first and only argument. inside the script you can simply do "eval $1" to use the variables as they are called here
+        long_ass_args_string = "OUTPUT_NAMES=%s;BABY_DIR=%s;ANALYSIS=%s;BABY_TAG=%s;DATASET=%s;SHORTNAME=%s;OUTPUT_DIR=%s;" \
+                % (",".join(output_names),baby["finaldir"],baby["analysis"],baby["baby_tag"], \
+                   self.sample["dataset"], shortname, params.baby_merged_dir)
+
+        # need to cd into the script area because if the script references local macros, the paths won't be right
+        dirname = os.path.dirname(script)
+        scriptname = os.path.basename(script)
+        stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
+
+        return stat == 0 # 0 is good, anything else is bad
+
+    def fake_baby_creation(self):
+        output_names = self.sample["baby"]["output_names"]
+        merged_dir = self.sample["baby"]["finaldir"]
+        # remember that the file names are merged_dir/{output_name_noext}/{output_name_noext}_{imerged}.root
+        d_output_name = {} # key is the output_name and value is a set of the done files
+        for output_name in output_names:
+            output_name_noext = output_name.rsplit(".",1)[0]
+            try: files = os.listdir(merged_dir+"/"+output_name_noext+"/")
+            except: files = []
+            files = [f for f in files if f.endswith(".root")]
+            d_output_name[output_name] = set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
+            # print output_name, d_output_name[output_name]
+        # done files are ones such that ALL output files are there, so we need to take the intersection of the sets
+        done_indices = set.intersection(*d_output_name.values())
+        notdone_indices = set(list(range(1,FAKE_BABY_NJOBS+1))) - done_indices
+
+        indices_to_make = random.sample(notdone_indices, min(len(notdone_indices),FAKE_BABY_MAKEPERITERATION))
+        for output_name in output_names:
+            output_name_noext = output_name.rsplit(".",1)[0]
+            thedir = merged_dir+"/"+output_name_noext
+            if not os.path.isdir(thedir): os.system("mkdir -p %s" % thedir)
+
+            for imerged in indices_to_make:
+                fname = "%s/%s_%i.root" % (thedir,output_name_noext,imerged)
+                os.system("touch %s" % fname)
+                # self.do_log("FAKE touched the FAKE baby file %s" % fname)
+                self.do_log("FAKE touched the FAKE baby file %s_%i.root" % (output_name_noext,imerged))
+
+
 
 
     def submit_merge_jobs(self):
@@ -1303,6 +1417,50 @@ class Sample:
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
 
+    def sweep_baby(self, fname):
+
+        script = self.sample["baby"]["sweepRoot_script"]
+        if script:
+
+            # need to cd into the script area because if the script references local macros, the paths won't be right
+            dirname = os.path.dirname(script)
+            scriptname = os.path.basename(script)
+            stat, out = u.cmd("cd %s; ./%s %s" % (dirname,scriptname,fname), returnStatus=True)
+            return stat == 0 # 0 is good, anything else is bad
+
+        return True
+
+    def sweep_babies(self):
+        imerged_swept_set = set(self.sample["baby"]["imerged_swept"])
+        output_names = self.sample["baby"]["output_names"]
+        merged_dir = self.sample["baby"]["finaldir"]
+
+        not_swept = self.get_merged_done() - imerged_swept_set
+        # print self.get_merged_done(),  imerged_swept_set, not_swept
+        for imerged in not_swept:
+            fnames = []
+            for output_name in output_names:
+                output_name_noext = output_name.rsplit(".",1)[0]
+                outfile = "%s/%s/%s_%i.root" % (merged_dir, output_name_noext, output_name_noext, imerged)
+                fnames.append(outfile)
+
+            # all output files must be good for this imerged to be good
+            good = True
+            for fname in fnames:
+                if not self.sweep_baby(fname):
+                    good = False
+                    break
+
+            if good:
+                self.sample["baby"]["imerged_swept"].append(imerged)
+            else:
+                # delete all if even one of them is bad since we will have to run the whole job again anyways
+                for fname in fnames:
+                    os.system("rm -f %s" % outfile)
+                    self.do_log("Deleted the baby file %s because this job failed sweepRooting." % (fname.rsplit("/")[-1]))
+
+        self.sample["baby"]["sweepRooted"] = len(self.sample["baby"]["imerged_swept"])
+
     def submit_baby_jobs(self):
         filenames = self.sample["baby"]["input_filenames"]
         analysis = self.sample["baby"]["analysis"]
@@ -1311,10 +1469,9 @@ class Sample:
         nevts = self.sample["baby"]["nevents"]
         output_names = self.sample["baby"]["output_names_nosplit"]
         exe_args = self.sample["baby"]["exe_args_nosplit"]
-        
-        package = "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"])
-        executable_script = "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"])
-        
+        package = self.sample["baby"]["package"]
+        executable_script = self.sample["baby"]["executable_script"]
+
         path_fragment = "%s/%s/%s" % (analysis, tag, shortname)
         condor_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/%s.log" % (os.getenv("USER"),path_fragment,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
         std_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/std_logs/" % (os.getenv("USER"),path_fragment)
@@ -1373,12 +1530,22 @@ class Sample:
 
         self.sample["baby"]["total"] = len(self.sample['baby']['imerged'])
         self.sample["baby"]["running"] = len(processing_set)
-        self.sample["baby"]["done"] = len(done_set)
+        self.sample["baby"]["condor_done"] = len(done_set)
+
+        if FAKE_BABY_MAKEPERITERATION > 0 and FAKE_BABY_SUBMIT:
+            self.fake_baby_creation()
+
 
         error = ""
         for filename in filenames:
+            
             imerged = int(filename.split(".root")[0].split("_")[-1])
             if imerged not in imerged_set: continue
+
+            if FAKE_BABY_SUBMIT:
+                # if len(done_set) == 0:
+                #     self.do_log("FAKE baby job for FAKE merged_ntuple_%i.root submitted successfully" % imerged) # NJA
+                continue
 
 
             condor_params["args"] = " ".join(map(str,\
@@ -1388,6 +1555,8 @@ class Sample:
             cfg = cfg_format.format(**condor_params)
             with open(submit_file, "w") as fhout:
                 fhout.write(cfg)
+
+
 
 
             submit_output = u.get("condor_submit %s" % submit_file)

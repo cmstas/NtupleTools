@@ -99,11 +99,13 @@ for i in range(5000):
                     if s.is_babymaking_done():
                         s.set_status("done")
                     else:
+                        s.sweep_babies()
                         s.submit_baby_jobs()
 
                 elif stat == "done":
                     s.do_done_stuff()
-                    s.check_new_merged_for_babies()
+                    if params.open_datasets:
+                        s.check_new_merged_for_babies()
 
 
             s.save()
@@ -113,16 +115,19 @@ for i in range(5000):
             logger.info( "send an (angry?) email to Nick with the Traceback below!!")
             logger.info( traceback.format_exc() )
 
-    tot_crab_breakdown = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
-    # TODO add breakdown of postprocessing and baby jobs as well
+    breakdown_crab = u.sum_dicts([samp["crab"]["breakdown"] for samp in data["samples"] if "crab" in samp and "breakdown" in samp["crab"]])
+    # breakdown_baby = u.sum_dicts([{"baby_"+key:samp["baby"].get(key,0) for key in ["running", "sweepRooted"]} for samp in data["samples"] if samp["type"] == "BABY"])
+    breakdown_baby = u.sum_dicts([{"running_babies":samp["baby"]["running"], "sweepRooted_babies":samp["baby"]["sweepRooted"]} for samp in data["samples"] if samp["type"] == "BABY"])
+    tot_breakdown = u.sum_dicts([breakdown_crab, breakdown_baby])
     data["last_updated"] = u.get_timestamp()
-    data["time_stats"].append( (u.get_timestamp(), tot_crab_breakdown) )
+    data["time_stats"].append( (u.get_timestamp(), tot_breakdown) )
     data["log"] = u.get_last_n_lines(fname=params.log_file, N=100)
     with open(data_json, "w") as fhout:
         json.dump(data, fhout, sort_keys = True, indent = 4)
     u.copy_json()
 
     sleep_time = 5 if i < 2 else 600
+    # sleep_time = 5 if i < 10 else 600 # FIXME
     logger.debug("sleeping for %i seconds..." % sleep_time)
     u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
 
