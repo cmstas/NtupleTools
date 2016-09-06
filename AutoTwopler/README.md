@@ -29,6 +29,9 @@ the script _MUST_ make sure the output root file is named `output.root`! At a mi
 ### SweepRoot
 If a shell script for sweepRoot is specified inside of `params.py`, then this script will be copied over into the AutoTwopler directory and executed. It will be given one parameter: the filename. It must end in `exit 0` to indicate a good file, or anything else for a bad file (to be deleted automatically). If no script is specified (empty string), then all files will pass the "sweepRoot" step. Note that because this parameter is a list, you may specify additional files that are also needed for sweepRooting (the first file must be the executable).
 
+### Merging
+Same story for merging as with sweepRoot. Parameters will be fed as in the example script in `baby_devel/mergeScript.sh`. Actually, you might as well just use this script since it already uses the main merging function for SNT and handles multiple output file types. Note that the final merged directory for babies must be specified inside `params.py` following the instructions there.
+
 ### Instructions syntax
 In the instructions file, an example line might look like
 ```
