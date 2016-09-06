@@ -13,16 +13,19 @@ merging_scripts = [] # same story as above for merging_scripts
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/" # where final merged babies will end up - useless if merging is disabled (empty list above)
 
 ### ANALYSIS-SPECIFIC STUFF FOR BABIES
-from same_sign import *
+# Prepare a file like same_sign.py in this directory with parameters that override the above defaults (default = no merging, no sweeprooting)
+# Note that you *must* provide a function called dataset_to_shortname that has below example behaviour (takes one dataset as a string and returns a shortname as a string for the merged ntuple's name)
+# Well, you could just put all these new parameters and functions in here, but it's probably better to factor out analysis-specific stuff and just do a single `from blah import *`
+"""
+def dataset_to_shortname(ds):
+    if ds=="/TestCMS3/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAOD":
+        return "Test_ntuple"
 sweepRoot_scripts = ["/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/sweepRoot.sh", "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/sweepRoot.C"]
 merging_scripts = ["/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/mergeScript.sh", "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/mergeHadoopFiles.C"]
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 """
-# this file must contain a so-called function which takes the dataset as a string and returns a short name as a string
-def dataset_to_shortname(ds):
-    if ds=="/TestCMS3/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAOD":
-        return "Test_ntuple"
-"""
+try: from same_sign import *
+except: pass
 
 ### CMS3
 pset_data = "DataProduction2015_NoFilter_PAT_cfg.py"
