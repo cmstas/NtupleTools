@@ -59,3 +59,9 @@ elif campaign == "80X_miniaodv2":
     cmssw_ver="CMSSW_8_0_5_patch1"
     jecs = 'Spring16_25nsV1_MC.db'
 
+elif campaign == "80X_stopBabyMaker":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-05"
+    cmssw_ver="CMSSW_8_0_5"
+    jecs = 'Spring16_25nsV1_MC.db'
+
