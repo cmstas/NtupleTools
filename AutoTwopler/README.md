@@ -21,7 +21,7 @@
 import run
 import params as p
 p.merging_scripts = [] # or modify it however you want
-run.main(instructions="instructions.txt", p=params)
+run.main(instructions="instructions.txt", params=p)
 ```
 
 ## Babymaking
