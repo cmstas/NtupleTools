@@ -10,10 +10,15 @@ echo "ANALYSIS: $ANALYSIS" # Stop_1l
 echo "BABY_TAG: $BABY_TAG" # v10
 echo "DATASET: $DATASET" # /TestCMS3/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/MINIAOD
 echo "SHORTNAME: $SHORTNAME" # Test_ntuple.root
+echo "EXTRA_ARGS: $EXTRA_ARGS" # Extra Args in instructions.txt file
 
 # convert comma separated list into array of output files
 OUTPUT_NAMES=(`echo $OUTPUT_NAMES | sed s/,/" "/g`)
 echo "OUTPUT_NAMES=${OUTPUT_NAMES[*]}"
+
+# same for extra args
+EXTRA_ARGS=(`echo $EXTRA_ARGS | sed s/,/" "/g`)
+echo "EXTRA_ARGS=${EXTRA_ARGS[*]}"
 
 for output_name in "${OUTPUT_NAMES[@]}"; do
 

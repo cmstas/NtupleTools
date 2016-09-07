@@ -1266,10 +1266,12 @@ class Sample:
         except: pass
         if not shortname.endswith(".root"): shortname += ".root"
 
+        extra_args = self.sample["baby"]["exe_args_nosplit"]
+
         # this will get passed to the bash script as the first and only argument. inside the script you can simply do "eval $1" to use the variables as they are called here
-        long_ass_args_string = "OUTPUT_NAMES=%s;BABY_DIR=%s;ANALYSIS=%s;BABY_TAG=%s;DATASET=%s;SHORTNAME=%s;OUTPUT_DIR=%s;" \
+        long_ass_args_string = "OUTPUT_NAMES=%s;BABY_DIR=%s;ANALYSIS=%s;BABY_TAG=%s;DATASET=%s;SHORTNAME=%s;OUTPUT_DIR=%s;EXTRA_ARGS=%s;" \
                 % (",".join(output_names),baby["finaldir"],baby["analysis"],baby["baby_tag"], \
-                   self.sample["dataset"], shortname, self.params.baby_merged_dir)
+                   self.sample["dataset"], shortname, self.params.baby_merged_dir, extra_args)
 
         # need to cd into the script area because if the script references local macros, the paths won't be right
         dirname = os.path.dirname(script)
