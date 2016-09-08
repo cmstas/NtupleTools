@@ -49,6 +49,8 @@ def main(instructions=None, params=None):
                 all_samples[all_samples.index(samp)].update_params(samp)
 
 
+        n_done = 0
+        n_samples = len(all_samples)
         for isample, s in enumerate(all_samples):
 
             try:
@@ -82,6 +84,7 @@ def main(instructions=None, params=None):
                             s.submit_merge_jobs()
                     elif stat == "done":
                         s.do_done_stuff()
+                        n_done += 1
 
                 elif typ == "BABY":
                     
@@ -100,6 +103,8 @@ def main(instructions=None, params=None):
                         s.do_done_stuff()
                         if params.open_datasets:
                             s.check_new_merged_for_babies()
+                        else:
+                            n_done += 1
 
 
                 s.save()
@@ -120,6 +125,10 @@ def main(instructions=None, params=None):
             json.dump(data, fhout, sort_keys = True, indent = 4)
         u.copy_json()
 
+        if params.exit_when_done and (n_done == n_samples):
+            print ">>> All %i samples are done. Exiting." % n_samples
+            sys.exit()
+
         sleep_time = 5 if i < 2 else 600
         logger.debug("sleeping for %i seconds..." % sleep_time)
         u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
@@ -130,7 +139,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         instructions = sys.argv[1]
     else:
-        print ">>> Note usage is: ./%s INSTRUCTIONS_FILE" % __file__
+        print ">>> Note usage is: %s INSTRUCTIONS_FILE" % __file__
         print ">>> But going ahead and using instructions.txt for convenience"
 
     if not os.path.isfile(instructions):
