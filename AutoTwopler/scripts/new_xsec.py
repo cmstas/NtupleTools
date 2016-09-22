@@ -174,34 +174,25 @@ def check_merged_rootfile(fname, total_events, treename="Events"):
 
 if __name__ == "__main__":
     samples = [
+            # dis_client.py -t snt "/WJetsToLNu_HT-*_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_*/MINIAODSIM | grep location,xsec,kfactor,filter_eff" --table
+            # dis_client.py -t snt "/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_*/MINIAODSIM | grep location,xsec,kfactor,filter_eff" --table
+            # dis_client.py -t snt "/GJets_HT-*_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-*/MINIAODSIM | grep location,xsec,kfactor,filter_eff" --table
+            # dis_client.py -t snt "/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM | grep location,xsec,kfactor,filter_eff" --table
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v3/V08-00-05/"      , 1345.0  , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/" , 1345.0  , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"      , 359.7   , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/" , 359.7   , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"      , 48.91   , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/" , 48.91   , 1.21 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"                             , 280.35  , 1.23 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ZJetsToNuNu_HT-100To200_13TeV-madgraph_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/"                        , 280.35  , 1.23 , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/GJets_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"            , 20790   , 1.0  , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/GJets_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v4/V08-00-05/"           , 9238    , 1.0  , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/GJets_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"           , 2305    , 1.0  , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"           , 274.4   , 1.0  , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/"           , 93.46   , 1.0  , 1.0) ,
+            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/" , 44.1    , 1.0  , 1.0) ,
             # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W1JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",              9493.0,    1.238, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W2JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",              3120.0,    1.231, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W3JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",               942.3,    1.231, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/W4JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",               524.2,    1.144, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W2JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",    3120.0,    1.231, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",     942.3,    1.231, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W4JetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",     524.2,    1.144, 1.0),
-            # # dis_client.py -t snt "/QCD*HT*,cms3tag=*V08* | grep dataset_name,xsec,filter_eff,kfactor" -p | grep -v GenJets | grep -v BGen | grep -v Enriched
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             1712000, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                  347700, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             347700, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",        347700, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",   347700, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                  32100, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",             32100, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",   32100, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                 6831, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",            6831, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/",       6831, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/",  6831, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                1207, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",           1207, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/", 1207, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v2/V08-00-05/",      1207, 1.0, 1.0), 
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/V08-00-01/",           119.9, 1.0, 1.0),
-            ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/", 119.9, 1.0, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv1/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/V08-00-01/",                119.9, 1.0, 1.0),
-            # ("/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v3/V08-00-05/",      119.9, 1.0, 1.0),
         ]
 
     # for in_dir,xsec in samples:
@@ -245,6 +236,7 @@ if __name__ == "__main__":
                     if isbad:
                         nbad += 1
                         print("%s IS BAD: %s" % (fname, isbad))
+                        print("Reason: %s" % (prob))
 
 
                 if isbad == 0:
