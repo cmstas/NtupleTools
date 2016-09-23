@@ -51,7 +51,7 @@ echo "[merge wrapper] t after addBranches.C: $(date +%s)"
 # stageout
 localFile=$(pwd)/$outFile
 echo "[merge wrapper] copying file from $localFile to $outDir/$outFile"
-gfal-copy -p -f -t 4200 --verbose file:$localFile srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outDir/$outFile
+gfal-copy -p -f -t 6000 --verbose file:$localFile srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=$outDir/$outFile
 echo "[merge wrapper] t after lcg-cp: $(date +%s)"
 
 # cleanup

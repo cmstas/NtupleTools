@@ -91,6 +91,16 @@ function handleDuckMode() {
 
 function drawChart() {
 
+
+    var ncms3 = 0;
+    var nbabies = 0;
+    for (var i = 0; i < alldata["samples"].length; i++) {
+        var type = alldata["samples"][i]["type"];
+        if (type == "BABY") nbabies++;
+        else if (type == "CMS3") ncms3++;
+    }
+    var graphCMS3 = (ncms3 > nbabies);
+
     var data_table = [ [
         'Time',
         'Finished',
@@ -99,6 +109,9 @@ function drawChart() {
         'Failed',
         'Idle',
     ] ];
+    if (!graphCMS3) {
+        data_table = [ [ 'Time', 'Done', 'Running' ] ];
+    }
     // console.log(alldata["time_stats"]);
     
     // data_table.push( [ new Date(1458116239), 100, 100, 100, 100, 100, ] );
@@ -119,14 +132,22 @@ function drawChart() {
             prevNjobs = njobs;
         }
 
-        data_table.push( [
-                new Date(td[0]*1000), // to ms
-                td[1]["finished"] ,
-                td[1]["transferred"]+td[1]["transferring"],
-                td[1]["running"],
-                td[1]["cooloff"]+td[1]["failed"],
-                td[1]["unsubmitted"]+td[1]["idle"],
-        ] );
+        if(graphCMS3) {
+            data_table.push( [
+                    new Date(td[0]*1000), // to ms
+                    td[1]["finished"] ,
+                    td[1]["transferred"]+td[1]["transferring"],
+                    td[1]["running"],
+                    td[1]["cooloff"]+td[1]["failed"],
+                    td[1]["unsubmitted"]+td[1]["idle"],
+            ] );
+        } else {
+            data_table.push( [
+                    new Date(td[0]*1000), // to ms
+                    td[1]["sweepRooted_babies"] ,
+                    td[1]["running_babies"] ,
+            ] );
+        }
     }
 
     console.log(data_table);

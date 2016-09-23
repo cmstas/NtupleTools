@@ -16,15 +16,15 @@ except:
     print ">>> Make sure to source setup.sh first!"
     sys.exit()
 
-import params
 import utils as u
 import scripts.dis_client as dis
 
 
-# FAKE_BABY_NJOBS = 15 # how many fake merged ntuples
+# FAKE_BABY_NJOBS = 5 # how many fake merged ntuples
 # FAKE_BABY_MERGED = True # fake the initial merged ntuples to run over
 # FAKE_BABY_SUBMIT = True # fake submission and checking on condor to see if they're running
-# FAKE_BABY_MAKEPERITERATION = 3 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+# FAKE_BABY_MAKEPERITERATION = 5 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+
 FAKE_BABY_NJOBS = 0 # how many fake merged ntuples
 FAKE_BABY_MERGED = False # fake the initial merged ntuples to run over
 FAKE_BABY_SUBMIT = False # fake submission and checking on condor to see if they're running
@@ -35,22 +35,26 @@ class Sample:
     def __init__(self, type="CMS3", dataset=None, gtag=None,  \
             kfact=None, efact=None,xsec=None,  \
             executable=None,package=None,analysis=None,baby_tag=None, \
-            sparms=[], extra={}):
+            sparms=[], extra={}, params=None):
+
+        self.params = params
+        if not params: 
+            self.params = __import__('params')
 
         setConsoleLogLevel(LOGLEVEL_MUTE)
 
-        self.specialdir_test = params.DO_TEST
-        self.do_skip_tail = params.DO_SKIP_TAIL
+        self.specialdir_test = self.params.DO_TEST
+        self.do_skip_tail = self.params.DO_SKIP_TAIL
 
         self.do_filelist = "filelist" in extra
         self.extra = extra
 
         self.baby = type == "BABY"
 
-        if params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
+        if self.params.DO_TEST: print ">>> You have specified DO_TEST, so final samples will end up in snt/test/!"
 
         self.proxy_file_dict = {}
-        if not params.FORSAKE_HEAVENLY_PROXY:
+        if not self.params.FORSAKE_HEAVENLY_PROXY:
             self.proxy_file_dict = {"proxy": u.get_proxy_file()}
         else:
             print ">>> You have chosen to forsake your heavenly proxy. Be wary of prompts for your password."
@@ -66,7 +70,7 @@ class Sample:
         self.misc["logfiles"] = []
         self.misc["last_saved"] = None # when was the last time we backed up this sample data
         self.misc["can_skip_tail"] = False
-        self.misc["email_when_done"] = params.EMAIL_WHEN_DONE
+        self.misc["email_when_done"] = self.params.EMAIL_WHEN_DONE
         self.misc["update_dis_when_done"] = True
 
         self.sample = {
@@ -75,8 +79,8 @@ class Sample:
                 "dataset" : dataset,
                 "shortname": u.get_shortname_from_dataset(dataset),
                 "user" : u.get_hadoop_name(),
-                "cms3tag" : params.cms3tag,
-                "cmsswver" : params.cmssw_ver,
+                "cms3tag" : self.params.cms3tag,
+                "cmsswver" : self.params.cmssw_ver,
                 "gtag" : gtag,
                 "kfact" : kfact,
                 "efact" : efact,
@@ -122,8 +126,11 @@ class Sample:
         if self.baby:
             self.sample["type"] = "BABY"
             self.sample["baby"] = {
+                "cmsswver" : self.params.cmssw_ver,
+                "scramarch" : self.params.scram_arch,
                 "baby_tag": baby_tag,
                 "analysis": analysis,
+                "dataset" : dataset,
                 "user_package": package,
                 "user_executable": executable,
                 "outputdir_pattern": "/hadoop/cms/store/user/%s/AutoTwopler_babies/${ANALYSIS}_${BABY_TAG}/${SHORTNAME}/" % os.getenv("USER"),
@@ -131,8 +138,10 @@ class Sample:
                 "package": "%s/%s/package.tar.gz" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "executable_script": "%s/%s/baby_ducks.sh" % (self.sample["basedir"], self.misc["pfx_babies"]),
                 "sweepRoot_script": None,
+                "merging_script": None,
                 "input_filenames": [],
                 "imerged": [],
+                "exe_args": [],
                 "imerged_swept": [], # indices of jobs that we have sweepRooted
                 "running": 0,
                 "idle": 0,
@@ -143,7 +152,7 @@ class Sample:
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
 
 
-        self.logger = logging.getLogger(params.log_file.replace(".","_"))
+        self.logger = logging.getLogger(self.params.log_file.replace(".","_"))
 
         self.crab_status_res = { }
 
@@ -201,7 +210,7 @@ class Sample:
 
         if self.sample["type"] == "BABY":
             for key in ["xsec", "specialdir", "sparms", "pset", "postprocessing", "nevents_unmerged", "nevents_merged", "nevents_DAS", \
-                        "kfact", "isdata", "gtag", "finaldir", "efact", "cmsswver", "cms3tag", "checks"]:
+                        "kfact", "isdata", "gtag", "finaldir", "efact", "cmsswver", "cms3tag", "checks", "output_names_nosplit"]:
                 if key in new_dict: del new_dict[key]
             for key in ["datetime", "jobs_left_tail", "outputdir", "resubmissions"]:
                 if key in new_dict["crab"]: del new_dict["crab"][key]
@@ -241,7 +250,7 @@ class Sample:
                 pickle.dump(d_tot, fhout)
         except:
             self.do_log("couldn't save %s" % backup_file)
-        # self.do_log("successfully backed up to %s" % backup_file)
+       # self.do_log("successfully backed up to %s" % backup_file)
         # self.do_log("successfully backed up")
 
     def load(self):
@@ -278,40 +287,40 @@ class Sample:
         ds = self.sample["dataset"]
 
         # figure out pset automatically
-        if ds.endswith("SIM"): self.sample["pset"] = params.pset_mc
-        # if len(self.sample["sparms"]) > 0: self.sample["pset"] = params.pset_mc_fastsim
-        if "FSPremix" in ds: self.sample["pset"] = params.pset_mc_fastsim
-        if "FastAsympt" in ds: self.sample["pset"] = params.pset_mc_fastsim
+        if ds.endswith("SIM"): self.sample["pset"] = self.params.pset_mc
+        # if len(self.sample["sparms"]) > 0: self.sample["pset"] = self.params.pset_mc_fastsim
+        if "FSPremix" in ds: self.sample["pset"] = self.params.pset_mc_fastsim
+        if "FastAsympt" in ds: self.sample["pset"] = self.params.pset_mc_fastsim
         if "/Run2015" in ds: 
             self.sample["isdata"] = True
-            self.sample["pset"] = params.pset_data
+            self.sample["pset"] = self.params.pset_data
         if "/Run2016" in ds:
             self.sample["isdata"] = True
-            self.sample["pset"] = params.pset_data
-        if self.sample["isdata"]: self.sample["pset"] = params.pset_data
+            self.sample["pset"] = self.params.pset_data
+        if self.sample["isdata"]: self.sample["pset"] = self.params.pset_data
 
         # figure out specialdir automatically
         if "50ns" in ds: self.sample["specialdir"] = "run2_50ns"
         elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds:
-            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
         elif "Spring16Fast" in ds:
-            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2_fastsim"
         elif "RunIISpring15FSPremix" in ds:
-            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
         elif "Private74X" in ds:
-            self.sample["pset"] = params.pset_mc_fastsim
+            self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim_private"
         elif "T2ttZH_" in ds or "T5qqqqWH_" in ds:
-            self.sample["pset"] = params.pset_mc
+            self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80Private"
 
         elif "RunIISpring15MiniAODv2" in ds: self.sample["specialdir"] = "run2_25ns_MiniAODv2"
         elif "RunIISpring16MiniAODv1" in ds: self.sample["specialdir"] = "run2_25ns_80MiniAODv1"
         elif "RunIISpring16MiniAODv2" in ds:
-            self.sample["pset"] = params.pset_mc
+            self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         else:
@@ -321,13 +330,13 @@ class Sample:
 
         if "76X_mcRun2_" in ds: self.sample["specialdir"] = "run2_25ns_76MiniAODv2"
         if "SSDL2016" in ds:
-            self.sample["pset"] = params.pset_mc
+            self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_ss_synch"
 
         if self.specialdir_test or "/Good" in ds:
             self.do_log("I think this is for a corrupted file, so will put in snt/test!")
             self.sample["specialdir"] = "test"
-            self.sample["pset"] = params.pset_mc
+            self.sample["pset"] = self.params.pset_mc
 
         self.sample["finaldir"] = "/hadoop/cms/store/group/snt/%s/%s/%s/" \
                 % (self.sample["specialdir"], self.sample["shortname"], self.sample["cms3tag"].split("_",1)[1])
@@ -337,7 +346,7 @@ class Sample:
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
-        taskdir = self.sample["crab"]["taskdir"]+"/"+self.sample["baby"]["baby_tag"]
+        taskdir = self.sample["crab"]["taskdir"]
         if not os.path.isdir(taskdir): os.makedirs(taskdir)
 
         user_executable = self.sample["baby"]["user_executable"]
@@ -346,12 +355,21 @@ class Sample:
         # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
         extra_vals = self.extra or []
         nevts, output_names, exe_args = -1, ["output.root"], ""
+        if len(extra_vals) == 2:
+            nevts, output_names = extra_vals
         if len(extra_vals) == 3:
             nevts, output_names, exe_args = extra_vals
-            output_names = output_names.split(",")
-            nevts = int(nevts)
+            
+        self.sample["baby"]["output_names_nosplit"] = output_names
+        self.sample["baby"]["exe_args_nosplit"] = exe_args
 
+        nevts = int(nevts)
+        output_names = output_names.split(",")
+        exe_args = exe_args.split(",")
+           
+        self.sample["baby"]["nevents"] = nevts
         self.sample["baby"]["output_names"] = output_names
+        self.sample["baby"]["exe_args"] = exe_args
 
         # copy the user package and move it here. at this point, we can just force the name to be package.tar.gz 
         # since the user isn't the one extracting it on the WN
@@ -359,13 +377,22 @@ class Sample:
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
 
         # if the user specified a sweepRoot file in the params.py, then copy it over
-        if(len(params.sweepRoot_scripts) > 0) and os.path.isfile(params.sweepRoot_scripts[0]): 
+        if(len(self.params.sweepRoot_scripts) > 0) and os.path.isfile(self.params.sweepRoot_scripts[0]): 
             new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
             self.sample["baby"]["sweepRoot_script"] = new_dir+"sweepRoot.sh"
-            for fname in params.sweepRoot_scripts:
+            for fname in self.params.sweepRoot_scripts:
                 u.cmd( "cp %s %s" % (fname, new_dir))
-            u.cmd( "cp %s %s/sweepRoot.sh" % (params.sweepRoot_scripts[0], new_dir))
+            u.cmd( "cp %s %s/sweepRoot.sh" % (self.params.sweepRoot_scripts[0], new_dir))
             u.cmd( "chmod u+x %s/sweepRoot.sh" % (new_dir))
+
+        # if the user specified a merge script in the params.py, then copy it over
+        if(len(self.params.merging_scripts) > 0) and os.path.isfile(self.params.merging_scripts[0]): 
+            new_dir = "%s/%s/" % (self.sample["basedir"], self.misc["pfx_babies"])
+            self.sample["baby"]["merging_script"] = new_dir+"merging_script.sh"
+            for fname in self.params.merging_scripts:
+                u.cmd( "cp %s %s" % (fname, new_dir))
+            u.cmd( "cp %s %s/merging_script.sh" % (self.params.merging_scripts[0], new_dir))
+            u.cmd( "chmod u+x %s/merging_script.sh" % (new_dir))
 
 
         # make new executable file with copy command at bottom and variables at top
@@ -376,37 +403,42 @@ class Sample:
         copy_cmds = []
         for output_name in output_names:
             output_name_noext = output_name.rsplit(".",1)[0]
-            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root" \
+            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root --checksum ADLER32" \
                     % (output_name, self.sample["baby"]["outputdir_pattern"], output_name_noext, output_name_noext)
             copy_cmds.append(copy_cmd)
 
         with open(self.sample["baby"]["executable_script"], "w") as fhout:
             fhout.write("#!/bin/bash\n\n")
-            fhout.write("DATASET=$1\n")
-            fhout.write("FILENAME=$2\n")
-            fhout.write("ANALYSIS=$3\n")
-            fhout.write("BABY_TAG=$4\n")
-            fhout.write("SHORTNAME=$5\n")
-            fhout.write("EXTRA1=$6\n")
-            fhout.write("EXTRA2=$7\n")
-            fhout.write("EXTRA3=$8\n")
+            fhout.write("CMSSW_VER=$1\n")
+            fhout.write("SCRAM_VER=$2\n")
+            fhout.write("DATASET=$3\n")
+            fhout.write("FILENAME=$4\n")
+            fhout.write("ANALYSIS=$5\n")
+            fhout.write("BABY_TAG=$6\n")
+            fhout.write("SHORTNAME=$7\n")
+            fhout.write("NEVENTS=$8\n")
+            fhout.write("OUTPUT_NAMES=$9\n")
+            fhout.write("EXE_ARGS=${10}\n")
             fhout.write("IMERGED=$(echo $FILENAME | sed 's/.*merged_ntuple_\\([0-9]\\+\\)\\.root/\\1/')\n\n")
+            fhout.write("echo cmssw_ver: $CMSSW_VER\n")
+            fhout.write("echo scram_ver: $SCRAM_VER\n")
             fhout.write("echo dataset: $DATASET\n")
             fhout.write("echo filename: $FILENAME\n")
             fhout.write("echo analysis: $ANALYSIS\n")
             fhout.write("echo baby_tag: $BABY_TAG\n")
             fhout.write("echo shortname: $SHORTNAME\n")
-            fhout.write("echo extra1: $EXTRA1\n")
-            fhout.write("echo extra2: $EXTRA2\n")
-            fhout.write("echo extra3: $EXTRA3\n")
-            fhout.write("echo imerged: $IMERGED\n\n")
+            fhout.write("echo nevents: $NEVENTS\n")
+            fhout.write("echo output_names: $OUTPUT_NAMES\n")
+            fhout.write("echo exe_args: $EXE_ARGS\n")
+            fhout.write("echo imerged: $IMERGED\n")
+            fhout.write("\n\n\n\n")
             fhout.write("echo Extracting package tar file\ntar -xzf package.tar.gz\n\n")
             fhout.write("echo Before executable\necho Date: $(date +%s)\nhostname\nls -l\n\n")
             fhout.write("# ----------------- BEGIN USER EXECUTABLE -----------------\n")
             with open(user_executable, "r") as fhin:
                 for line in fhin:
                     fhout.write(line)
-            fhout.write("# ----------------- END USER EXECUTABLE -----------------\n\n\n")
+            fhout.write("\n# ----------------- END USER EXECUTABLE -----------------\n\n\n")
             fhout.write("echo After executable\necho Date: $(date +%s)\nls -l\n\n")
             for copy_cmd in copy_cmds:
                 fhout.write(copy_cmd + "\n\n")
@@ -529,7 +561,7 @@ class Sample:
         config.General.transferLogs = True
         config.General.requestName = self.sample["crab"]["requestname"]
         config.section_('JobType')
-        config.JobType.inputFiles = [params.jecs]
+        config.JobType.inputFiles = [self.params.jecs]
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
         config.JobType.allowUndistributedCMSSW = True
@@ -568,7 +600,7 @@ class Sample:
     def make_pset(self):
         if not os.path.isdir(self.misc["pfx_pset"]): os.makedirs(self.misc["pfx_pset"])
 
-        pset_in_fname = params.cmssw_ver+"/src/CMS3/NtupleMaker/test/"+self.sample["pset"]
+        pset_in_fname = self.params.cmssw_ver+"/src/CMS3/NtupleMaker/test/"+self.sample["pset"]
         pset_out_fname = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
 
         if os.path.isfile(pset_out_fname): 
@@ -590,7 +622,7 @@ class Sample:
                 elif ".GlobalTag." in line: line = line.split("=")[0]+" = '"+self.sample["gtag"]+"'\n"
                 elif ".reportEvery" in line: line = line.split("=")[0]+" = 1000\n"
                 elif ".eventMaker.datasetName." in line: line = line.split("(")[0]+"('%s')\n" % self.sample["dataset"]
-                elif "era=" in line: line = line.split("=")[0]+" = '"+params.jecs.replace(".db","")+"'\n"
+                elif "era=" in line: line = line.split("=")[0]+" = '"+self.params.jecs.replace(".db","")+"'\n"
                 elif "runOnData=" in line: line = '%s = %s\n' % (line.split("=")[0], self.sample["isdata"])
                 elif ".eventMaker.isData" in line: line = "%s = cms.bool(%s)\n" % (line.split("=")[0], self.sample["isdata"])
                 elif "cms.Path" in line:
@@ -603,7 +635,7 @@ class Sample:
             if len(sparms) > 0:
                 sparms = list(set(map(lambda x: x.strip(), sparms)))
                 sparms = ['"%s"' % sp for sp in sparms]
-                if params.campaign == "80X_miniaodv2":
+                if self.params.campaign == "80X_miniaodv2":
                     newlines.append('process.sParmMaker.sparm_inputTag       = cms.InputTag("source")\n')
                 newlines.append('process.sParmMaker.vsparms = cms.untracked.vstring(' + ",".join(sparms) + ')\n')
                 newlines.append('process.p.insert( -1, process.sParmMakerSequence )\n')
@@ -1204,15 +1236,49 @@ class Sample:
         else:
             done = (len(self.get_condor_submitted()[0]) == 0) and (nmerged_done == nmerged) and (nmerged > 0) and (nswept == nmerged)
         # print "done:", done
-        if done:
-            self.sample["baby"]["running"] = 0
-            self.sample["baby"]["idle"] = 0
-            self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
-            self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
+        if not done: return False
 
+        merged = self.do_merge_babies()
+        self.sample["baby"]["running"] = 0
+        self.sample["baby"]["idle"] = 0
+        self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
+        self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
+
+        if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
+        else: 
+            self.sample["baby"]["merged_dir"] = self.params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
             self.do_log("This sample is now done.")
 
-        return done
+        return merged
+
+    def do_merge_babies(self):
+        script = self.sample["baby"]["merging_script"]
+        if not script: return True
+
+        def remove_ext(fname):
+            return fname.rsplit(".",1)[0]
+
+        baby = self.sample["baby"]
+        output_names = map(remove_ext, baby["output_names"])
+
+        shortname = self.sample["shortname"]
+        try: shortname = self.params.dataset_to_shortname(self.sample["dataset"])
+        except: pass
+        if not shortname.endswith(".root"): shortname += ".root"
+
+        extra_args = self.sample["baby"]["exe_args_nosplit"]
+
+        # this will get passed to the bash script as the first and only argument. inside the script you can simply do "eval $1" to use the variables as they are called here
+        long_ass_args_string = "OUTPUT_NAMES=%s;BABY_DIR=%s;ANALYSIS=%s;BABY_TAG=%s;DATASET=%s;SHORTNAME=%s;OUTPUT_DIR=%s;EXTRA_ARGS=%s;" \
+                % (",".join(output_names),baby["finaldir"],baby["analysis"],baby["baby_tag"], \
+                   self.sample["dataset"], shortname, self.params.baby_merged_dir, extra_args)
+
+        # need to cd into the script area because if the script references local macros, the paths won't be right
+        dirname = os.path.dirname(script)
+        scriptname = os.path.basename(script)
+        stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
+
+        return stat == 0 # 0 is good, anything else is bad
 
     def fake_baby_creation(self):
         output_names = self.sample["baby"]["output_names"]
@@ -1356,12 +1422,15 @@ class Sample:
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
 
-    def is_baby_good(self, fname):
+    def sweep_baby(self, fname):
 
         script = self.sample["baby"]["sweepRoot_script"]
         if script:
-            if not script.startswith("/"): script = "." + script
-            stat, out = u.cmd("%s %s" % (script,fname), returnStatus=True)
+
+            # need to cd into the script area because if the script references local macros, the paths won't be right
+            dirname = os.path.dirname(script)
+            scriptname = os.path.basename(script)
+            stat, out = u.cmd("cd %s; ./%s %s" % (dirname,scriptname,fname), returnStatus=True)
             return stat == 0 # 0 is good, anything else is bad
 
         return True
@@ -1383,7 +1452,7 @@ class Sample:
             # all output files must be good for this imerged to be good
             good = True
             for fname in fnames:
-                if not self.is_baby_good(fname):
+                if not self.sweep_baby(fname):
                     good = False
                     break
 
@@ -1399,15 +1468,14 @@ class Sample:
 
     def submit_baby_jobs(self):
         filenames = self.sample["baby"]["input_filenames"]
-        extra1 = ""
-        extra2 = ""
-        extra3 = ""
-
-        tag = self.sample["baby"]["baby_tag"]
         analysis = self.sample["baby"]["analysis"]
+        tag = self.sample["baby"]["baby_tag"]
+        shortname = self.sample["shortname"]
+        nevts = self.sample["baby"]["nevents"]
+        output_names = self.sample["baby"]["output_names_nosplit"]
+        exe_args = self.sample["baby"]["exe_args_nosplit"]
         package = self.sample["baby"]["package"]
         executable_script = self.sample["baby"]["executable_script"]
-        shortname = self.sample["shortname"]
 
         path_fragment = "%s/%s/%s" % (analysis, tag, shortname)
         condor_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/%s.log" % (os.getenv("USER"),path_fragment,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
@@ -1486,7 +1554,7 @@ class Sample:
 
 
             condor_params["args"] = " ".join(map(str,\
-                    [self.sample["dataset"], filename, analysis, tag, shortname, extra1, extra2, extra3]\
+                    [self.sample["baby"]["cmsswver"], self.sample["baby"]["scramarch"], self.sample["dataset"], filename, analysis, tag, shortname, nevts, output_names, exe_args]\
                     ))
             
             cfg = cfg_format.format(**condor_params)

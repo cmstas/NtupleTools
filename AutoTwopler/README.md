@@ -16,6 +16,14 @@
 8. Sit quack and relax
 9. When you see done samples on the dashboard, you can enter your username in the Twiki section, select the appropriate Twiki, and hit "Update Twiki with done samples" to automagically fill in the Twiki entries
 
+### Basic API usage
+```python
+import run
+import params as p
+p.merging_scripts = [] # or modify it however you want
+run.main(instructions="instructions.txt", params=p)
+```
+
 ## Babymaking
 Babies can be made using the AutoTwopler as well. These instructions will be updated (and the procedure streamlined) in the future. The inputs to the 
 babymaking process are an executable script, a package tar file, a dataset name, an analysis name ("SS", "MT2", etc.), and a baby tag version ("v0.1", "v1.2-fix", etc.).
@@ -28,6 +36,9 @@ the script _MUST_ make sure the output root file is named `output.root`! At a mi
 
 ### SweepRoot
 If a shell script for sweepRoot is specified inside of `params.py`, then this script will be copied over into the AutoTwopler directory and executed. It will be given one parameter: the filename. It must end in `exit 0` to indicate a good file, or anything else for a bad file (to be deleted automatically). If no script is specified (empty string), then all files will pass the "sweepRoot" step. Note that because this parameter is a list, you may specify additional files that are also needed for sweepRooting (the first file must be the executable).
+
+### Merging
+Same story for merging as with sweepRoot. Parameters will be fed as in the example script in `baby_devel/mergeScript.sh`. Actually, you might as well just use this script since it already uses the main merging function for SNT and handles multiple output file types. Note that the final merged directory for babies must be specified inside `params.py` following the instructions there.
 
 ### Instructions syntax
 In the instructions file, an example line might look like
