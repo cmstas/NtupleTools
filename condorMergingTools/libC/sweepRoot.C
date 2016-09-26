@@ -159,7 +159,8 @@ int main(int argc, char** argv) {
       /****************/
       if (tree_name != "") {
          TTree* tree = (TTree*)f->Get(tree_name.c_str());
-         if (tree->GetEntriesFast() > 0) {
+	 int nEntries = tree->GetEntriesFast();
+         if (nEntries > 0) {
            TH1F* h_pfmet = new TH1F("h_pfmet", "h_pfmet", 1000, 0, 1000);
            tree->Draw("evt_pfmet >> h_pfmet");
            float avg_pfmet = h_pfmet->GetMean(1);
