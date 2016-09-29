@@ -185,6 +185,34 @@ if [ $didAddBranches != 0 ]; then
 	exit 3
 fi
 
+# Rigorous sweeproot which checks ALL branches for ALL events.
+# If GetEntry() returns -1, then there was an I/O problem, so we will delete it
+cat > rigorousSweepRoot.sh << EOL
+import ROOT as r
+import os
+
+f1 = r.TFile("$outFileName")
+t = f1.Get("Events")
+print "[RSR] ntuple has %i events" % t.GetEntries()
+
+foundBad = False
+for i in range(0,t.GetEntries(),1):
+    if t.GetEntry(i) < 0:
+        foundBad = True
+        print "[RSR] found bad event %i" % i
+        break
+
+if foundBad:
+    print "[RSR] removing merged_ntuple.root because it does not deserve to live"
+    os.system("rm $outFileName")
+else:
+    print "[RSR] passed the rigorous sweeproot"
+EOL
+
+date +%s
+python rigorousSweepRoot.sh
+date +%s
+
 echo $CMSSW_RELEASE_BASE
 #use lcgcp to stageout
 echo "filename = $outFileName"

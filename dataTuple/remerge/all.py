@@ -27,43 +27,27 @@ def check(old, new):
 
 
 fnames=[
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_129.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_142.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_152.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_154.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_239.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_248.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_251.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_326.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_349.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_352.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_359.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_78.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_152.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_154.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_162.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_163.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_212.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_215.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_50.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_67.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_68.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_7.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_74.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_88.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_113.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_124.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_148.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_161.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_3.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_30.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_56.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged//V08-00-12/merged_ntuple_62.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_408.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_103.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_723.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_822.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_899.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MET_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_153.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MET_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_169.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_33.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleElectron_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_680.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleElectron_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_731.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_185.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_413.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_713.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_819.root",
+        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SinglePhoton_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_47.root",
         ]
 
 
+os.system("[ ! -d DataTuple-backup ] && git clone ssh://git@github.com/cmstas/DataTuple-backup")
+
 for fname in fnames:
-    os.system("[ ! -d DataTuple-backup ] && git clone ssh://git@github.com/cmstas/DataTuple-backup")
 
 
     print "Working on %s" % (fname)
