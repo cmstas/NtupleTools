@@ -3,7 +3,7 @@
 This is a "core dump" of every branch in CMS3 for **TWO RELEASES**.  If you want one release by itself, you are looking for cmstas/NtupleTools/validation/branchDumper.  
 
 ###Instructions:
-1. In compareNtuples.C, put the OLD and NEW samples on line 114-115. 
+1. In compareNtuples.C, put the OLD and NEW samples on line 118-119. 
 2. "root -b do.C"
 3. ". process.sh" 
 4. Now overview.pdf has everything you need. 
