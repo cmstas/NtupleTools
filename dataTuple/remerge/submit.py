@@ -18,7 +18,7 @@ def check(old, new):
     size_old = os.path.getsize(old)
     size_new = os.path.getsize(new)
 
-    isgood = (n_old == n_new) and (size_new > size_old)
+    isgood = (n_old == n_new) and (size_new > 0.9999*size_old)
     return isgood, (n_old, n_new), (size_old, size_new)
 
 
@@ -26,10 +26,8 @@ def check(old, new):
 def main():
     os.system("[ ! -d DataTuple-backup ] && git clone ssh://git@github.com/cmstas/DataTuple-backup")
     fnames = [
-"/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_126.root",
-"/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_127.root",
-"/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_128.root",
-]
+    ]
+    fnames.extend( [fname.strip() for fname in open("filelist.txt","r").readlines() if len(fname.strip())>10] )
 
     done_candidates = []
     for fname in fnames:
@@ -54,13 +52,13 @@ def main():
             print "Error: did not find exactly 2 files for %s" % fname
             continue
 
+        if (shortname, imerged) in running_set:
+            print "Job is running on condor, skipping"
+            continue
+
         if os.path.isfile(outputfile):
             print "Merged file already exists, not resubmitting"
             done_candidates.append( {"shortname":shortname,"imerged":imerged, "outputfile":outputfile, "fname":fname} )
-            continue
-
-        if (shortname, imerged) in running_set:
-            print "Job is running on condor, skipping"
             continue
 
         executable =  "%s/mergeScriptRoot6.sh" % (cwd)
@@ -115,6 +113,8 @@ queue
 
         if not isgood:
             print "Ntuple is bad, deleting"
+            print "Event counts (old,new): (%i,%i)" % (n_old, n_new)
+            print "Sizes (old,new): (%i,%i)" % (size_old, size_new)
             os.system("rm %s" % outputfile)
             continue
 

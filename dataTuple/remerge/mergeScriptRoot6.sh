@@ -213,6 +213,8 @@ date +%s
 python rigorousSweepRoot.sh
 date +%s
 
+ls -l
+
 echo $CMSSW_RELEASE_BASE
 #use lcgcp to stageout
 echo "filename = $outFileName"

@@ -78,7 +78,8 @@ lumisCompleted = []
 # goldenJson = "/home/users/namin/dataTuple/2016F/NtupleTools/dataTuple/Cert_271036-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 20.1/fb, no L1T from Aug19
 # goldenJson = "/home/users/namin/dataTuple/2016G/NtupleTools/dataTuple/Cert_271036-279588_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 22.0/fb no L1T from Sept1
 # goldenJson = "/home/users/namin/dataTuple/2016G/NtupleTools/dataTuple/Cert_271036-279931_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 24.5/fb no L1T from Sept9
-goldenJson = "/home/users/namin/dataTuple/2016G/NtupleTools/dataTuple/Cert_271036-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 26.4/fb no L1T from Sept20
+# goldenJson = "/home/users/namin/dataTuple/2016G/NtupleTools/dataTuple/Cert_271036-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt" # 26.4/fb no L1T from Sept20
+goldenJson = "/home/users/namin/dataTuple/2016G/NtupleTools/dataTuple/Cert_271036-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt" # 27.22/fb no L1T from Sept30
 
 # if(len(sys.argv) > 1):
 #     goldenJson = sys.argv[1]

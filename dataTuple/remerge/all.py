@@ -27,22 +27,7 @@ def check(old, new):
 
 
 fnames=[
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_408.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_DoubleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_103.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_723.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_822.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_JetHT_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_899.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MET_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_153.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MET_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_169.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_MuonEG_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_33.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleElectron_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_680.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleElectron_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_731.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_185.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_413.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_713.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SingleMuon_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_819.root",
-        # "/hadoop/cms/store/group/snt/run2_data/Run2016G_SinglePhoton_MINIAOD_PromptReco-v1/merged/V08-00-12/merged_ntuple_47.root",
-        ]
+       ]
 
 
 os.system("[ ! -d DataTuple-backup ] && git clone ssh://git@github.com/cmstas/DataTuple-backup")
@@ -67,6 +52,8 @@ for fname in fnames:
             print "Redoing since file is not good:", n_old, n_new, size_old, size_new
     else:
         print "REMAKING!"
+
+    continue # FIXME
 
 
     metadata_files = glob.glob("DataTuple-backup/*/mergedLists/%s/*_%i.txt" % (sample, imerged))
