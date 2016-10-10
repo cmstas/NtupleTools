@@ -129,9 +129,9 @@ do
       else
         echo "$mergeFile has the wrong number of events. Will delete and resubmit."
         rm $mergeFile
-        . submitPPJob.sh $taskName $counter $JOBTYPE
+        . submitPPJob.sh $taskname $counter $JOBTYPE
         submitTime=`date +%s`
-        echo "/hadoop/cms/store/user/$USER/dataTuple/$taskName/merged/merged_ntuple_$counter.root $submitTime" >> submitPPList.txt
+        echo "/hadoop/cms/store/user/$USER/dataTuple/$taskname/merged/merged_ntuple_$counter.root $submitTime" >> submitPPList.txt
       fi
     else
       echo "$mergeFile exists, but might be copying. Adding to delaylist.txt"
@@ -144,7 +144,7 @@ do
       echo "$mergeFile does not exist! Will resubmit."
       . submitPPJob.sh $taskname $counter $JOBTYPE
       submitTime=`date +%s`
-      echo "/hadoop/cms/store/user/$USER/$jobDir/$taskName/merged/merged_ntuple_$counter.root $submitTime" >> submitPPList.txt
+      echo "/hadoop/cms/store/user/$USER/$jobDir/$taskname/merged/merged_ntuple_$counter.root $submitTime" >> submitPPList.txt
     else
       echo "Adding mergeFile to delaylist.txt"
       echo "$mergeFile" >> delayList.txt
