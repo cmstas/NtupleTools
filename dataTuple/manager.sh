@@ -46,7 +46,7 @@ fi
 CMS3tag=CMS3_V08-00-14
 
 #Set the global tag to use
-GTAG=80X_dataRun2_Prompt_v14
+GTAG=80X_dataRun2_2016SeptRepro_v3
 #for reminiAOD data, change this to 74X_dataRun2_reMiniAOD_v0
 
 #State the maxmimum number of events
