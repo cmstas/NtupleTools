@@ -214,8 +214,7 @@ def submit_mergejobs(shortname, merged_file_num):
 if __name__ == '__main__':
     # corrupt_files = find_corrupt() # FIXME uncomment when finished testing
     corrupt_files = [
-            "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/merged_ntuple_44.root",
-             "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/W3JetsToLNu_NuPt-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/merged_ntuple_9.root",
+            "/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/V08-00-05/merged_ntuple_41.root"
              ]
 
     for cf in corrupt_files:
@@ -245,6 +244,7 @@ if __name__ == '__main__':
         if have_new_unmerged:
             # copy over the merged to "cf"
             print pfx, "copying over new merged file to", cf # FIXME do it
+            print "Note that the script isn't actually copying stuff over right now. You must do it manually, or bug Nick to fix it."
 
             with open("files_done.txt", "a") as fhdone:
                 fhdone.write(cf + "\n")

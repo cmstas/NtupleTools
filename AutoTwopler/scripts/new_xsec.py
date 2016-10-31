@@ -242,7 +242,7 @@ if __name__ == "__main__":
                 if isbad == 0:
                     new_nevents = get_events_in_chain(in_dir + "/new_xsec/*.root")
                     if new_nevents == nevents:
-                        print("rm -f {0}/*.root ; mv {0}/new_xsec/*.root {0}/".format(in_dir))
+                        print("rm -f {0}/*.root ; mv {0}/new_xsec/* {0}/".format(in_dir))
                         metadata["xsec"] = xsec
                         metadata["kfact"] = kfact
                         metadata["efact"] = efact

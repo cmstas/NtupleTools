@@ -57,6 +57,7 @@ elif campaign == "80X":
 elif campaign == "80X_miniaodv2":
     scram_arch="slc6_amd64_gcc530"
     cms3tag="CMS3_V08-00-05"
+    # cms3tag="CMS3_V08-00-09"
     cmssw_ver="CMSSW_8_0_5_patch1"
     jecs = 'Spring16_25nsV1_MC.db'
 
@@ -72,3 +73,15 @@ elif campaign == "80X_stopBabyMaker":
     cmssw_ver="CMSSW_8_0_5"
     jecs = 'Spring16_25nsV1_MC.db'
 
+elif campaign == "80X_miniaodv2_vince":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-12"
+    # cms3tag="CMS3_V08-00-09"
+    cmssw_ver="CMSSW_8_0_5_patch1"
+    jecs = 'Spring16_25nsV1_MC.db'
+
+elif campaign == "80X_miniaodv2_new":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-12"
+    cmssw_ver="CMSSW_8_0_14"
+    jecs = 'Spring16_25nsV1_MC.db'

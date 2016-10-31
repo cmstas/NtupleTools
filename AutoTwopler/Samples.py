@@ -313,7 +313,7 @@ class Sample:
         elif "Private74X" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim_private"
-        elif "T2ttZH_" in ds or "T5qqqqWH_" in ds:
+        elif "T2ttZH_" in ds or "T5qqqqWH_" in ds or "Private80Xv2" in ds:
             self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80Private"
 
@@ -769,7 +769,7 @@ class Sample:
         dtstr = self.sample["crab"]["datetime"]
         then = datetime.datetime.strptime(dtstr, "%y%m%d_%H%M%S")
         now = datetime.datetime.utcnow() # crab datestr uses GMT, so must use utcnow()
-        return (then-now).seconds / 60.0
+        return (now-then).seconds / 60.0
 
     def crab_parse_status(self):
         if self.misc["can_skip_tail"]: return
@@ -821,8 +821,8 @@ class Sample:
             if len(warning) > 0 and "not yet bootstrapped" in warning[0]:
                 mins = self.minutes_since_crab_submit()
                 self.do_log("task has not bootstrapped yet, and it's been %i minutes" % mins)
-                if mins > 300: # resubmit if been more than 5 hours
-                    self.do_log("been more than 5 hours, so trying to resubmit")
+                if mins > 120: # resubmit if been more than 2 hours
+                    self.do_log("been more than 2 hours, so trying to resubmit")
                     self.crab_resubmit()
 
         if self.sample["crab"]["breakdown"]["finished"] > 0:
@@ -1330,6 +1330,12 @@ class Sample:
         nevents_both = self.sample['ijob_to_nevents'].values()
         nevents = sum([x[0] for x in nevents_both])
         nevents_effective = sum([x[1] for x in nevents_both])
+
+        if self.do_filelist:
+            if "nevents" in self.extra and "nevents_effective" in self.extra:
+                nevents = self.extra["nevents"]
+                nevents_effective = self.extra["nevents_effective"]
+                self.do_log("NOTE: Since it looks like you specified nevents and nevents_effective in the filelist, I will be using %i and %i respectively for the merged output" % (nevents, nevents_effective))
 
         try:
             if not os.path.isdir(std_log_files): os.makedirs(std_log_files)

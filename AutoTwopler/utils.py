@@ -108,12 +108,14 @@ def parse_filelist(filename):
 
             if line.startswith("dataset:"): dataset = line.split(":")[-1].strip()
             elif line.startswith("files_per_job:"): files_per_job = int(line.split(":")[-1].strip())
+            elif line.startswith("nevents:"): nevents = int(line.split(":")[-1].strip())
+            elif line.startswith("nevents_effective:"): nevents_effective = int(line.split(":")[-1].strip())
             elif line.endswith(".root"): filelist.append(line)
 
     if not dataset or not filelist:
         return { }
     else:
-        return {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist}}
+        return {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist, "nevents": nevents, "nevents_effective": nevents_effective}}
 
 
 def proxy_renew():
@@ -367,12 +369,12 @@ def get_shortname_from_dataset(dataset):
 
 if __name__=='__main__':
 
-    # if proxy_hours_left() < 5:
-    #     print "Proxy near end of lifetime, renewing."
-    #     proxy_renew()
-    # else:
-    #     print "Proxy looks good"
-    # print get_proxy_file()
+    if proxy_hours_left() < 5:
+        print "Proxy near end of lifetime, renewing."
+        proxy_renew()
+    else:
+        print "Proxy looks good"
+    print get_proxy_file()
 
     from pprint import pprint
     # pprint(read_samples("john_instructions.txt"))
