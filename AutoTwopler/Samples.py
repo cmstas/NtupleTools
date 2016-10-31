@@ -297,7 +297,10 @@ class Sample:
         if "/Run2016" in ds:
             self.sample["isdata"] = True
             self.sample["pset"] = self.params.pset_data
-        if self.sample["isdata"]: self.sample["pset"] = self.params.pset_data
+        if self.sample["isdata"]: 
+            self.do_log("recognized that this is data")
+            self.do_skip_tail = False
+            self.sample["pset"] = self.params.pset_data
 
         # figure out specialdir automatically
         if "50ns" in ds: self.sample["specialdir"] = "run2_50ns"
@@ -323,6 +326,7 @@ class Sample:
             self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
+        elif self.sample["isdata"]: self.sample["specialdir"] = "run2_data_test"
         else:
             self.do_log("can't match patterns in dataset name to figure out where in .../snt/ to put it. using /snt/run2/. move it later")
             self.sample["specialdir"] = "run2"

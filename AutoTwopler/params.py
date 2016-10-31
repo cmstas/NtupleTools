@@ -85,3 +85,9 @@ elif campaign == "80X_miniaodv2_new":
     cms3tag="CMS3_V08-00-12"
     cmssw_ver="CMSSW_8_0_14"
     jecs = 'Spring16_25nsV1_MC.db'
+
+elif campaign == "80X_data_reproc":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-14"
+    cmssw_ver="CMSSW_8_0_20"
+    jecs = 'Spring16_25nsV1_MC.db'

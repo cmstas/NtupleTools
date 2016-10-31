@@ -63,7 +63,8 @@ print
 
 
 # Make pset for this file
-pset_in_fname = params.cmssw_ver+"/src/CMS3/NtupleMaker/test/MCProduction2015_NoFilter_cfg.py"
+# pset_in_fname = params.cmssw_ver+"/src/CMS3/NtupleMaker/test/MCProduction2015_NoFilter_cfg.py"
+pset_in_fname = params.cmssw_ver+"/src/CMS3/NtupleMaker/test/DataProduction2015_NoFilter_RECO_cfg.py"
 pset_out_fname = "test_pset.py"
 newlines = []
 with open(pset_in_fname, "r") as fhin:
