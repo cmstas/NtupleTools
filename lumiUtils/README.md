@@ -1,11 +1,11 @@
 # Luminosity utililities
 
 ## Setup/background
+**Only read this section if you want to host your own instance of this, otherwise, my file (the default in `lumi_utils.py`) is always current and usable.**
 It's a huge pain to log into lxplus to run brilcalc since the developers seem to not want to make it easily available outside the CERN firewall. So, I have a cron job on lxplus that runs brilcalc every 24 hrs and hosts the output at http://namin.web.cern.ch/namin/lumis_skim.tar.gz. I also have a cronjob on the uaf to curl this into the file /home/users/namin/dataTuple/2016D/NtupleTools/dataTuple/lumis/lumis_skim.csv. The columns are run,lumi,timestamp,lumidelivered(pb),lumirecorded(pb). The scripts here take this file and parse it.
 
-**Only if you want to host your own instance of this, then follow the next few lines, otherwise, my file (the default) is always current and usable.**
 
-The file is generated on lxplus using a script with contents
+The file is generated on lxplus using a script (`do.sh`) with contents
 ```bash
 /afs/cern.ch/user/n/namin/.local/bin/brilcalc lumi --begin 272000 --normtag=/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json --byls -u /pb --output-style csv > lumis.csv
 /usr/bin/python /afs/cern.ch/user/n/namin/lumi/skim.py
@@ -15,7 +15,7 @@ cp lumis_skim.* /afs/cern.ch/user/n/namin/www/
 and it is run using an AFS crontab (`acrontab -e`)
 `46 11 * * * lxplus.cern.ch /bin/bash /afs/cern.ch/user/n/namin/lumi/do.sh > /afs/cern.ch/user/n/namin/www/acron.log 2>&1` (normal crontab does not work on lxplus due to expiring credentials).
 
-The file is then obtained on the UAF via a script with contents
+The file is then obtained on the UAF via a script (`fetch_lumis.sh`) with contents
 ```bash
 curl -O http://namin.web.cern.ch/namin/lumis_skim.tar.gz --connect-timeout 60 -s
 tar xzf lumis_skim.tar.gz
@@ -25,7 +25,7 @@ and a crontab entry like `cd /home/users/namin/dataTuple/2016D/NtupleTools/dataT
 ## Usage
 
 ### `dis` (Das Is Slow)
-* These scripts use an API for DIS that is explained and obtained via the `examples` link on http://uaf-8.t2.ucsd.edu/~namin/makers/disMaker/index.html
+* The `get_lumi_for_eras.py` script uses an API for DIS that is explained and obtained via the `examples` link on http://uaf-8.t2.ucsd.edu/~namin/makers/disMaker/index.html
 * In a nutshell, this lets you make DAS/DBS queries with a nice interface, as well as querying the SNT Twiki information
 * **Get the command line script and put it in your python path (or keep it in this folder), as this is a generally useful script**
  * `curl -O https://raw.githubusercontent.com/cmstas/NtupleTools/master/AutoTwopler/scripts/dis_client.py`
