@@ -100,6 +100,7 @@ def parse_filelist(filename):
     dataset = None
     files_per_job = 1
     filelist = []
+    nevents, nevents_effective = None, None
     with open(filename, "r") as fhin:
         for line in fhin.readlines():
             line = line.strip()
@@ -115,7 +116,12 @@ def parse_filelist(filename):
     if not dataset or not filelist:
         return { }
     else:
-        return {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist, "nevents": nevents, "nevents_effective": nevents_effective}}
+        # return {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist, "nevents": nevents, "nevents_effective": nevents_effective}}
+        ret = {"dataset": dataset, "extra": {"files_per_job": files_per_job, "filelist": filelist}}
+        if nevents and nevents_effective:
+            ret["extra"]["nevents"] = nevents
+            ret["extra"]["nevents_effective"] = nevents_effective
+        return ret
 
 
 def proxy_renew():
