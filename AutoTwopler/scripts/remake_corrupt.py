@@ -1,9 +1,13 @@
 import json
+import os
 
 
 # THIS ONLY MAKES THE FILELIST TO USE WITH THE AUTOTWOPLER. YOU WILL STILL NEED TO COPY THE MERGED FILE OUT OF THE FINAL HADOOP AREA (SAME AS DATASSET, BUT WITH Immaculate_<imerged#> IN FRONT OF IT
 
 corrupt_files = ["/hadoop/cms/store/group/snt/run2_25ns_80MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/V08-00-05/merged_ntuple_26.root"]
+
+os.system("mkdir -p ../remake/")
+os.system("touch ../instructions_remake.txt")
 
 for cf in corrupt_files:
     metadata_fname = cf.split("merged_ntuple")[0]+"metadata.json"
@@ -34,15 +38,33 @@ for cf in corrupt_files:
 
         merged_nevents = sum([ijob_to_nevents[str(ijob)][0] for ijob in ijobs])
 
-        print "____ put the lines below the __s into a file. note that the CMS3tag used was %s ______" % metadata["cms3tag"]
-        print "____ instructions.txt line: <filename> %s %s %s %s %s ______" % \
-                (metadata["gtag"], metadata["xsec"], metadata["kfact"], metadata["efact"], ",".join(metadata["sparms"]))
-        print "___________________________________________________"
-        print "dataset: %s" % new_dataset
-        print "nevents: %i" % nevents
-        print "nevents_effective: %i" % nevents_effective
-        for miniaod in miniaods:
-            print miniaod
-        print
-        print 
+
+        outname = "../remake/filelist__%s__%i.txt" % (pd,imerged)
+        with open(outname, "w") as fhout:
+            fhout.write( "dataset: %s\n" % new_dataset )
+            fhout.write( "nevents: %i\n" % nevents )
+            fhout.write( "nevents_effective: %i\n" % nevents_effective )
+            for miniaod in miniaods:
+                fhout.write( miniaod + "\n" )
+
+        print ">>> Wrote to %s and updated instructions_remake.txt" % outname
+
+        with open("../instructions_remake.txt", "a") as fhout:
+            fhout.write("%s %s %s %s %s %s\n" % \
+                (os.path.abspath(outname), metadata["gtag"], metadata["xsec"], metadata["kfact"], metadata["efact"], ",".join(metadata["sparms"])))
+
+            # print
+            # print 
+
+            # print "____ put the lines below the __s into a file. note that the CMS3tag used was %s ______" % metadata["cms3tag"]
+            # print "____ instructions.txt line: <filename> %s %s %s %s %s ______" % \
+            #         (metadata["gtag"], metadata["xsec"], metadata["kfact"], metadata["efact"], ",".join(metadata["sparms"]))
+            # print "___________________________________________________"
+            # print "dataset: %s" % new_dataset
+            # print "nevents: %i" % nevents
+            # print "nevents_effective: %i" % nevents_effective
+            # for miniaod in miniaods:
+            #     print miniaod
+            # print
+            # print 
 
