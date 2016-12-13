@@ -7,11 +7,11 @@ import os, time, re
 # USER PARAMS
 #############
 twiki_username = "FrankGolf"
-old_twiki = "Run2Samples25ns80X"
-new_twiki = "Run2Samples25ns80XminiAODv2"
-campaign_string = "RunIISpring16MiniAODv2"
-new_gtag = "80X_mcRun2_asymptotic_2016_miniAODv2_v0"
-new_cms3tag = "CMS3_V08-00-05"
+old_twiki = "Run2Samples25ns80XminiAODv2"
+new_twiki = "Run2Samples25nsMoriond17"
+campaign_string = "RunIISummer16MiniAODv2"
+new_gtag = "80X_mcRun2_asymptotic_2016_TrancheIV_v6"
+new_cms3tag = "CMS3_V08-00-16"
 new_assigned = "Frank"
 do_xsec_check = True # MAKE SURE ALL XSEC MATCH OR ELSE VERY BAD
 if os.getenv("USER") == "namin":
@@ -63,31 +63,46 @@ old_datasets = [s["dataset"] for s in old_samples if "dataset" in s]
 new_datasets = dis_client.query("/*/*%s*/MINIAODSIM" % campaign_string)["response"]["payload"]
 already_new_datasets = [s["dataset"] for s in already_new_samples if "dataset" in s]
 
+# print new_datasets
+# /TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM
+# print [nd for nd in new_datasets if "ttw" in nd.lower()]
+
 # for each old, find new sample that has same content between first two slashes (the Primary Dataset) and ext number matches
 # map old dataset name --> new dataset name
 # map new dataset name --> old dataset name
+# print [od for od in old_datasets if "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8" in od]
+# print [od for od in new_datasets if "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8" in od]
+
 d_old_to_new = {}
 for old in old_datasets:
     matches = []
     for new in new_datasets:
-        if old.split("/")[1] != new.split("/")[1]: continue
-        if "RAWAODSIM" in old or "RAWAODSIM" in new: continue
 
-        ext = None
-        match_old = re.search("_ext([0-9]{1,2})", old)
-        match_new = re.search("_ext([0-9]{1,2})", new)
-        if match_old:
-            # if old is _ext, then make sure new matches, or else skip
-            if not match_new: continue
-            if match_new and match_new.group(0) != match_old.group(0): continue
-        else:
-            # if old is not ext, then don't match a new ext to it
-            if match_new: continue
+        if old.split("/")[1] != new.split("/")[1]: continue
+        if "RAWAODSIM" in new: continue
+        if "RECODEBUG" in new: continue
+        if "PUFlat" in new: continue
+        if "QCD_Pt-15to7000" in new: continue
+
+        # if "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8" in old and "QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8" in new:
+        #     print "_____>", old, new
+
+        # ext = None
+        # match_old = re.search("_ext([0-9]{1,2})", old)
+        # match_new = re.search("_ext([0-9]{1,2})", new)
+        # if match_old:
+        #     # if old is _ext, then make sure new matches, or else skip
+        #     if not match_new: continue
+        #     if match_new and match_new.group(0) != match_old.group(0): continue
+        # else:
+        #     # if old is not ext, then don't match a new ext to it
+        #     if match_new: continue
 
 
         matches.append(new)
 
-    if len(matches) != 1: continue
+    # print "len(matches)", len(matches)
+    if len(matches) < 1: continue
     d_old_to_new[old] = matches[0]
 
 # invert dict can't use dict comprehension in python 2.6 wtf
@@ -100,7 +115,7 @@ for typ in types:
     samples = [d_old_to_new[old] for old in d_samples_to_type if d_samples_to_type[old] == typ and old in d_old_to_new and d_old_to_new[old] not in already_new_datasets]
     if len(samples) == 0: print_good(typ + " (%i)" % len(samples))
     else: print_warn(typ + " (%i)" % len(samples))
-    for new in samples:
+    for new in sorted(list(set(samples))):
 
         twikiline = d_dataset_to_twikiline[ d_new_to_old[new] ]
         parts = twikiline.split("|")

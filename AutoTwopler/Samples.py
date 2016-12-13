@@ -8,7 +8,7 @@ import random
 try:
     from WMCore.Configuration import Configuration
     from CRABAPI.RawCommand import crabCommand
-    from CRABClient.UserUtilities import setConsoleLogLevel
+    from CRABClient.UserUtilities import setConsoleLogLevel, getUsernameFromSiteDB
     from CRABClient.ClientUtilities import LOGLEVEL_MUTE
     # I recommend putting `Root.ErrorIgnoreLevel: Error` in your .rootrc file
     from ROOT import TFile, TH1F, TChain
@@ -325,6 +325,9 @@ class Sample:
         elif "RunIISpring16MiniAODv2" in ds:
             self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
+        elif "RunIISummer16MiniAODv2" in ds:
+            self.sample["pset"] = self.params.pset_mc
+            self.sample["specialdir"] = "run2_moriond17"
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         elif self.sample["isdata"]: self.sample["specialdir"] = "run2_data_test"
         else:
@@ -576,6 +579,7 @@ class Sample:
         config.Data.unitsPerJob = 1
         config.Data.ignoreLocality = True
         config.Data.splitting = 'FileBased'
+        config.Data.outLFNDirBase = '/store/user/%s/AutoTwopler/' % (getUsernameFromSiteDB())
         # TODO: per https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
         #       use outLFNDirBase to make samples go into, say "/hadoop/cms/store/user/<user>/80X/"
         #       need to propagate this change everywhere else too
@@ -930,7 +934,7 @@ class Sample:
         if self.do_filelist:
             primary_dataset = "_".join(self.sample["dataset"].split("/")[1:3])
 
-        self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/%s/crab_%s/%s/0000/" % (self.sample["user"], primary_dataset, requestname, datetime)
+        self.sample["crab"]["outputdir"] = "/hadoop/cms/store/user/%s/AutoTwopler/%s/crab_%s/%s/0000/" % (self.sample["user"], primary_dataset, requestname, datetime)
 
         if "status" not in self.sample["crab"]: return False
         if self.sample["crab"]["status"] != "COMPLETED": return False
@@ -1664,9 +1668,6 @@ class Sample:
         fname_to_info = {}
         imerged_to_ijob = self.sample["imerged_to_ijob"]
         ijob_to_nevents = self.sample["ijob_to_nevents"]
-
-        # TODO/FIXME maybe if we run the rootfile checking function twice and require the output is the same
-        # then we can eliminate uber-transient issues? (or run thrice if first two don't agree)
 
         # main loop to store any and all problems with each merged file
         self.do_log("started looping over merged files to check for validity")
