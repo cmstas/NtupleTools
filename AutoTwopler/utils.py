@@ -65,15 +65,17 @@ def read_samples(filename="instructions.txt"):
                 analysis, baby_tag, dataset, package, executable = parts[1:6]
                 if len(parts) > 6:
                     extra = parts[6:]
+                else:
+                    extra = ''
                 sample = {
-                        "analysis": analysis,
-                        "dataset": dataset,
-                        "baby_tag": baby_tag,
-                        "package": package,
-                        "executable": executable,
-                        "type": "BABY",
-                        "extra": extra,
-                        }
+                  "analysis": analysis,
+                  "dataset": dataset,
+                  "baby_tag": baby_tag,
+                  "package": package,
+                  "executable": executable,
+                  "type": "BABY",
+                  "extra": extra,
+                }
 
             else:
                 dataset, gtag, xsec, kfact, efact = parts[:5]
@@ -94,6 +96,7 @@ def read_samples(filename="instructions.txt"):
                     for key in d_parsed: sample[key] = d_parsed[key]
 
             samples.append(sample)
+            print sample
     return samples
 
 def parse_filelist(filename):
