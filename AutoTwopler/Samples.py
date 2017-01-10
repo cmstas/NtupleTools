@@ -361,7 +361,7 @@ class Sample:
 
         # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
         extra_vals = self.extra or []
-        nevts, output_names, exe_args = -1, ["output.root"], ""
+        nevts, output_names, exe_args = -1, "output.root", ""
         if len(extra_vals) == 2:
             nevts, output_names = extra_vals
         if len(extra_vals) == 3:
