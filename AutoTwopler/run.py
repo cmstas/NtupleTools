@@ -129,7 +129,7 @@ def main(instructions=None, params=None):
             print ">>> All %i samples are done. Exiting." % n_samples
             sys.exit()
 
-        sleep_time = 5 if i < 2 else 600
+        sleep_time = 60 if i < 2 else 3*600
         logger.debug("sleeping for %i seconds..." % sleep_time)
         u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
 
