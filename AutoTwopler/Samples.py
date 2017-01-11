@@ -309,7 +309,8 @@ class Sample:
             self.sample["specialdir"] = "run2_fastsim"
         elif "Spring16Fast" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
-            self.sample["specialdir"] = "run2_25ns_80MiniAODv2_fastsim"
+            # self.sample["specialdir"] = "run2_25ns_80MiniAODv2_fastsim"
+            self.sample["specialdir"] = "run2_moriond17_fastsim"
         elif "RunIISpring15FSPremix" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
@@ -592,7 +593,8 @@ class Sample:
         config.section_('User')
         config.section_('Site')
         config.Site.storageSite = 'T2_US_UCSD'
-        config.Site.whitelist = ['T2_US_*']
+        # config.Site.whitelist = ['T2_US_*']
+        config.Site.whitelist = ['T2_*']
 
         if self.do_filelist:
             files = self.extra["filelist"]
@@ -718,9 +720,9 @@ class Sample:
                     q.put(out)
                 except Exception as e:
                     self.do_log("ERROR with crab submit (will try again later): "+str(e))
-                    print "printing e"
-                    print e
-                    print "printed e"
+                    self.do_log("Deleting crab task directory so that we will submit on next iteration")
+                    u.cmd("[[ -e {0} ]] && rm -rf {0}".format(self.sample["crab"]["taskdir"]))
+                    q.put({})
 
             self.do_log("submitting jobs...")
             p = multiprocessing.Process(target=submit, args=(q, self.misc["crab_config"], self.proxy_file_dict.get("proxy",None)))
@@ -769,7 +771,8 @@ class Sample:
     def crab_resubmit(self, more_ram=False):
         try:
             if more_ram:
-                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], maxmemory="3000", **self.proxy_file_dict)
+                # out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], maxmemory="3000", **self.proxy_file_dict)
+                out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], maxmemory="3500", **self.proxy_file_dict)
             else:
                 out = crabCommand('resubmit', dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
             return out["status"] == "SUCCESS"
@@ -869,7 +872,7 @@ class Sample:
 
                     self.sample["crab"]["jobs_left"].append(ijob)
 
-                    if (nretries >= 0 and done_frac > 0.95) or (nretries >= 1 and done_frac > 0.93):
+                    if (nretries >= 0 and done_frac > 0.90) or (nretries >= 1 and done_frac > 0.87):
                         self.sample["crab"]["jobs_left_tail"].append(ijob)
 
         # print self.sample["crab"]["jobs_left"]
@@ -1035,20 +1038,28 @@ class Sample:
             return (True, 0, 0, 0)
 
         tree = f.Get(treename)
-        n_entries = tree.GetEntriesFast()
+        try:
+            n_entries = tree.GetEntriesFast()
+        except ReferenceError as e:
+            self.do_log("ERROR with rootfile: "+str(e))
+            return (True, 0, 0, 0)
+
+
         if n_entries == 0:
             self.do_log("WARNING: %s has 0 entries" % fname)
             return (True, 0, 0, 0)
 
-        if self.sample["isdata"]:
-            pos_weight = tree.GetEntries()
-        else:
+        pos_weight = n_entries
+        isdata = self.sample["isdata"]
+        isnlo = ("powheg" in self.sample["dataset"]) or ("amcatnlo" in self.sample["dataset"])
+        if not isdata and isnlo:
+            # self.do_log("Note: this is an NLO sample, so we're scanning genps_weight")
             pos_weight = tree.GetEntries("genps_weight>=0")
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 
         h_pfmet = TH1F("h_pfmet", "h_pfmet", 100, 0, 1000);
-        tree.Draw("evt_pfmet >> h_pfmet", "", "goff")
+        tree.Draw("evt_pfmet >> h_pfmet", "", "goff",1000)
         avg_pfmet = h_pfmet.GetMean()
         if avg_pfmet < 0.01 or avg_pfmet > 10000:
             self.do_log("WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet))
@@ -1394,7 +1405,7 @@ class Sample:
         do_kill_long_running_condor = True
         if do_kill_long_running_condor:
             # only ~2% of jobs take more than 5 hours
-            longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=5.0)
+            longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=4.0)
             if len(longrunning_list) > 0:
                 longrunning_set = set(longrunning_list)
                 longrunning_ID_set = set(longrunning_ID_list)
