@@ -51,9 +51,14 @@ def make_dashboard():
 def copy_json():
     cmd("cp data.json %s/" % get_web_dir())
 
-def read_samples(filename="instructions.txt"):
+def read_samples(instructions="instructions.txt"):
+    # if user fed in a list of dicts, then just make this the 
+    # already-parsed object and return it
+    if type(instructions) == list:
+        return instructions
+
     samples = []
-    with open(filename, "r") as fhin:
+    with open(instructions, "r") as fhin:
         for line in fhin.readlines():
             line = line.strip()
             if len(line) < 5: continue
