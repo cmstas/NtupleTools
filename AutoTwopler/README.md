@@ -99,4 +99,3 @@ into [input directory]/new_xsec. It is up to the user to verify that the xsec wa
 
 ## TODO:
 - [ ] Make tester class
-- [ ] Put crab output into a folder within hadoop so that not all folders are directly in hadoop, maybe use "80X" or "76X" as the folder, so /hadoop/cms/..../namin/80X/crab_TTJets.....
