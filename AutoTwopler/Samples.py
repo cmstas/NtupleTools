@@ -480,6 +480,11 @@ class Sample:
             self.do_log("found an action to send an email when job is complete")
             self.misc["email_when_done"] = True
             return True
+
+        elif "baby_remerge" in action:
+            self.do_log("found an action to remerge baby")
+            self.set_status("condor")
+            return True
         
         else:
             self.do_log("don't recognize action '%s'" % action)
@@ -1284,6 +1289,7 @@ class Sample:
         # need to cd into the script area because if the script references local macros, the paths won't be right
         dirname = os.path.dirname(script)
         scriptname = os.path.basename(script)
+        self.do_log("Starting to merge the sample")
         stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
 
         return stat == 0 # 0 is good, anything else is bad

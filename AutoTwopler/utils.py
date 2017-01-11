@@ -355,6 +355,7 @@ def smart_sleep(t, files_to_watch=[]):
     for i in range(10):
         time.sleep(tenth)
         for fname in files_to_watch:
+            if type(fname) != str: continue
             if os.path.isfile(fname) and time.time()-os.path.getmtime(fname) <= tenth:
                 return
     return

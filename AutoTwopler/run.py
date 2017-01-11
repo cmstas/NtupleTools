@@ -58,7 +58,7 @@ def main(instructions=None, params=None):
                 typ = s.get_type()
 
                 # grab actions from a text file and act on them, consuming (removing) them if successful
-                for dataset_name, action in u.get_actions(dataset_name=s["dataset"]):
+                for dataset_name, action in u.get_actions(actions_fname=os.path.abspath(__file__).rsplit("/",1)[0]+"/actions.txt",dataset_name=s["dataset"]):
                     if s.handle_action(action):
                         u.consume_actions(dataset_name=s["dataset"],action=action)
 
@@ -131,7 +131,7 @@ def main(instructions=None, params=None):
 
         sleep_time = 5 if i < 2 else 600
         logger.debug("sleeping for %i seconds..." % sleep_time)
-        u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
+        u.smart_sleep(sleep_time, files_to_watch=[os.path.abspath(__file__).rsplit("/",1)[0]+"/actions.txt", instructions])
 
 if __name__ == "__main__":
 
