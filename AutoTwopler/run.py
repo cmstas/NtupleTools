@@ -123,6 +123,7 @@ def main(instructions=None, params=None):
         data["time_stats"].append( (u.get_timestamp(), tot_breakdown) )
         data["log"] = u.get_last_n_lines(fname=params.log_file, N=100)
         with open(data_json, "w") as fhout:
+            data["samples"] = sorted(data["samples"], key=lambda x: x.get("status","done")=="done")
             json.dump(data, fhout, sort_keys = True, indent = 4)
         u.copy_json()
 
