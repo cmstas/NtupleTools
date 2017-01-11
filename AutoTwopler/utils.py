@@ -101,7 +101,6 @@ def read_samples(instructions="instructions.txt"):
                     for key in d_parsed: sample[key] = d_parsed[key]
 
             samples.append(sample)
-            print sample
     return samples
 
 def parse_filelist(filename):
