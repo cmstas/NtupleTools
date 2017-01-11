@@ -25,8 +25,8 @@ sweepRoot_scripts = ["/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_de
 merging_scripts = ["/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/mergeScript.sh", "/home/users/namin/duck_80x/NtupleTools/AutoTwopler/baby_devel/mergeHadoopFiles.C"]
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 """
-try: from same_sign import *
-except: pass
+# try: from same_sign import *
+# except: pass
 
 ### CMS3
 pset_data = "DataProduction2015_NoFilter_PAT_cfg.py"
@@ -71,6 +71,12 @@ elif campaign == "80X_stopBabyMaker":
     scram_arch="slc6_amd64_gcc530"
     cms3tag="CMS3_V08-00-05"
     cmssw_ver="CMSSW_8_0_5"
+    jecs = 'Spring16_25nsV1_MC.db'
+
+elif campaign == "SS_babymaker":
+    scram_arch="slc6_amd64_gcc491"
+    cms3tag="CMS3_V08-00-05"
+    cmssw_ver="CMSSW_7_4_12"
     jecs = 'Spring16_25nsV1_MC.db'
 
 elif campaign == "80X_miniaodv2_vince":

@@ -51,9 +51,14 @@ def make_dashboard():
 def copy_json():
     cmd("cp data.json %s/" % get_web_dir())
 
-def read_samples(filename="instructions.txt"):
+def read_samples(instructions="instructions.txt"):
+    # if user fed in a list of dicts, then just make this the 
+    # already-parsed object and return it
+    if type(instructions) == list:
+        return instructions
+
     samples = []
-    with open(filename, "r") as fhin:
+    with open(instructions, "r") as fhin:
         for line in fhin.readlines():
             line = line.strip()
             if len(line) < 5: continue
@@ -65,15 +70,17 @@ def read_samples(filename="instructions.txt"):
                 analysis, baby_tag, dataset, package, executable = parts[1:6]
                 if len(parts) > 6:
                     extra = parts[6:]
+                else:
+                    extra = ''
                 sample = {
-                        "analysis": analysis,
-                        "dataset": dataset,
-                        "baby_tag": baby_tag,
-                        "package": package,
-                        "executable": executable,
-                        "type": "BABY",
-                        "extra": extra,
-                        }
+                  "analysis": analysis,
+                  "dataset": dataset,
+                  "baby_tag": baby_tag,
+                  "package": package,
+                  "executable": executable,
+                  "type": "BABY",
+                  "extra": extra,
+                }
 
             else:
                 dataset, gtag, xsec, kfact, efact = parts[:5]
@@ -94,6 +101,7 @@ def read_samples(filename="instructions.txt"):
                     for key in d_parsed: sample[key] = d_parsed[key]
 
             samples.append(sample)
+            print sample
     return samples
 
 def parse_filelist(filename):
@@ -347,6 +355,7 @@ def smart_sleep(t, files_to_watch=[]):
     for i in range(10):
         time.sleep(tenth)
         for fname in files_to_watch:
+            if type(fname) != str: continue
             if os.path.isfile(fname) and time.time()-os.path.getmtime(fname) <= tenth:
                 return
     return

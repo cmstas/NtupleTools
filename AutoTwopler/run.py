@@ -19,6 +19,7 @@ def main(instructions=None, params=None):
         params = __import__('params')
 
     data_json = "data.json"
+    actions_fname = os.path.abspath(__file__).rsplit("/",1)[0]+"/actions.txt"
 
     u.copy_jecs()
     logger_name = u.setup_logger()
@@ -58,9 +59,9 @@ def main(instructions=None, params=None):
                 typ = s.get_type()
 
                 # grab actions from a text file and act on them, consuming (removing) them if successful
-                for dataset_name, action in u.get_actions(dataset_name=s["dataset"]):
+                for dataset_name, action in u.get_actions(actions_fname=actions_fname,dataset_name=s["dataset"]):
                     if s.handle_action(action):
-                        u.consume_actions(dataset_name=s["dataset"],action=action)
+                        u.consume_actions(dataset_name=s["dataset"],action=action, actions_fname=actions_fname)
 
                 if not s.pass_tsa_prechecks(): continue
 
@@ -122,6 +123,7 @@ def main(instructions=None, params=None):
         data["time_stats"].append( (u.get_timestamp(), tot_breakdown) )
         data["log"] = u.get_last_n_lines(fname=params.log_file, N=100)
         with open(data_json, "w") as fhout:
+            data["samples"] = sorted(data["samples"], key=lambda x: x.get("status","done")=="done")
             json.dump(data, fhout, sort_keys = True, indent = 4)
         u.copy_json()
 
@@ -131,7 +133,7 @@ def main(instructions=None, params=None):
 
         sleep_time = 60 if i < 2 else 3*600
         logger.debug("sleeping for %i seconds..." % sleep_time)
-        u.smart_sleep(sleep_time, files_to_watch=["actions.txt", instructions])
+        u.smart_sleep(sleep_time, files_to_watch=[actions_fname, instructions])
 
 if __name__ == "__main__":
 

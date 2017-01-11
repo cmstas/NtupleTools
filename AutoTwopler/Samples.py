@@ -362,7 +362,7 @@ class Sample:
 
         # extra_vals at the moment will be a list of the arguments given after the first 6 things for babies in instructions.txt
         extra_vals = self.extra or []
-        nevts, output_names, exe_args = -1, ["output.root"], ""
+        nevts, output_names, exe_args = -1, "output.root", ""
         if len(extra_vals) == 2:
             nevts, output_names = extra_vals
         if len(extra_vals) == 3:
@@ -480,6 +480,11 @@ class Sample:
         elif "email_done" in action:
             self.do_log("found an action to send an email when job is complete")
             self.misc["email_when_done"] = True
+            return True
+
+        elif "baby_remerge" in action:
+            self.do_log("found an action to remerge baby")
+            self.set_status("condor")
             return True
         
         else:
@@ -1295,6 +1300,7 @@ class Sample:
         # need to cd into the script area because if the script references local macros, the paths won't be right
         dirname = os.path.dirname(script)
         scriptname = os.path.basename(script)
+        self.do_log("Starting to merge the sample")
         stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
 
         return stat == 0 # 0 is good, anything else is bad

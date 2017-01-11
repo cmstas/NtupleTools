@@ -391,6 +391,8 @@ function fillDOM(data) {
             if(sample["type"] == "CMS3") {
                 buff += "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")' title='skip tail CRAB jobs'> &#9986; </a> ";
                 buff += "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")' title='re-postprocess'> &#128296; </a> ";
+            } else {
+                buff += "<a href='#/' onClick='doSendAction(\"baby_remerge\","+i+")' title='remerge'> &#128290; </a> ";
             }
             buff += "<a href='#/' onClick='doSendAction(\"email_done\","+i+")' title='send email when done'> &#9993; </a> ";
 
