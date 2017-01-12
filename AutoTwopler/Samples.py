@@ -1,5 +1,6 @@
 import os, sys, glob, select
 import datetime, tarfile, pprint
+import time
 import pickle, json, logging
 import multiprocessing
 import re, copy
@@ -351,6 +352,8 @@ class Sample:
 
 
     def set_baby_inputs(self):
+
+
         if self.sample["baby"]["have_set_inputs"]: return
 
         if not os.path.isdir(self.misc["pfx_babies"]): os.makedirs(self.misc["pfx_babies"])
@@ -452,7 +455,7 @@ class Sample:
                 fhout.write(copy_cmd + "\n\n")
             fhout.write("echo After copy\necho Date: $(date +%s)")
         
-        self.sample["baby"]["input_filenames"] = self.get_snt_merged_files()
+        self.sample["baby"]["input_filenames"], self.sample["cms3tag"] = self.get_cms3_info()
         self.sample["baby"]["imerged"] = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
         self.sample["baby"]["have_set_inputs"] = True
 
@@ -536,23 +539,24 @@ class Sample:
         self.sample["crab"]["status"] = "COMPLETED"
         return True
 
-    def get_snt_merged_files(self):
+    def get_cms3_info(self):
         filenames = []
 
         if FAKE_BABY_MERGED: 
             self.do_log("Running over %i FAKE merged ntuples" % FAKE_BABY_NJOBS)
             return ["/hadoop/cms/store/user/namin/fakedirectory/merged_ntuple_%i.root" % i for i in range(1,FAKE_BABY_NJOBS+1)]
 
-        query_str = "%s | grep location" % self.sample["dataset"]
+        query_str = "%s,sample_type=CMS3 | grep cms3tag,location" % self.sample["dataset"]
         response = dis.query(query_str, typ='snt')
-        finaldir = response["response"]["payload"][0]
+        finaldir = response["response"]["payload"][0]["location"]
+        cms3tag = response["response"]["payload"][0]["cms3tag"]
         filenames = glob.glob("%s/merged_ntuple_*.root" % finaldir)
 
-        return filenames
+        return filenames, cms3tag
 
 
     def check_new_merged_for_babies(self):
-        self.sample["baby"]["input_filenames"] = self.get_snt_merged_files()
+        self.sample["baby"]["input_filenames"], _ = self.get_cms3_info()
         old_imerged = self.sample["baby"]["imerged"]
         new_imerged = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
         self.sample["baby"]["imerged"] = new_imerged
@@ -1193,7 +1197,8 @@ class Sample:
 
 
     def get_merged_done(self):
-        # return set of merged indices
+        # return set of merged indices. my naming convention is unfortunate:
+        # for CMS3, this means actual merged files, and for babies this means completed *unmerged* babies
         merged_dir = ""
         if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
         elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
@@ -1271,6 +1276,7 @@ class Sample:
         if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
         else: 
             self.sample["baby"]["merged_dir"] = self.params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
+            self.sample["baby"]["merged_dir"] += "/%s/%s/" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"])
             self.do_log("This sample is now done.")
 
         return merged
@@ -1634,8 +1640,14 @@ class Sample:
         if self.misc["update_dis_when_done"]:
 
             d = copy.deepcopy(self.sample)
-            query_str = "dataset_name=%s,sample_type=%s,cms3tag=%s,gtag=%s,location=%s,nevents_in=%i,nevents_out=%i,xsec=%s,kfactor=%s,filter_eff=%s" \
-               % (d["dataset"], d["type"], d["cms3tag"], d["gtag"], d["finaldir"], d["nevents_DAS"], d["nevents_merged"], str(d["xsec"]), str(d["kfact"]), str(d["efact"]))
+
+            timestamp = int(time.time())
+            if self.baby:
+                query_str = "dataset_name=%s,sample_type=%s,analysis=%s,cms3tag=%s,baby_tag=%s,location=%s,timestamp=%i" \
+                   % (d["dataset"], d["type"], d["baby"]["analysis"], d["cms3tag"], d["baby"]["baby_tag"], d["baby"]["merged_dir"],timestamp)
+            else:
+                query_str = "dataset_name=%s,sample_type=%s,cms3tag=%s,gtag=%s,location=%s,nevents_in=%i,nevents_out=%i,xsec=%s,kfactor=%s,filter_eff=%s,timestamp=%i" \
+                   % (d["dataset"], d["type"], d["cms3tag"], d["gtag"], d["finaldir"], d["nevents_DAS"], d["nevents_merged"], str(d["xsec"]), str(d["kfact"]), str(d["efact"]),timestamp)
 
             response = {}
             try:
@@ -1643,6 +1655,7 @@ class Sample:
                 response = dis.query(query_str, typ='update_snt')
                 response = response["response"]["payload"]
                 if "updated" in response and str(response["updated"]).lower() == "true": succeeded = True
+                self.do_log("updated DIS")
             except: pass
 
             if not succeeded:
@@ -1654,6 +1667,7 @@ class Sample:
 
 
     def do_done_stuff(self):
+
         self.do_send_email()
         self.do_update_dis()
 
@@ -1661,7 +1675,6 @@ class Sample:
     def copy_files(self):
         self.do_log("started copying files to %s" % self.sample["finaldir"])
         u.cmd("mkdir -p %s/" % self.sample["finaldir"])
-        # TODO: hadoop move command is faster
         u.cmd( "mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
         self.do_log("finished copying files")
 
