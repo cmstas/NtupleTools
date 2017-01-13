@@ -12,6 +12,7 @@ open_datasets = False # for babies, if we want the AutoTwopler to keep pulling i
 sweepRoot_scripts = [] # put absolute path to a bash script which takes 1 argument (filename) and has "exit 0" for good file, and something else for bad files. leaving this as an empty list will skip sweepRooting. Since it is a list, you can put multiple files to copy over for use with sweepRooting (first element must still be the executable)
 merging_scripts = [] # same story as above for merging_scripts
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/" # where final merged babies will end up - useless if merging is disabled (empty list above)
+merge_babies_on_condor = False # if you're weird like MT2 and need to merge on condor
 
 ### ANALYSIS-SPECIFIC STUFF FOR BABIES
 # Prepare a file like same_sign.py in this directory with parameters that override the above defaults (default = no merging, no sweeprooting)

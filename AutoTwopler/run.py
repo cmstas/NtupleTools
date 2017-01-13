@@ -11,7 +11,7 @@ import traceback
 import os
 import logging
 
-def main(instructions=None, params=None):
+def main(instructions=None, params=None, do_one_iteration=False):
     if not instructions:
         return
 
@@ -131,9 +131,12 @@ def main(instructions=None, params=None):
             print ">>> All %i samples are done. Exiting." % n_samples
             sys.exit()
 
-        sleep_time = 60 if i < 2 else 3*600
-        logger.debug("sleeping for %i seconds..." % sleep_time)
-        u.smart_sleep(sleep_time, files_to_watch=[actions_fname, instructions])
+        if not do_one_iteration:
+            sleep_time = 60 if i < 2 else 3*600
+            logger.debug("sleeping for %i seconds..." % sleep_time)
+            u.smart_sleep(sleep_time, files_to_watch=[actions_fname, instructions])
+        else:
+            break
 
 if __name__ == "__main__":
 

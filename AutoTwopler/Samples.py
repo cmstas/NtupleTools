@@ -1160,11 +1160,15 @@ class Sample:
         self.sample['nevents_unmerged'] = sum([x[0] for x in self.sample['ijob_to_nevents'].values()])
 
 
-    def get_condor_submitted(self, running_at_least_hours=0.0):
+    def get_condor_submitted(self, running_at_least_hours=0.0, baby_merge_jobs=False):
         # return lists of merged indices and set of condor clusterID
         macro_val = self.sample["crab"]["requestname"]
         if self.sample["type"] == "BABY":
             macro_val = "BABY_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], self.sample["shortname"])
+
+        if baby_merge_jobs:
+            macro_val = "BABYMERGE_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], self.sample["shortname"])
+
         cmd = "condor_q $USER -autoformat ClusterId GridJobStatus EnteredCurrentStatus CMD ARGS -const 'AutoTwopleRequestname==\"%s\"'" % macro_val
         output = u.get(cmd)
 
@@ -1196,12 +1200,13 @@ class Sample:
         return merged_ids, clusterIDs
 
 
-    def get_merged_done(self):
+    def get_merged_done(self, merged_dir=None, startswith=None, get_baby_merged=False):
         # return set of merged indices. my naming convention is unfortunate:
         # for CMS3, this means actual merged files, and for babies this means completed *unmerged* babies
-        merged_dir = ""
-        if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
-        elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
+        # if "get_baby_merged" is True, then this refers to actually *merged* babies
+        if not merged_dir:
+            if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
+            elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
 
         if not os.path.isdir(merged_dir): return set()
 
@@ -1209,7 +1214,7 @@ class Sample:
             files = os.listdir(merged_dir)
             files = [f for f in files if f.endswith(".root")]
             return set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
-        elif self.sample["type"] == "BABY":
+        elif self.sample["type"] == "BABY" and not get_baby_merged:
             output_names = self.sample["baby"]["output_names"]
             # remember that the file names are merged_dir/{output_name_noext}/{output_name_noext}_{imerged}.root
             d_output_name = {} # key is the output_name and value is a set of the done files
@@ -1222,6 +1227,12 @@ class Sample:
             # done files are ones such that ALL output files are there, so we need to take the intersection of the sets
             done_indices = set.intersection(*d_output_name.values())
             return done_indices
+
+        elif self.sample["type"] == "BABY" and get_baby_merged:
+            files = os.listdir(merged_dir)
+            files = [f for f in files if f.endswith(".root")]
+            files = [f for f in files if f.startswith(startswith)]
+            return set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
 
 
 
@@ -1267,14 +1278,21 @@ class Sample:
         # print "done:", done
         if not done: return False
 
-        merged = self.do_merge_babies()
         self.sample["baby"]["running"] = 0
         self.sample["baby"]["idle"] = 0
         self.sample["baby"]["condor_done"] = self.sample["baby"]["total"]
         self.sample["baby"]["sweepRooted"] = self.sample["baby"]["total"]
 
-        if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
-        else: 
+        if self.params.merge_babies_on_condor:
+            merged = self.do_merge_babies_condor()
+            
+        else:
+            
+            merged = self.do_merge_babies()
+
+            if not merged: self.do_log("ERROR: This sample didn't merge successfully. Will keep trying on the next pass.")
+
+        if merged:
             self.sample["baby"]["merged_dir"] = self.params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
             self.sample["baby"]["merged_dir"] += "/%s/%s/" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"])
             self.do_log("This sample is now done.")
@@ -1310,6 +1328,49 @@ class Sample:
         stat, out = u.cmd("cd %s; ./%s \"%s\" >& ../%s/merged_log.txt" % (dirname,scriptname,long_ass_args_string, self.sample["crab"]["taskdir"]), returnStatus=True)
 
         return stat == 0 # 0 is good, anything else is bad
+
+    def do_merge_babies_condor(self):
+        input_dir = self.sample["baby"]["finaldir"]
+
+        baby = self.sample["baby"]
+
+        shortname = self.sample["shortname"]
+        try: shortname = self.params.dataset_to_shortname(self.sample["dataset"])
+        except: pass
+        if not shortname.endswith(".root"): shortname += ".root"
+
+        output_names = map(lambda x: x.rsplit(".",1)[0], baby["output_names"])
+        
+        self.sample["imerged_to_ijob"] = {}
+
+        # make dictionary of baby indices to merge together (each output_name has its own dict)
+        if not self.sample["imerged_to_ijob"]:
+            tmp = {}
+            for oname in output_names:
+                tmp[oname] = {}
+                self.do_log("making merging chunks for %s_*.root" % oname)
+                group, groups = [], []
+                tot_size = 0.0
+                for irfile, rfile in enumerate(glob.glob("%s/%s/*.root" % (input_dir,oname))):
+                    file_size = os.path.getsize(rfile) / 1.0e9
+                    ijob = int(rfile.split("_")[-1].replace(".root",""))
+                    tot_size += file_size
+                    group.append(ijob)
+                    if tot_size >= 2.0: # in GB!
+                        groups.append(group)
+                        group = []
+                        tot_size = 0.0
+                if len(group) > 0: groups.append(group) # finish up last group
+                for igp,gp in enumerate(groups):
+                    tmp[oname][igp+1] = gp
+
+            self.sample["imerged_to_ijob"] = tmp.copy()
+
+        if self.sample["imerged_to_ijob"]:
+            return self.submit_baby_merge_jobs()
+
+        return False
+        
 
     def fake_baby_creation(self):
         output_names = self.sample["baby"]["output_names"]
@@ -1458,6 +1519,142 @@ class Sample:
 
         if len(error) > 0:
             self.do_log("submit error: %s" % error)
+    
+    def submit_baby_merge_jobs(self):
+
+        """
+        executable will take args:
+        inputdir (merge the comma separated input_files here)
+        outputdir (copy them here)
+        imerged 
+        output_name
+        shortname (name should be: <shortname>_<output_name>_<imerged>.root
+                   so if we merge Wjets skim.root and we're in the first (or only
+                   chunk), then the output should be named Wjets_skim_1.root)
+        input_files
+        """
+
+        baby = self.sample["baby"]
+
+        shortname = self.sample["shortname"]
+        try: shortname = self.params.dataset_to_shortname(self.sample["dataset"])
+        except: pass
+        shortname = shortname.replace(".root","")
+
+        output_names = map(lambda x: x.rsplit(".",1)[0], baby["output_names"])
+        
+        working_dir = self.sample["basedir"]
+        unmerged_dir = baby["finaldir"]
+
+        output_dir = self.params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
+        output_dir += "/%s/%s/" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"])
+
+        path_fragment = "%s/%s/%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], shortname)
+        submit_file = "%s/%s/submit_merge.cmd" % (self.sample["basedir"], self.misc["pfx_babies"])
+        executable_script = baby["merging_script"]
+        merge_script = [ms for ms in self.params.merging_scripts if ".sh" not in ms][0]
+        proxy_file = u.get("find /tmp/x509up_u* -user $USER").strip()
+        condor_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/%s.log" % (os.getenv("USER"),path_fragment,datetime.datetime.now().strftime("+%Y.%m.%d-%H.%M.%S"))
+        std_log_files = "/nfs-7/userdata/%s/tupler_babies/%s/std_logs/" % (os.getenv("USER"),path_fragment)
+        input_files = ",".join([executable_script, merge_script])
+
+        try:
+            if not os.path.isdir(std_log_files): os.makedirs(std_log_files)
+        except:
+            self.do_log("ERROR making log file directory: %s" % std_log_files)
+            self.do_log("see if you can make it manually. if not, switch to another uaf.")
+            raise Exception("can't make log file directory: %s" % std_log_files)
+
+        condor_params = {
+                "exe": executable_script,
+                "inpfiles": input_files,
+                "condorlog": condor_log_files,
+                "stdlog": std_log_files,
+                "proxy": proxy_file,
+                "requestname": "BABYMERGE_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], shortname),
+                }
+
+        cfg_format = "universe=grid \n" \
+                     "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
+                     "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
+                     "executable={exe} \n" \
+                     "arguments={args} \n" \
+                     "transfer_executable=True \n" \
+                     "when_to_transfer_output = ON_EXIT \n" \
+                     "transfer_input_files={inpfiles} \n" \
+                     "+Owner = undefined  \n" \
+                     "+AutoTwopleRequestname=\"{requestname}\" \n" \
+                     "log={condorlog} \n" \
+                     "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
+                     "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
+                     "notification=Never \n" \
+                     "x509userproxy={proxy} \n" \
+                     "should_transfer_files = yes \n" \
+                     "queue \n" 
+
+        self.sample["postprocessing"]["total"] = 0
+        self.sample["postprocessing"]["running"] = 0
+        self.sample["postprocessing"]["done"] = 0
+
+        for oname in output_names:
+            imerged_set = set(self.sample['imerged_to_ijob'][oname].keys())
+            processing_list, processing_ID_list = self.get_condor_submitted()
+            processing_set = set(processing_list)
+            processing_ID_set = set(processing_ID_list)
+
+            do_kill_long_running_condor = True
+            if do_kill_long_running_condor:
+                # only ~2% of jobs take more than 5 hours
+                longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=4.0)
+                if len(longrunning_list) > 0:
+                    longrunning_set = set(longrunning_list)
+                    longrunning_ID_set = set(longrunning_ID_list)
+                    self.do_log("The following merged file indices have been merging for more than 5 hours: %s" % ", ".join(map(str,longrunning_set)))
+                    self.do_log("Killing and resubmitting condor IDs: %s" % ", ".join(map(str,longrunning_ID_set)))
+
+                    u.cmd( "condor_rm %s" % " ".join(map(str,longrunning_ID_set)) )
+                    processing_set = processing_set - longrunning_set
+                    processing_ID_set = processing_ID_set - longrunning_ID_set
+
+            # subtract running jobs from done. we might think they're done if they begin
+            # to stageout, but they're not yet done staging out
+            done_set = self.get_merged_done(merged_dir="%s/%s/" % (output_dir,oname),startswith="%s_%s_" % (shortname, oname), get_baby_merged=True) - processing_set
+            imerged_list = list( imerged_set - processing_set - done_set ) 
+
+            self.sample["postprocessing"]["total"] += len(imerged_set)
+            self.sample["postprocessing"]["running"] += len(processing_set)
+            self.sample["postprocessing"]["done"] += len(done_set)
+
+            if len(imerged_list) > 0:
+                self.sample["status"] = "postprocessing"
+                self.do_log("submitting %i merge jobs" % len(imerged_list))
+
+            error = ""
+            for imerged in imerged_list:
+                input_names=",".join(map(lambda x: "%s_%i.root" % (oname,x),self.sample['imerged_to_ijob'][oname][imerged]))
+
+                input_arguments = " ".join(map(str,[unmerged_dir, "%s/%s/" % (output_dir, oname), imerged, oname, shortname, input_names]))
+                condor_params["args"] = input_arguments
+
+                cfg = cfg_format.format(**condor_params)
+                with open(submit_file, "w") as fhout:
+                    fhout.write(cfg)
+
+                submit_output = u.get("condor_submit %s" % submit_file)
+
+                if " submitted " in submit_output: 
+                    self.do_log("job for merged_ntuple_%i.root submitted successfully" % imerged)
+                else:
+                    self.do_log("error submitting job for merged_ntuple_%i.root" % imerged)
+                    error = submit_output
+
+            if len(error) > 0:
+                self.do_log("submit error: %s" % error)
+
+        self.sample["postprocessing"]["idle"] = self.sample["postprocessing"]["total"] - self.sample["postprocessing"]["running"] - self.sample["postprocessing"]["done"]
+
+        return self.sample["postprocessing"]["total"] == self.sample["postprocessing"]["done"]
+
 
     def sweep_baby(self, fname):
 
@@ -1479,6 +1676,8 @@ class Sample:
 
         not_swept = self.get_merged_done() - imerged_swept_set
         # print self.get_merged_done(),  imerged_swept_set, not_swept
+        if len(not_swept) >= 0:
+            self.do_log("sweeprooting %i output files" % len(not_swept))
         for imerged in not_swept:
             fnames = []
             for output_name in output_names:
