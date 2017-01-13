@@ -1676,7 +1676,7 @@ class Sample:
 
         not_swept = self.get_merged_done() - imerged_swept_set
         # print self.get_merged_done(),  imerged_swept_set, not_swept
-        if len(not_swept) >= 0:
+        if len(not_swept) > 0:
             self.do_log("sweeprooting %i output files" % len(not_swept))
         for imerged in not_swept:
             fnames = []
