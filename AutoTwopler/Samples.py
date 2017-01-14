@@ -1347,8 +1347,6 @@ class Sample:
 
         output_names = map(lambda x: x.rsplit(".",1)[0], baby["output_names"])
         
-        self.sample["imerged_to_ijob"] = {}
-
         # make dictionary of baby indices to merge together (each output_name has its own dict)
         if not self.sample["imerged_to_ijob"]:
             tmp = {}
