@@ -1632,7 +1632,7 @@ class Sample:
             error = ""
             for imerged in imerged_list:
                 input_names=",".join(map(lambda x: "%s_%i.root" % (oname,x),self.sample['imerged_to_ijob'][oname][imerged]))
-                input_arguments = " ".join(map(str,[unmerged_dir, "%s/%s/" % (output_dir, oname), imerged, oname, shortname, input_names]))
+                input_arguments = map(str,[unmerged_dir, "%s/%s/" % (output_dir, oname), imerged, oname, shortname, input_names])
                 long_ass_args_string = "UNMERGED_DIR=%s;OUTPUT_DIR=%s;IMERGED=%s;OUTPUT_NAME=%s;SHORTNAME=%s;INPUT_NAMES=%s;" % input_arguments
                 condor_params["args"] = long_ass_args_string
 
