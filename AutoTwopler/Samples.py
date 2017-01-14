@@ -1604,14 +1604,14 @@ class Sample:
 
         for oname in output_names:
             imerged_set = set(self.sample['imerged_to_ijob'][oname].keys())
-            processing_list, processing_ID_list = self.get_condor_submitted()
+            processing_list, processing_ID_list = self.get_condor_submitted(baby_merge_jobs=True)
             processing_set = set(processing_list)
             processing_ID_set = set(processing_ID_list)
 
             do_kill_long_running_condor = True
             if do_kill_long_running_condor:
                 # only ~2% of jobs take more than 5 hours
-                longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=4.0)
+                longrunning_list, longrunning_ID_list = self.get_condor_submitted(running_at_least_hours=4.0, baby_merge_jobs=True)
                 if len(longrunning_list) > 0:
                     longrunning_set = set(longrunning_list)
                     longrunning_ID_set = set(longrunning_ID_list)
