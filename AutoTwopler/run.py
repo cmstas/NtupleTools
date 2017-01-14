@@ -93,7 +93,7 @@ def main(instructions=None, params=None, do_one_iteration=False):
                         s.set_baby_inputs()
                         s.submit_baby_jobs()
 
-                    elif stat == "condor":
+                    elif stat == "condor" or stat == "postprocessing"
                         if s.is_babymaking_done():
                             s.set_status("done")
                         else:
@@ -129,10 +129,10 @@ def main(instructions=None, params=None, do_one_iteration=False):
 
         if params.exit_when_done and (n_done == n_samples):
             print ">>> All %i samples are done. Exiting." % n_samples
-            sys.exit()
+            break
 
         if not do_one_iteration:
-            sleep_time = 60 if i < 2 else 3*600
+            sleep_time = 60 if i < 2 else 2*600
             logger.debug("sleeping for %i seconds..." % sleep_time)
             u.smart_sleep(sleep_time, files_to_watch=[actions_fname, instructions])
         else:
