@@ -93,7 +93,7 @@ def main(instructions=None, params=None, do_one_iteration=False):
                         s.set_baby_inputs()
                         s.submit_baby_jobs()
 
-                    elif stat == "condor" or stat == "postprocessing"
+                    elif stat == "condor" or stat == "postprocessing":
                         if s.is_babymaking_done():
                             s.set_status("done")
                         else:
