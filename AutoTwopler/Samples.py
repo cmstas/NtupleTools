@@ -1178,10 +1178,16 @@ class Sample:
             if len(line.strip()) < 2: continue
 
             if self.sample["type"] == "BABY":
-                clusterID, status, entered_current_status, cmd = line.strip().split(" ")[:4]
-                merged_index = int(line.split("merged_ntuple_",1)[1].split(".root")[0])
+                if baby_merge_jobs:
+                    # 907891.0   fgolf           1/13 21:46   0+00:00:00 I  0   0.0  merging_script.sh UNMERGED_DIR=/hadoop/cms/store/user/fgolf/AutoTwopler_babies/mt2_V00-08-14/WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/;OUTPUT_DIR=/nfs-7/userdata/fgolf/tupler_babies/merged//mt2/V00-08-14//output/;IMERGED=2;OUTPUT_NAME=output;SHORTNAME=WJetsToLNu_HT-600To800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1;INPUT_NAMES=output_3.root,output_4.root,output_5.root,output_6.root,output_7.root,output_8.root,output_9.root;
+                    clusterID, status, entered_current_status, cmd, args = line.strip().split(" ")[:5]
+                    merged_index = args.split("IMERGED")[-1].split(";")[0]
+                else:
+                    clusterID, status, entered_current_status, cmd = line.strip().split(" ")[:4]
+                    merged_index = args.split("IMERGED=")[-1].split(";")[0]
             else:
                 clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.strip().split(" ")[:7]
+
 
             # if we've specified to look only at jobs which have been running for at least x hours
             if running_at_least_hours > 0.01:
