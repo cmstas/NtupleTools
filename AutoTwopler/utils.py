@@ -35,21 +35,28 @@ def copy_jecs():
     if not os.path.isfile(params.jecs):
         os.system("cp /nfs-7/userdata/JECs/%s ." % params.jecs)
 
-def get_web_dir():
-    return "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
+def get_web_dir(overriden_params=None):
+    if overriden_params:
+        return "%s/public_html/%s/" % (os.getenv("HOME"), overriden_params.dashboard_name)
+    else:
+        return "%s/public_html/%s/" % (os.getenv("HOME"), params.dashboard_name)
 
-def make_dashboard():
-    web_dir = get_web_dir()
+def make_dashboard(web_dir=None):
+    if not web_dir:
+        web_dir = get_web_dir()
     if not os.path.isdir(web_dir): os.makedirs(web_dir)
-    cmd("chmod 755 -R %s" % web_dir)
     cmd("chmod 755 %s/*.py" % web_dir)
-    cmd("cp -rp dashboard/* %s/" % web_dir)
+    cmd("chmod 755 -R %s" % web_dir)
+    cmd("cp -rp %s/dashboard/* %s/" % (os.path.abspath(__file__).rsplit("/",1)[0],web_dir))
     # cmd("sed -i s#BASEDIR_PLACEHOLDER#%s/# %s/main.js" % (os.getcwd(), web_dir))
     cmd("sed -i \"s,^var baseDir = .*$,var baseDir = '%s';,g\" %s/main.js" % (os.getcwd()+"/", web_dir))
     print "http://uaf-6.t2.ucsd.edu/~%s/%s" % (os.getenv("USER"), web_dir.split("public_html/")[1])
 
-def copy_json():
-    cmd("cp data.json %s/" % get_web_dir())
+def copy_json(overriden_params=None):
+    web_dir = get_web_dir(overriden_params)
+    if not os.path.isfile(web_dir+"/index.html"):
+        make_dashboard(web_dir)
+    cmd("cp data.json %s/" % web_dir)
 
 def read_samples(instructions="instructions.txt"):
     # if user fed in a list of dicts, then just make this the 

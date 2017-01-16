@@ -125,7 +125,7 @@ def main(instructions=None, params=None, do_one_iteration=False):
         with open(data_json, "w") as fhout:
             data["samples"] = sorted(data["samples"], key=lambda x: x.get("status","done")=="done")
             json.dump(data, fhout, sort_keys = True, indent = 4)
-        u.copy_json()
+        u.copy_json(params)
 
         if params.exit_when_done and (n_done == n_samples):
             print ">>> All %i samples are done. Exiting." % n_samples
