@@ -1214,6 +1214,9 @@ class Sample:
             if self.sample["type"] == "CMS3": merged_dir = self.sample["crab"]["outputdir"]+"/merged/"
             elif self.sample["type"] == "BABY": merged_dir = self.sample["baby"]["finaldir"]
 
+        merged_dir = merged_dir.replace("$tag","").replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
+        # print "[NJA] WTF this better be a directory: ",merged_dir
+
         if not os.path.isdir(merged_dir): return set()
 
         if self.sample["type"] == "CMS3":
@@ -1235,7 +1238,9 @@ class Sample:
             return done_indices
 
         elif self.sample["type"] == "BABY" and get_baby_merged:
+            # print "[NJA] Checking for merged babies in %s" % merged_dir
             files = os.listdir(merged_dir)
+            # print "[NJA] Files:", files
             files = [f for f in files if f.endswith(".root")]
             files = [f for f in files if f.startswith(startswith)]
             return set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
@@ -1370,6 +1375,7 @@ class Sample:
 
             self.sample["imerged_to_ijob"] = tmp.copy()
 
+        # print "[NJA] About to do submit_baby_merge_jobs if self.sample['imerged_to_ijob'] is not null"
         if self.sample["imerged_to_ijob"]:
             return self.submit_baby_merge_jobs()
 
@@ -1537,10 +1543,12 @@ class Sample:
                    chunk), then the output should be named Wjets_skim_1.root)
         input_files
         """
+        # print "[NJA] Inside submit_baby_merge_jobs"
 
         baby = self.sample["baby"]
 
-        shortname = self.sample["shortname"]
+        shortname = str(self.sample["shortname"])
+        long_shortname = str(self.sample["shortname"])
         try: shortname = self.params.dataset_to_shortname(self.sample["dataset"])
         except: pass
         shortname = shortname.replace(".root","")
@@ -1551,6 +1559,7 @@ class Sample:
         unmerged_dir = baby["finaldir"]
 
         output_dir = self.params.baby_merged_dir.replace("${USER}","$USER").replace("$USER",os.getenv("USER"))
+        output_dir = self.params.baby_merged_dir.replace("${SHORTNAME}","$SHORTNAME").replace("$SHORTNAME",shortname)
         output_dir += "/%s/%s/" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"])
 
         path_fragment = "%s/%s/%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], shortname)
@@ -1575,7 +1584,7 @@ class Sample:
                 "condorlog": condor_log_files,
                 "stdlog": std_log_files,
                 "proxy": proxy_file,
-                "requestname": "BABYMERGE_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], shortname),
+                "requestname": "BABYMERGE_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], long_shortname),
                 }
 
         cfg_format = "universe=grid \n" \
@@ -1601,6 +1610,7 @@ class Sample:
         self.sample["postprocessing"]["done"] = 0
 
         for oname in output_names:
+            # print "[NJA]",oname
             imerged_set = set(self.sample['imerged_to_ijob'][oname].keys())
             processing_list, processing_ID_list = self.get_condor_submitted(baby_merge_jobs=True)
             processing_set = set(processing_list)
@@ -1622,7 +1632,9 @@ class Sample:
 
             # subtract running jobs from done. we might think they're done if they begin
             # to stageout, but they're not yet done staging out
+            # print "[NJA] Making done_set by calling get_merged_done() with merged_dir of %s/%s" % (output_dir,oname)
             done_set = self.get_merged_done(merged_dir="%s/%s/" % (output_dir,oname),startswith="%s_%s_" % (shortname, oname), get_baby_merged=True) - processing_set
+            # print "[NJA] Done making done_set:", done_set
             imerged_list = list( imerged_set - processing_set - done_set ) 
 
             self.sample["postprocessing"]["total"] += len(imerged_set)
