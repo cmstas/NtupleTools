@@ -9,6 +9,8 @@ test*
 *.root
 *.db
 *.out
+*.so
+*.bak
 CMSSW_*/
 crab
 pset
