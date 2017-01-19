@@ -1229,7 +1229,10 @@ class Sample:
             d_output_name = {} # key is the output_name and value is a set of the done files
             for output_name in output_names:
                 output_name_noext = output_name.rsplit(".",1)[0]
-                files = os.listdir(merged_dir+"/"+output_name_noext+"/")
+                try:
+                    files = os.listdir(merged_dir+"/"+output_name_noext+"/")
+                except:
+                    files = []
                 files = [f for f in files if f.endswith(".root")]
                 d_output_name[output_name] = set(map(lambda x: int(x.split("_")[-1].split(".")[0]), files))
                 # print output_name, d_output_name[output_name]
