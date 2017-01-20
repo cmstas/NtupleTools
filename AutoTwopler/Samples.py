@@ -455,7 +455,11 @@ class Sample:
                 fhout.write(copy_cmd + "\n\n")
             fhout.write("echo After copy\necho Date: $(date +%s)")
         
-        self.sample["baby"]["input_filenames"], self.sample["cms3tag"] = self.get_cms3_info()
+        try:
+            self.sample["baby"]["input_filenames"], self.sample["cms3tag"] = self.get_cms3_info()
+        except IndexError:
+            # Please don't cry about this poor python usage. Catching an exception to raise another one...
+            raise Exception("ERROR getting file list from DIS. Please check this dataset.")
         self.sample["baby"]["imerged"] = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
         self.sample["baby"]["have_set_inputs"] = True
 
@@ -1285,6 +1289,9 @@ class Sample:
         nmerged = len(self.sample["baby"]["imerged"])
         nswept = self.sample["baby"]["sweepRooted"]
         nmerged_done = len(self.get_merged_done())
+        # print nmerged_done
+        # print len(self.get_condor_submitted()[0])
+        # print nswept, nmerged
         if FAKE_BABY_SUBMIT:
             done = (nmerged_done == nmerged) and (nmerged > 0) and (nswept == nmerged)
         else:
@@ -1693,7 +1700,10 @@ class Sample:
         output_names = self.sample["baby"]["output_names"]
         merged_dir = self.sample["baby"]["finaldir"]
 
-        not_swept = self.get_merged_done() - imerged_swept_set
+        processing_list, processing_ID_list = self.get_condor_submitted()
+        processing_set = set(processing_list)
+        not_swept = self.get_merged_done() - processing_set - imerged_swept_set
+
         # print self.get_merged_done(),  imerged_swept_set, not_swept
         if len(not_swept) > 0:
             self.do_log("sweeprooting %i output files" % len(not_swept))
