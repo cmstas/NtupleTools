@@ -459,7 +459,7 @@ class Sample:
             self.sample["baby"]["input_filenames"], self.sample["cms3tag"] = self.get_cms3_info()
         except IndexError:
             # Please don't cry about this poor python usage. Catching an exception to raise another one...
-            raise Exception("ERROR getting file list from DIS. Please check this dataset.")
+            raise Exception("ERROR getting file list from DIS. Please check this dataset: %s" % self.sample["dataset"])
         self.sample["baby"]["imerged"] = map(lambda x: int(x.split(".root")[0].split("_")[-1]), self.sample["baby"]["input_filenames"])
         self.sample["baby"]["have_set_inputs"] = True
 
