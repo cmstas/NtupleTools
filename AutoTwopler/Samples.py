@@ -453,7 +453,11 @@ class Sample:
             fhout.write("echo After executable\necho Date: $(date +%s)\nls -l\n\n")
             for copy_cmd in copy_cmds:
                 fhout.write(copy_cmd + "\n\n")
-            fhout.write("echo After copy\necho Date: $(date +%s)")
+            fhout.write("echo After copy\necho Date: $(date +%s)\n")
+            fhout.write("echo Cleaning up\n")
+            fhout.write("for FILE in `find . -not -name \"*stderr\" -not -name \"*stdout\"`; do rm -rf $FILE; done\n")
+            fhout.write("echo Cleaned up\n")
+            fhout.write("ls -l\n")
         
         try:
             self.sample["baby"]["input_filenames"], self.sample["cms3tag"] = self.get_cms3_info()
