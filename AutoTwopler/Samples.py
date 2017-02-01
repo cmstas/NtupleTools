@@ -1604,6 +1604,7 @@ class Sample:
         cfg_format = "universe=grid \n" \
                      "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
                      "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
+                     "+request_disk=2500M \n" \
                      "executable={exe} \n" \
                      "arguments={args} \n" \
                      "transfer_executable=True \n" \
