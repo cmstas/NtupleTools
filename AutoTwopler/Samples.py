@@ -414,7 +414,7 @@ class Sample:
         copy_cmds = []
         for output_name in output_names:
             output_name_noext = output_name.rsplit(".",1)[0]
-            copy_cmd = "gfal-copy -k -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root --checksum ADLER32" \
+            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root --checksum ADLER32" \
                     % (output_name, self.sample["baby"]["outputdir_pattern"], output_name_noext, output_name_noext)
             copy_cmds.append(copy_cmd)
 
