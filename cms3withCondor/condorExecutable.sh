@@ -32,7 +32,8 @@ export PYTHONPATH=$PWD/python:$PYTHONPATH:python/
 #Set environment
 # note, non-patches are in a different folder, run `scram list -a CMSSW | grep 8_0_14` to check
 # pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_12/src/ 
-pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20/src
+# pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20/src
+pushd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/src/
 eval `scramv1 runtime -sh`
 echo "should be in cvmfs: $PWD"
 popd
@@ -42,9 +43,9 @@ echo "libCMS3 = $libCMS3"
 
 if [ -e $libCMS3 ]
 then
-  scramv1 project CMSSW CMSSW_8_0_20
-  mv $libCMS3 CMSSW_8_0_20/
-  cd CMSSW_8_0_20
+  scramv1 project CMSSW CMSSW_8_0_26_patch1
+  mv $libCMS3 CMSSW_8_0_26_patch1/
+  cd CMSSW_8_0_26_patch1
   tar -xzvf $libCMS3
   scram b -j 8
   eval `scramv1 runtime -sh`

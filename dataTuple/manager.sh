@@ -43,11 +43,12 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-14
+CMS3tag=CMS3_V08-00-17
 
 #Set the global tag to use
-GTAG=80X_dataRun2_2016SeptRepro_v3
-#for reminiAOD data, change this to 74X_dataRun2_reMiniAOD_v0
+# make sure to edit the pattern for GTAGSECOND appropriately
+GTAG=80X_dataRun2_2016SeptRepro_v7
+GTAGSECOND=80X_dataRun2_Prompt_v16
 
 #State the maxmimum number of events
 MAX_NEVENTS=-1 #all events
@@ -73,7 +74,8 @@ fi
 source /code/osgcode/cmssoft/cmsset_default.sh
 export SCRAM_ARCH=slc6_amd64_gcc530
 pushd .
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20
+# cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/src/
 # note, patches are in a different folder, run `scram list -a CMSSW | grep 8_0_13_patch1` to check
 #cd /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_13_patch1/src/
 eval `scramv1 runtime -sh`
@@ -339,8 +341,10 @@ then
     CMS3tagFragment=`echo $CMS3tag | tr '_' ' ' | awk '{print $2}'`
     outputDir=`echo $currentLine | tr '/' ' ' |  awk '{print $3"_"$4"_"$5"_"$6}'`
     outputDir=$outputDir/$CMS3tagFragment
-    . submitJob.sh filesToSubmit.txt $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $GTAG
-    echo "submitting!  $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $GTAG"
+    MYGTAG=$GTAG
+    [[ "$currentLine" == *Run2016H* ]] && MYGTAG=$GTAGSECOND
+    . submitJob.sh filesToSubmit.txt $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $MYGTAG
+    echo "submitting!  $currentTime $outputPath/$outputDir $outputName $lineno $CMS3tag $MAX_NEVENTS $MYGTAG"
 
     #c. Update submitted list
     echo "step 5c -- $(date)"

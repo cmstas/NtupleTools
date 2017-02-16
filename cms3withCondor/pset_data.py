@@ -1,10 +1,9 @@
 import FWCore.ParameterSet.Config as cms
-import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as pt
 from Configuration.EventContent.EventContent_cff        import *
 
 import CMS3.NtupleMaker.configProcessName as configProcessName
-is_relval = False
-configProcessName.name = configProcessName.name2 = "reRECO" if is_relval else "RECO"
+configProcessName.name="PAT"
+configProcessName.name2="RECO"
 configProcessName.isFastSim=False
 
 #CMS3
@@ -49,7 +48,7 @@ process.out.outputCommands.extend(cms.untracked.vstring('drop CaloTowers*_*_*_CM
 #load cff and third party tools
 from JetMETCorrections.Configuration.DefaultJEC_cff import *
 from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
-from JMEAnalysis.JetToolbox.jetToolbox_cff import *
+# from JMEAnalysis.JetToolbox.jetToolbox_cff import *
 #from JetMETCorrections.Configuration.JetCorrectionProducers_cff import *
 from JetMETCorrections.Configuration.CorrectedJetProducersDefault_cff import *
 from JetMETCorrections.Configuration.CorrectedJetProducers_cff import *
@@ -69,13 +68,37 @@ process.egmGsfElectronIDSequence = cms.Sequence(process.electronMVAValueMapProdu
 my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
                  'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff',
                  'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff']
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_HZZ_V1_cff']
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
+from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+from PhysicsTools.PatAlgos.tools.jetTools import *
+deep_discriminators = ["deepFlavourJetTags:probudsg", "deepFlavourJetTags:probb", "deepFlavourJetTags:probc", "deepFlavourJetTags:probbb", "deepFlavourJetTags:probcc" ]
+updateJetCollection(
+    process,
+    jetSource = cms.InputTag('slimmedJets'),
+   jetCorrections = ('AK4PFchs', cms.vstring([]), 'None'),
+    btagDiscriminators = deep_discriminators
+)
+updateJetCollection(
+    process,
+    labelName = 'Puppi',
+    jetSource = cms.InputTag('slimmedJetsPuppi'),
+   jetCorrections = ('AK4PFchs', cms.vstring([]), 'None'),
+    btagDiscriminators = deep_discriminators
+)
+
 
 #Load Ntuple producer cff
 process.load("CMS3.NtupleMaker.cms3CoreSequences_cff")
 process.load("CMS3.NtupleMaker.cms3PFSequence_cff")
+
+# Needed for the above updateJetCollection() calls
+process.pfJetMaker.pfJetsInputTag = cms.InputTag('selectedUpdatedPatJets')
+process.pfJetPUPPIMaker.pfJetsInputTag = cms.InputTag('selectedUpdatedPatJetsPuppi')
 
 # Hypothesis cuts
 process.hypDilepMaker.TightLepton_PtCut  = cms.double(10.0)
@@ -102,7 +125,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(SUPPLY_MAX_N
 runOnData=True #data/MC switch
 usePrivateSQlite=False #use external JECs (sqlite file)
 useHFCandidates=True #create an additionnal NoHF slimmed MET collection if the option is set to false
-applyResiduals=True #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
+applyResiduals=True  #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
 #===================================================================
 
 if usePrivateSQlite:
@@ -141,22 +164,21 @@ if not useHFCandidates:
 #jets are rebuilt from those candidates by the tools, no need to do anything else
 ### =================================================================================
 
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+# from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
 
 #default configuration for miniAOD reprocessing, change the isData flag to run on data
 #for a full met computation, remove the pfCandColl input
-pt.runMETCorrectionsAndUncertainties(process,
-      addToPatDefaultSequence=False, #This seems to crash if true
-      pfCandCollection=cms.InputTag('particleFlow'),
-      onMiniAOD=True 
-)
+# runMetCorAndUncFromMiniAOD(process,
+#                            isData=runOnData,
+#                            )
 
-if not useHFCandidates:
-    pt.runMETCorrectionsAndUncertainties(process,
-      addToPatDefaultSequence=False, #This seems to crash if true
-      pfCandCollection=cms.InputTag('noHFCands'),
-      onMiniAOD=True 
-    )
+# if not useHFCandidates:
+#     runMetCorAndUncFromMiniAOD(process,
+#                                isData=runOnData,
+#                                pfCandColl=cms.InputTag("noHFCands"),
+#                                postfix="NoHF"
+#                                )
 
 ### -------------------------------------------------------------------
 ### the lines below remove the L2L3 residual corrections when processing data
@@ -178,6 +200,12 @@ if not applyResiduals:
           process.shiftedPatJetEnUpNoHF.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
 ### ------------------------------------------------------------------
 
+# store the collection of discarded pfcandidates with different prefix
+process.pfCandidateDiscardedMaker = process.pfCandidateMaker.clone(
+        aliasPrefix         = cms.untracked.string("pfcandsdiscard"),
+        pfCandidatesTag     = cms.InputTag("packedPFCandidatesDiscarded","",configProcessName.name),
+        )
+
 # end Run corrected MET maker
 
 # #Run jet tool box
@@ -192,8 +220,10 @@ process.p = cms.Path(
   process.secondaryVertexMaker *
   process.eventMaker *
   process.pfCandidateMaker *
+  process.pfCandidateDiscardedMaker *
   process.isoTrackMaker *
   process.recoConversionMaker *
+  process.electronBeforeGSFixMaker *
   process.electronMaker *
   process.muonMaker *
   process.pfJetMaker *
@@ -202,14 +232,21 @@ process.p = cms.Path(
   process.subJetMaker *
 #  process.ca12subJetMaker *
   process.pfmetMaker *
+  process.pfmetMakerEGClean * 
+  process.pfmetMakerMuEGClean * 
+  process.pfmetMakerUncorr * 
   process.pfmetpuppiMaker *
+  # process.T1pfmetMaker *
+  # process.T1pfmetNoHFMaker *
   process.hltMakerSequence *
   process.pftauMaker *
+  process.photonBeforeGSFixMaker *
   process.photonMaker *
   #process.genMaker *
   #process.genJetMaker *
   process.muToTrigAssMaker *  # requires muonMaker
   process.elToTrigAssMaker *  # requires electronMaker
+  process.photonToTrigAssMaker *  # requires photonMaker
   #process.candToGenAssMaker * # requires electronMaker, muonMaker, pfJetMaker, photonMaker
   #process.pdfinfoMaker *
   #process.puSummaryInfoMaker *
@@ -221,7 +258,3 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.eventMaker.isData                        = cms.bool(True)
 process.pfmetMaker.isData                        = process.eventMaker.isData
 
-
-# redefine
-# process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","",configProcessName.name)
-# process.slimmedMETsNoHF.t01Variation = cms.InputTag("slimmedMETsNoHF","",configProcessName.name)
