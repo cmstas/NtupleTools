@@ -164,14 +164,14 @@ if not useHFCandidates:
 #jets are rebuilt from those candidates by the tools, no need to do anything else
 ### =================================================================================
 
-# from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
 
 #default configuration for miniAOD reprocessing, change the isData flag to run on data
 #for a full met computation, remove the pfCandColl input
-# runMetCorAndUncFromMiniAOD(process,
-#                            isData=runOnData,
-#                            )
+runMetCorAndUncFromMiniAOD(process,
+                           isData=runOnData,
+                           )
 
 # if not useHFCandidates:
 #     runMetCorAndUncFromMiniAOD(process,
@@ -206,6 +206,29 @@ process.pfCandidateDiscardedMaker = process.pfCandidateMaker.clone(
         pfCandidatesTag     = cms.InputTag("packedPFCandidatesDiscarded","",configProcessName.name),
         )
 
+# Now you are creating the e/g corrected MET on top of the bad muon corrected MET (on re-miniaod)
+from PhysicsTools.PatUtils.tools.corMETFromMuonAndEG import corMETFromMuonAndEG
+corMETFromMuonAndEG(process,
+    pfCandCollection="", #not needed                                                                                                                                \
+                           
+    electronCollection="slimmedElectronsBeforeGSFix",
+    photonCollection="slimmedPhotonsBeforeGSFix",
+    corElectronCollection="slimmedElectrons",
+    corPhotonCollection="slimmedPhotons",
+    allMETEGCorrected=True,
+    muCorrection=False,
+    eGCorrection=True,
+    runOnMiniAOD=True,
+    postfix="MuEGClean"
+    )
+process.slimmedMETsMuEGClean = process.slimmedMETs.clone()
+process.slimmedMETsMuEGClean.src = cms.InputTag("patPFMetT1MuEGClean")
+process.slimmedMETsMuEGClean.rawVariation =  cms.InputTag("patPFMetRawMuEGClean")
+process.slimmedMETsMuEGClean.t1Uncertainties = cms.InputTag("patPFMetT1%sMuEGClean")
+del process.slimmedMETsMuEGClean.caloMET
+process.out.outputCommands.extend(cms.untracked.vstring('drop patMETs_patCaloMet__CMS3*'))
+ 
+ 
 # end Run corrected MET maker
 
 # #Run jet tool box
@@ -234,6 +257,7 @@ process.p = cms.Path(
   process.pfmetMaker *
   process.pfmetMakerEGClean * 
   process.pfmetMakerMuEGClean * 
+  process.pfmetMakerMuEGCleanFix * 
   process.pfmetMakerUncorr * 
   process.pfmetpuppiMaker *
   # process.T1pfmetMaker *
