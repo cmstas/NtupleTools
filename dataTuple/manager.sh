@@ -43,7 +43,7 @@ then
 fi
 
 #Set CMS3 tag to use
-CMS3tag=CMS3_V08-00-17
+CMS3tag=CMS3_V08-00-18
 
 #Set the global tag to use
 # make sure to edit the pattern for GTAGSECOND appropriately
