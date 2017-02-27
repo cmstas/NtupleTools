@@ -94,17 +94,20 @@ def main(instructions=None, params=None, do_one_iteration=False):
                         s.submit_baby_jobs()
 
                     elif stat == "condor" or stat == "postprocessing":
-                        if s.is_babymaking_done():
+                        if params.open_datasets:
+                            s.check_new_merged_for_babies()
+
+                        if not params.open_datasets and s.is_babymaking_done():
                             s.set_status("done")
                         else:
                             s.sweep_babies()
                             s.submit_baby_jobs()
 
                     elif stat == "done":
-                        s.do_done_stuff()
                         if params.open_datasets:
                             s.check_new_merged_for_babies()
                         else:
+                            s.do_done_stuff()
                             n_done += 1
 
 
