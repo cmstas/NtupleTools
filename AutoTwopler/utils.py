@@ -56,6 +56,7 @@ def copy_json(overriden_params=None):
     web_dir = get_web_dir(overriden_params)
     if not os.path.isfile(web_dir+"/index.html"):
         make_dashboard(web_dir)
+    cmd("chmod 755 data.json")
     cmd("cp data.json %s/" % web_dir)
 
 def read_samples(instructions="instructions.txt"):
