@@ -268,7 +268,9 @@ function getProgress(sample) {
     } else if(type == "BABY") {
         done = sample["baby"]["sweepRooted"];
         tot = sample["baby"]["total"];
-        return 100.0*done/tot;
+        var babypct = 99.0*done/tot;
+        if (stat == "done") babypct = 100.0;
+        return babypct;
     }
 
 }
@@ -278,9 +280,7 @@ function doSendAction(type, isample) {
     var shortname = dataset.split("/")[1];
     console.log("action,isample: " + type + " " + isample);
 
-    // FIXME uncomment before letting people use
     if (!confirm('Are you sure you want to do the action: ' + type)) return;
-    // FIXME uncomment before letting people use
 
     var obj = {};
     obj["action"] = "action";
@@ -392,6 +392,7 @@ function fillDOM(data) {
                 buff += "<a href='#/' onClick='doSendAction(\"skip_tail\","+i+")' title='skip tail CRAB jobs'> &#9986; </a> ";
                 buff += "<a href='#/' onClick='doSendAction(\"repostprocess\","+i+")' title='re-postprocess'> &#128296; </a> ";
             } else {
+                buff += "<a href='#/' onClick='doSendAction(\"baby_skip_tail\","+i+")' title='skip rest of baby jobs'> &#9986; </a> ";
                 buff += "<a href='#/' onClick='doSendAction(\"baby_remerge\","+i+")' title='remerge'> &#128290; </a> ";
             }
             buff += "<a href='#/' onClick='doSendAction(\"email_done\","+i+")' title='send email when done'> &#9993; </a> ";

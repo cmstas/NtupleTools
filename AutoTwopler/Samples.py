@@ -483,9 +483,14 @@ class Sample:
             consume_action = self.force_repostprocess()
             return consume_action
 
-        elif "skip_tail" in action:
+        elif "skip_tail" == action:
             self.do_log("found an action to skip tail crab jobs")
             consume_action = self.force_skip_tail()
+            return consume_action
+
+        elif "baby_skip_tail" == action:
+            self.do_log("found an action to skip rest of baby jobs (if they're possibly corrupted)")
+            consume_action = self.baby_skip_tail()
             return consume_action
 
         elif "email_done" in action:
@@ -547,6 +552,22 @@ class Sample:
         self.sample["crab"]["status"] = "COMPLETED"
         return True
 
+    def baby_skip_tail(self):
+        if not self.sample["status"] == "condor":
+            self.do_log("you want me to skip the tail jobs, but status is '%s', not 'condor'" % self.sample["status"])
+            return True
+
+        # back to condor status and just set the total list of imerged to run on
+        # equal to the imerged that we've already done
+        self.set_status("condor")
+        self.sample["baby"]["imerged"] = list(self.get_merged_done())
+        self.sample["baby"]["sweepRooted"] = len(self.sample["baby"]["imerged"])
+
+        self.do_log("removing residual condor jobs")
+        u.cmd( "condor_rm %s" % " ".join(map(str,self.get_condor_submitted()[1])) )
+
+        return True
+
     def get_cms3_info(self):
         filenames = []
 
@@ -598,9 +619,6 @@ class Sample:
         config.Data.ignoreLocality = True
         config.Data.splitting = 'FileBased'
         config.Data.outLFNDirBase = '/store/user/%s/AutoTwopler/' % (getUsernameFromSiteDB())
-        # TODO: per https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
-        #       use outLFNDirBase to make samples go into, say "/hadoop/cms/store/user/<user>/80X/"
-        #       need to propagate this change everywhere else too
         config.Data.inputDBS = "phys03" if self.sample["dataset"].endswith("/USER") else "global"
         config.section_('User')
         config.section_('Site')
@@ -1712,7 +1730,8 @@ class Sample:
         # print self.get_merged_done(),  imerged_swept_set, not_swept
         if len(not_swept) > 0:
             self.do_log("sweeprooting %i output files" % len(not_swept))
-        for imerged in not_swept:
+        for isweep, imerged in enumerate(not_swept):
+            self.do_log("sweeprooting file %i of %i" % (isweep+1, len(not_swept)))
             fnames = []
             for output_name in output_names:
                 output_name_noext = output_name.rsplit(".",1)[0]
