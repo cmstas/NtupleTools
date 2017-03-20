@@ -141,9 +141,10 @@ def parse_filelist(filename):
 
 def proxy_renew():
     # http://www.t2.ucsd.edu/tastwiki/bin/view/CMS/LongLivedProxy
-    cert_file = "/home/users/{0}/.globus/proxy_for_{0}.file".format(os.getenv("USER"))
-    if os.path.exists(cert_file): cmd("voms-proxy-init -q -voms cms -hours 120 -valid=120:0 -cert=%s" % cert_file)
-    else: cmd("voms-proxy-init -hours 9876543:0 -out=%s" % cert_file)
+    # cert_file = "/home/users/{0}/.globus/proxy_for_{0}.file".format(os.getenv("USER"))
+    cert_file = "/home/users/{0}/.globus/proxy_for_{0}_test.file".format(os.getenv("USER"))
+    if os.path.exists(cert_file): cmd("voms-proxy-init -q -rfc -voms cms -hours 120 -valid=120:0 -cert=%s" % cert_file)
+    else: cmd("voms-proxy-init -hours 9876543:0 -rfc -out=%s" % cert_file)
 
 def get_proxy_file():
     cert_file = '/tmp/x509up_u%s' % str(os.getuid()) # TODO: check that this is the same as `voms-proxy-info -path`

@@ -1213,12 +1213,16 @@ class Sample:
                     merged_index = int(line.split("merged_ntuple_",1)[1].split(".root")[0])
             else:
                 clusterID, status, entered_current_status, cmd, unmerged_dir, _, merged_index = line.strip().split(" ")[:7]
+            try:
+                status = int(status)
+            except:
+                status = -1
 
 
             # if we've specified to look only at jobs which have been running for at least x hours
             if running_at_least_hours > 0.01:
                 hours = 1.0*(datetime.datetime.now()-datetime.datetime.fromtimestamp(int(entered_current_status))).seconds / 3600.0
-                if status == "RUNNING":
+                if status == 2: # RUNNING
                     if hours < running_at_least_hours: continue
                 else:
                     # if the job is not running, then don't consider it regardless of time
@@ -1793,8 +1797,8 @@ class Sample:
                 "requestname": "BABY_%s_%s_%s" % (analysis, tag, shortname),
                 }
 
-        cfg_format = "universe=grid \n" \
-                     "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
+        cfg_format = "universe=Vanilla \n" \
+                     "+DESIRED_Sites=\"T2_US_UCSD\" \n" \
                      "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
                      "executable={exe} \n" \
                      "arguments={args} \n" \
@@ -1803,6 +1807,7 @@ class Sample:
                      "transfer_output_files = \"\"\n" \
                      "+Owner = undefined  \n" \
                      "+AutoTwopleRequestname=\"{requestname}\" \n" \
+                     "+project_Name=\"cmssurfandturf\" \n" \
                      "log={condorlog} \n" \
                      "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
                      "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
