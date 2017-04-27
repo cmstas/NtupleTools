@@ -327,9 +327,10 @@ class Sample:
         elif "RunIISpring16MiniAODv2" in ds:
             self.sample["pset"] = self.params.pset_mc
             self.sample["specialdir"] = "run2_25ns_80MiniAODv2"
-        elif "RunIISummer16MiniAODv2" in ds:
+        elif "RunIISummer16MiniAODv2" in ds or "Private80X" in ds:
             self.sample["pset"] = self.params.pset_mc
-            self.sample["specialdir"] = "run2_moriond17"
+            # self.sample["specialdir"] = "run2_moriond17"
+            self.sample["specialdir"] = "run2_moriond17_cms4" # FIXME
         elif "25ns" in ds: self.sample["specialdir"] = "run2_25ns"
         elif self.sample["isdata"]: self.sample["specialdir"] = "run2_data_test"
         else:
@@ -615,7 +616,7 @@ class Sample:
         config.Data.allowNonValidInputDataset = True
         config.Data.publication = False
         config.Data.inputDataset = self.sample["dataset"]
-        config.Data.unitsPerJob = 1
+        config.Data.unitsPerJob = self.params.nfiles_per_job
         config.Data.ignoreLocality = True
         config.Data.splitting = 'FileBased'
         config.Data.outLFNDirBase = '/store/user/%s/AutoTwopler/' % (getUsernameFromSiteDB())
@@ -624,7 +625,7 @@ class Sample:
         config.section_('Site')
         config.Site.storageSite = 'T2_US_UCSD'
         # config.Site.whitelist = ['T2_US_*']
-        config.Site.whitelist = ['T2_*']
+        config.Site.whitelist = ['T2_US_*']
 
         if self.do_filelist:
             files = self.extra["filelist"]
@@ -1088,12 +1089,12 @@ class Sample:
         neg_weight = n_entries - pos_weight
         n_entries_eff = pos_weight - neg_weight
 
-        h_pfmet = TH1F("h_pfmet", "h_pfmet", 100, 0, 1000);
-        tree.Draw("evt_pfmet >> h_pfmet", "", "goff",1000)
-        avg_pfmet = h_pfmet.GetMean()
-        if avg_pfmet < 0.01 or avg_pfmet > 10000:
-            self.do_log("WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet))
-            return (True, 0, 0, 0)
+        # h_pfmet = TH1F("h_pfmet", "h_pfmet", 100, 0, 10000);
+        # tree.Draw("evt_pfmet >> h_pfmet", "", "goff",1000)
+        # avg_pfmet = h_pfmet.GetMean()
+        # if avg_pfmet < 0.01 or avg_pfmet > 5000:
+        #     self.do_log("WARNING: %s has insane evt_pfmet value of %f" % (fname, avg_pfmet))
+        #     return (True, 0, 0, 0)
 
         f.Close()
         return (False, n_entries, n_entries_eff, f.GetSize()/1.0e9)
@@ -1159,7 +1160,9 @@ class Sample:
 
 
     def make_merging_chunks(self, force=True):
-        if self.sample["imerged_to_ijob"] and self.sample["nevents_unmerged"] and not force: return
+        skip_postprocess = not self.params.do_postprocess
+
+        if (self.sample["imerged_to_ijob"] or skip_postprocess) and self.sample["nevents_unmerged"] and not force: return
 
         self.do_log("making map from merged index to unmerged indicies")
         group, groups = [], []
@@ -1173,15 +1176,18 @@ class Sample:
             if is_bad:
                 self.do_log("WARNING: ntuple_%i.root is bad, will skip" % (ijob))
                 continue
+            if skip_postprocess:
+                continue
             tot_size += file_size
             group.append(ijob)
             if tot_size >= 4.7: # in GB!
                 groups.append(group)
                 group = []
                 tot_size = 0.0
-        if len(group) > 0: groups.append(group) # finish up last group
-        for igp,gp in enumerate(groups):
-            self.sample["imerged_to_ijob"][igp+1] = gp
+        if not skip_postprocess:
+            if len(group) > 0: groups.append(group) # finish up last group
+            for igp,gp in enumerate(groups):
+                self.sample["imerged_to_ijob"][igp+1] = gp
 
         self.sample['nevents_unmerged'] = sum([x[0] for x in self.sample['ijob_to_nevents'].values()])
 
@@ -1300,6 +1306,8 @@ class Sample:
         return True
 
     def is_merging_done(self):
+        if not self.params.do_postprocess: return True
+
         # want 0 running condor jobs and all merged files in output area
         nmerged = len(self.sample["imerged_to_ijob"].keys())
         done = len(self.get_condor_submitted()[0]) == 0 and len(self.get_merged_done()) == nmerged and nmerged > 0
@@ -1450,6 +1458,10 @@ class Sample:
 
 
     def submit_merge_jobs(self):
+        if not self.params.do_postprocess:
+            self.sample["status"] = "postprocessing"
+            return
+
         working_dir = self.sample["basedir"]
         shortname = self.sample["shortname"]
         unmerged_dir = self.sample["crab"]["outputdir"]
@@ -1882,7 +1894,10 @@ class Sample:
 
         # copy to merged and backup
         u.cmd('chmod a+rw %s' % (metadata_file))
-        u.cmd("cp %s %s/" % (metadata_file, self.sample["crab"]["outputdir"]+"/merged/"))
+        if not self.params.do_postprocess: 
+            u.cmd("cp %s %s/" % (metadata_file, self.sample["crab"]["outputdir"]))
+        else:
+            u.cmd("cp %s %s/" % (metadata_file, self.sample["crab"]["outputdir"]+"/merged/"))
         u.cmd('mkdir -p {0} ; chmod a+rw {0}'.format(metadatabank_dir))
         u.cmd('cp %s %s/' % (metadata_file, metadatabank_dir))
 
@@ -1895,6 +1910,10 @@ class Sample:
 
     def do_update_dis(self):
         if self.misc["update_dis_when_done"]:
+
+            if not self.params.do_postprocess: # FIXME
+                print "not updating dis for cms4 yet"
+                return
 
             d = copy.deepcopy(self.sample)
 
@@ -1932,10 +1951,25 @@ class Sample:
     def copy_files(self):
         self.do_log("started copying files to %s" % self.sample["finaldir"])
         u.cmd("mkdir -p %s/" % self.sample["finaldir"])
-        u.cmd( "mv %s/merged/* to %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
+
+        if not self.params.do_postprocess: 
+            # rename files from ntuple_<i>.root to merged_ntuple_<i>.root since we didn't postprocess them
+            u.cmd( "mv %s/* %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
+            u.cmd( "rename ntuple merged_ntuple %s/*.root" % (self.sample["finaldir"]) )
+
+            # now delete files corresponding to tail jobs
+            def get_num(fname): return int(fname.split("_")[-1].split(".")[0])
+            rootfiles = glob.glob(self.sample["finaldir"] + "/*.root")
+            to_delete = {fname for fname in rootfiles if get_num(fname) in self.sample["crab"]["jobs_left_tail"]}
+            for td in to_delete:
+                self.do_log("deleting tail job: %s" % td)
+                u.cmd("rm -f %s" % td)
+        else:
+            u.cmd( "mv %s/merged/* %s/" % (self.sample["crab"]["outputdir"], self.sample["finaldir"]) )
+
         self.do_log("finished copying files")
 
-        if self.get_events_in_chain(self.sample["finaldir"]+"/*.root") == self.sample['nevents_merged']:
+        if (not self.params.do_postprocess) or self.get_events_in_chain(self.sample["finaldir"]+"/*.root") == self.sample['nevents_merged']:
             # if finaldir doesn't have nevents_merged, must've been a mv error, so redo merging and mv again
             self.do_log("copying was successful, so we're done!!!")
             self.sample["status"] = "done"
@@ -1944,6 +1978,15 @@ class Sample:
             self.submit_merge_jobs()
 
     def check_output(self):
+
+        if not self.params.do_postprocess: 
+            self.sample["checks"]["nproblems"] = 0
+            self.sample["checks"]["problems"] = []
+            files_wildcard = self.sample["crab"]["outputdir"]+"/*.root"
+            tot_events = self.get_events_in_chain(files_wildcard)
+            self.sample['nevents_merged'] = tot_events
+            return True
+
         merged_wildcard = self.sample["crab"]["outputdir"]+"/merged/merged_ntuple_*.root"
 
         tot_events = self.get_events_in_chain(merged_wildcard)

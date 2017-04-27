@@ -65,7 +65,6 @@ def main(instructions=None, params=None, do_one_iteration=False):
 
                 if not s.pass_tsa_prechecks(): continue
 
-
                 if typ == "CMS3":
 
                     if stat == "new":
