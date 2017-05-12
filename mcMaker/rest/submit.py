@@ -4,15 +4,23 @@ import time
 import commands
 import pickle
 
-def main(fnames, executable, outputname, shortname, pset, cmsswversion, basedir):
+def main(fnames, executable, outputname, shortname, pset, cmsswversion, basedir, lhe=False, nevtsperjob=-1, njobs=-1):
     
     outputdir = "%s/%s/" % (basedir, shortname)
 
     done_candidates = []
-    for fname in fnames:
+    if lhe:
+        # for LHE, want to feed in comma separated list of all LHE for each job,
+        # but each job will have a different firstevt value
+        fnamesstr = ",".join(fnames)
+        fnames = njobs*[fnamesstr]
+    for ifname, fname in enumerate(fnames):
 
 
-        ifile = int(fname.rsplit("_",1)[-1].split(".")[0])
+        if lhe:
+            ifile = ifname+1
+        else:
+            ifile = int(fname.rsplit("_",1)[-1].split(".")[0])
 
         cwd = os.getcwd()
 
@@ -21,7 +29,7 @@ def main(fnames, executable, outputname, shortname, pset, cmsswversion, basedir)
         if (shortname, ifile) in complete_set:
             continue
 
-        print "--> Working on %s" % (fname)
+        print "--> Working on %s [%i]" % (fname, ifile)
 
         if (shortname, ifile) in running_set:
             print "Job is running on condor, skipping"
@@ -37,30 +45,19 @@ def main(fnames, executable, outputname, shortname, pset, cmsswversion, basedir)
 
         os.system("mkdir -p logs/{shortname}/submit/std_logs/".format(shortname=shortname))
 
-# universe=Vanilla
-# +DESIRED_Sites="T2_US_UCSD" 
-# executable={executable}
-# arguments={outputdir} {outputname} {inputfilename} {ifile} {pset} {cmsswversion}
-# transfer_executable=True
-# when_to_transfer_output = ON_EXIT
-# transfer_input_files={pset}
-# +Owner = undefined 
-# log=logs/{shortname}/submit/log_{timestamp}.log
-# output=logs/{shortname}/submit/std_logs//1e.$(Cluster).$(Process).out
-# error =logs/{shortname}/submit/std_logs//1e.$(Cluster).$(Process).err
-# notification=Never
-# x509userproxy=/tmp/x509up_u{uid}
-# should_transfer_files = yes
-# +CMSSWCondor="yeah"
-# +project_Name="cmssurfandturf"
-# queue
+        nevts = nevtsperjob
+        firstevt = -1
+        if lhe:
+            firstevt = ifname*nevtsperjob
+        scramarch="slc6_amd64_gcc530"
+        if "CMSSW_7" in cmsswversion:
+            scramarch="slc6_amd64_gcc481"
 
         cfg = """
-universe=grid
-grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu
-+remote_DESIRED_Sites="T2_US_UCSD,T2_US_Nebraska,T2_US_Wisconsin,T2_US_MIT" 
+universe=Vanilla
++DESIRED_Sites="T2_US_UCSD,UCSB" 
 executable={executable}
-arguments={outputdir} {outputname} {inputfilename} {ifile} {pset} {cmsswversion}
+arguments={outputdir} {outputname} {inputfilenames} {ifile} {pset} {cmsswversion} {scramarch} {nevts} {firstevt}
 transfer_executable=True
 when_to_transfer_output = ON_EXIT
 transfer_input_files={pset}
@@ -72,8 +69,21 @@ notification=Never
 x509userproxy=/tmp/x509up_u{uid}
 should_transfer_files = yes
 +CMSSWCondor="yeah"
++project_Name="cmssurfandturf"
 queue
-        """.format(executable=executable,outputdir=outputdir,uid=uid,inputfilename=fname,ifile=ifile,outputname=outputname,pset=pset,shortname=shortname,timestamp=timestamp,cmsswversion=cmsswversion)
+        """.format(executable=executable,
+                   outputdir=outputdir,
+                   uid=uid,
+                   inputfilenames=fname,
+                   ifile=ifile,
+                   outputname=outputname,
+                   pset=pset,
+                   shortname=shortname,
+                   timestamp=timestamp,
+                   cmsswversion=cmsswversion,
+                   nevts=nevts,
+                   firstevt=firstevt,
+                   scramarch=scramarch)
 
         with open("submit.cmd", "w") as fhout:
             fhout.write(cfg)
@@ -129,17 +139,41 @@ if __name__ == "__main__":
     get_complete_set()
     get_condor_running()
 
+    # EDIT ME tags for your MC
     tags = [
-            "TTWW",
+            "tttw_4f",
+            "tttw_5f",
             ]
 
     # EDIT ME where all the output will go
-    basedir = "/hadoop/cms/store/user/yourusername/"
+    basedir = "/hadoop/cms/store/user/namin/mc/"
     for tag in tags:
-        # EDIT ME point to all the gensim root files as the entry point
-        gendir = "/hadoop/cms/store/user/yourusername/blah/blah/70423*/0000/*.root".format(basedir,tag)
+
+        # ### IF YOU WANT TO MAKE GENSIM WITH CONDOR
+        # # EDIT ME point to all the lhe files for a given tag
+        # lhefiles = "/hadoop/cms/store/user/namin/mc/May11/lhe/*{0}*.lhe".format(tag)
+        # nevtsperjob=100 # for LHE to GENSIM
+        # njobs=100 # for LHE to GENSIM
+        # d = {
+        #     "basedir": "{0}".format(basedir),
+        #     "fnames" : glob.glob(lhefiles),
+        #     "executable" : "condorExecutable.sh",
+        #     "outputname" : "GENSIM",
+        #     "shortname" : "{0}_GENSIM".format(tag),
+        #     "pset" : "pset_gensim.py",
+        #     "cmsswversion" : "CMSSW_7_1_20_patch3", # EDIT ME, what CMSSW is associated with this step?
+        #     "lhe": True,
+        #     "nevtsperjob": nevtsperjob,
+        #     "njobs": njobs,
+        # }
+        # main(**d)
+
+        ### IF YOU ALREADY MADE GENSIM WITH CRAB
+        # EDIT ME point to all the lhe files for a given tag
+        gendir = "/hadoop/cms/store/user/namin/{0}/{0}/17*/0000/*root".format(tag)
         d = {
             "basedir": "{0}".format(basedir),
+            # "fnames" : glob.glob("{0}/{0}_GENSIM/*.root".format(basedir,tag)), # use this line if making gensim on condor EDIT ME
             "fnames" : glob.glob(gendir),
             "executable" : "condorExecutable.sh",
             "outputname" : "RAW",
@@ -150,7 +184,7 @@ if __name__ == "__main__":
         main(**d)
         d = {
             "basedir": "{0}".format(basedir),
-            "fnames" : glob.glob("{0}/{0}_RAW/*.root".format(basedir,tag)),
+            "fnames" : glob.glob("{0}/{1}_RAW/*.root".format(basedir,tag)),
             "executable" : "condorExecutable.sh",
             "outputname" : "AOD",
             "shortname" : "{0}_AOD".format(tag),
@@ -160,7 +194,7 @@ if __name__ == "__main__":
         main(**d)
         d = {
             "basedir": "{0}".format(basedir),
-            "fnames" : glob.glob("{0}/{0}_AOD/*.root".format(basedir,tag)),
+            "fnames" : glob.glob("{0}/{1}_AOD/*.root".format(basedir,tag)),
             "executable" : "condorExecutable.sh",
             "outputname" : "MINIAOD",
             "shortname" : "{0}_MINIAOD".format(tag),

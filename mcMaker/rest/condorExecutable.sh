@@ -2,17 +2,18 @@
 
 OUTPUTDIR=$1
 OUTPUTNAME=$2
-INPUTFILENAME=$3
+INPUTFILENAMES=$3
 IFILE=$4
 PSET=$5
 CMSSWVERSION=$6
+SCRAMARCH=$7
+NEVTS=$8
+FIRSTEVT=$9
 
-INPUTFILENAME=$(echo $INPUTFILENAME | sed 's|/hadoop/cms||')
-INPUTFILENAME="root://xrootd.unl.edu/${INPUTFILENAME}"
 
 echo "OUTPUTDIR: $OUTPUTDIR"
 echo "OUTPUTNAME: $OUTPUTNAME"
-echo "INPUTFILENAME: $INPUTFILENAME"
+echo "INPUTFILENAMES: $INPUTFILENAMES"
 echo "IFILE: $IFILE"
 echo "PSET: $PSET"
 echo "CMSSWVERSION: $CMSSWVERSION"
@@ -22,7 +23,7 @@ echo "host: `hostname`"
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-export SCRAM_ARCH=slc6_amd64_gcc530
+export SCRAM_ARCH=${SCRAMARCH}
 
 eval `scramv1 project CMSSW $CMSSWVERSION`
 cd $CMSSWVERSION
@@ -30,9 +31,17 @@ eval `scramv1 runtime -sh`
 mv ../$PSET pset.py
 
 
-# echo "process.source.fileNames = cms.untracked.vstring([\"file:${INPUTFILENAME}\"])" >> pset.py
-echo "process.source.fileNames = cms.untracked.vstring([\"${INPUTFILENAME}\"])" >> pset.py
-echo "process.maxEvents.input = cms.untracked.int32(-1)" >> pset.py
+echo "process.maxEvents.input = cms.untracked.int32(${NEVTS})" >> pset.py
+echo "process.source.fileNames = cms.untracked.vstring([" >> pset.py
+for INPUTFILENAME in $(echo "$INPUTFILENAMES" | sed -n 1'p' | tr ',' '\n'); do
+    INPUTFILENAME=$(echo $INPUTFILENAME | sed 's|/hadoop/cms||')
+    INPUTFILENAME="root://xrootd.unl.edu/${INPUTFILENAME}"
+    echo "\"${INPUTFILENAME}\"," >> pset.py
+done
+echo "])" >> pset.py
+if [ "$FIRSTEVT" -ge 1 ]; then
+    echo "process.source.skipEvents = cms.untracked.uint32(${FIRSTEVT})" >> pset.py
+fi
 
 echo "ls -lrth"
 ls -lrth 
