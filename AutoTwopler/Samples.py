@@ -783,11 +783,12 @@ class Sample:
             except: pass
 
         try:
-            out = crabCommand('status', dir=self.sample["crab"]["taskdir"], long=do_long, **self.proxy_file_dict)
+            cmdname = 'statusold'
+            out = crabCommand(cmdname, dir=self.sample["crab"]["taskdir"], long=do_long, **self.proxy_file_dict)
             if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
                 self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
                 self.do_log("falling back to regular old crab status, but I thought you'd like to know at least")
-                out = crabCommand('status', dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
+                out = crabCommand(cmdname, dir=self.sample["crab"]["taskdir"], **self.proxy_file_dict)
             self.crab_status_res = out
             return 1 # succeeded
         except Exception as e:
@@ -1491,22 +1492,24 @@ class Sample:
                 "requestname": self.sample["crab"]["requestname"]
                 }
 
-        cfg_format = "universe=grid \n" \
-                     "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
+        cfg_format = "universe=Vanilla \n" \
+                     "+DESIRED_Sites=\"T2_US_UCSD\" \n" \
                      "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
                      "executable={exe} \n" \
                      "arguments={args} \n" \
                      "transfer_executable=True \n" \
-                     "when_to_transfer_output = ON_EXIT \n" \
                      "transfer_input_files={inpfiles} \n" \
+                     "transfer_output_files = \"\"\n" \
                      "+Owner = undefined  \n" \
                      "+AutoTwopleRequestname=\"{requestname}\" \n" \
+                     "+project_Name=\"cmssurfandturf\" \n" \
                      "log={condorlog} \n" \
                      "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
                      "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
                      "notification=Never \n" \
+                     "should_transfer_files = YES \n" \
+                     "when_to_transfer_output = ON_EXIT \n" \
                      "x509userproxy={proxy} \n" \
-                     "should_transfer_files = yes \n" \
                      "queue \n" 
 
         # don't resubmit the ones that are already running or done
@@ -1623,23 +1626,24 @@ class Sample:
                 "requestname": "BABYMERGE_%s_%s_%s" % (self.sample["baby"]["analysis"], self.sample["baby"]["baby_tag"], long_shortname),
                 }
 
-        cfg_format = "universe=grid \n" \
-                     "grid_resource = condor cmssubmit-r1.t2.ucsd.edu glidein-collector.t2.ucsd.edu \n" \
+        cfg_format = "universe=Vanilla \n" \
+                     "+DESIRED_Sites=\"T2_US_UCSD\" \n" \
                      "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
-                     "+request_disk=2500M \n" \
                      "executable={exe} \n" \
                      "arguments={args} \n" \
                      "transfer_executable=True \n" \
-                     "when_to_transfer_output = ON_EXIT \n" \
                      "transfer_input_files={inpfiles} \n" \
+                     "transfer_output_files = \"\"\n" \
                      "+Owner = undefined  \n" \
                      "+AutoTwopleRequestname=\"{requestname}\" \n" \
+                     "+project_Name=\"cmssurfandturf\" \n" \
                      "log={condorlog} \n" \
                      "output={stdlog}/1e.$(Cluster).$(Process).out \n" \
                      "error={stdlog}/1e.$(Cluster).$(Process).err \n" \
                      "notification=Never \n" \
+                     "should_transfer_files = YES \n" \
+                     "when_to_transfer_output = ON_EXIT \n" \
                      "x509userproxy={proxy} \n" \
-                     "should_transfer_files = yes \n" \
                      "queue \n" 
 
         self.sample["postprocessing"]["total"] = 0
