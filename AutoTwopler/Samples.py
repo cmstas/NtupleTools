@@ -308,10 +308,11 @@ class Sample:
         elif "RunIISpring15MiniAODv2-FastAsympt25ns" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
-        elif "Spring16Fast" in ds:
+        elif "Spring16Fast" in ds or "Summer16Fast" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
             # self.sample["specialdir"] = "run2_25ns_80MiniAODv2_fastsim"
-            self.sample["specialdir"] = "run2_moriond17_fastsim"
+            # self.sample["specialdir"] = "run2_moriond17_fastsim"
+            self.sample["specialdir"] = "run2_moriond17_cms4" # FIXME
         elif "RunIISpring15FSPremix" in ds:
             self.sample["pset"] = self.params.pset_mc_fastsim
             self.sample["specialdir"] = "run2_fastsim"
@@ -608,7 +609,7 @@ class Sample:
         config.General.transferLogs = True
         config.General.requestName = self.sample["crab"]["requestname"]
         config.section_('JobType')
-        config.JobType.inputFiles = [self.params.jecs]
+        config.JobType.inputFiles = [self.params.jecs] if self.params.jecs else []
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
         config.JobType.allowUndistributedCMSSW = True
@@ -638,6 +639,11 @@ class Sample:
             config.Data.unitsPerJob = self.extra["files_per_job"]
             config.Data.userInputFiles = files
             config.Data.totalUnits = len(files)
+
+        if self.params.do_event_splitting:
+            config.Data.splitting = 'EventAwareLumiBased'
+            config.Data.unitsPerJob = self.params.events_per_job
+
 
 
 
@@ -684,7 +690,7 @@ class Sample:
                 if self.params.campaign == "80X_miniaodv2":
                     newlines.append('process.sParmMaker.sparm_inputTag       = cms.InputTag("source")\n')
                 newlines.append('process.sParmMaker.vsparms = cms.untracked.vstring(' + ",".join(sparms) + ')\n')
-                newlines.append('process.p.insert( -1, process.sParmMakerSequence )\n')
+                # newlines.append('process.p.insert( -1, process.sParmMakerSequence )\n')
 
         with open(pset_out_fname, "w") as fhout:
             fhout.write( "".join(newlines) )

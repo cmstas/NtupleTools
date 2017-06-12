@@ -4,7 +4,9 @@ DO_SKIP_TAIL = True # if True, skip crab jobs that are taking too long (doesn't 
 EMAIL_WHEN_DONE = False # if True, send email to user when each sample finishes (must have email in git config)
 FORSAKE_HEAVENLY_PROXY = False # if True, don't use autorenewable proxy, so user may need to put in password every now and then (hopefully not often...this is a backup option)
 exit_when_done = False # if True, when all samples are done, exit the run.py process
-nfiles_per_job = 5 # number of miniaod files per CMS3 job
+nfiles_per_job = 4 # number of miniaod files per crab job
+do_event_splitting = True
+events_per_job = 250000
 do_postprocess = False # do postprocessing/merging step?
 dashboard_name = "AutoTwopler_CMS4"
 log_file = "duck.log"
@@ -109,6 +111,6 @@ elif campaign == "80X_moriond":
 
 elif campaign == "80X_moriond_CMS4":
     scram_arch="slc6_amd64_gcc530"
-    cms3tag="CMS4_V00-00-01"
+    cms3tag="CMS4_V00-00-02"
     cmssw_ver="CMSSW_8_0_21"
-    jecs = 'Spring16_25nsV1_MC.db'
+    jecs = ''

@@ -4,9 +4,11 @@ import sys
 import datetime
 
 sntdir = "run2_moriond17_cms4"
-cmstag = "V00-00-01"
+# cmstag = "V00-00-01"
+# cmstag = "V00-00-02"
 
-sampledirs = glob.glob("/hadoop/cms/store/group/snt/{}/*/{}/".format(sntdir,cmstag))
+# sampledirs = glob.glob("/hadoop/cms/store/group/snt/{}/*/{}/".format(sntdir,cmstag))
+sampledirs = glob.glob("/hadoop/cms/store/group/snt/{}/*/*/".format(sntdir))
 
 print "# file created on %s" % (datetime.datetime.now())
 # print "# {:153s} , {:17s} , {:9s} , {:9s} , {:8s} , {:10s}".format("dataset","tag","nevts_tot","nevts_eff","xsec","scale1fb")
