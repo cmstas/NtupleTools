@@ -649,13 +649,13 @@ class Sample:
 
         self.misc["crab_config"] = config
     
-    def make_pset(self):
+    def make_pset(self, force=False):
         if not os.path.isdir(self.misc["pfx_pset"]): os.makedirs(self.misc["pfx_pset"])
 
         pset_in_fname = self.params.cmssw_ver+"/src/CMS3/NtupleMaker/test/"+self.sample["pset"]
         pset_out_fname = "%s/%s_cfg.py" % (self.misc["pfx_pset"], self.sample["shortname"])
 
-        if os.path.isfile(pset_out_fname): 
+        if os.path.isfile(pset_out_fname) and not force: 
             self.do_log("pset already made, not remaking")
             return
 
@@ -669,19 +669,13 @@ class Sample:
             newlines.append("import sys, os\n")
             newlines.append("sys.path.append(os.getenv('CMSSW_BASE')+'/src/CMS3/NtupleMaker/test')\n\n")
             for iline, line in enumerate(lines):
-                if line.strip().startswith("fileName") and "process.out" in lines[iline-1]:
-                    line = line.split("(")[0]+"('ntuple.root'),\n"
-                elif ".GlobalTag." in line: line = line.split("=")[0]+" = '"+self.sample["gtag"]+"'\n"
-                elif ".reportEvery" in line: line = line.split("=")[0]+" = 1000\n"
-                elif ".eventMaker.datasetName." in line: line = line.split("(")[0]+"('%s')\n" % self.sample["dataset"]
-                elif "era=" in line: line = line.split("=")[0]+" = '"+self.params.jecs.replace(".db","")+"'\n"
-                elif "runOnData=" in line: line = '%s = %s\n' % (line.split("=")[0], self.sample["isdata"])
-                elif ".eventMaker.isData" in line: line = "%s = cms.bool(%s)\n" % (line.split("=")[0], self.sample["isdata"])
-                elif "cms.Path" in line:
-                    newlines.append( "process.eventMaker.datasetName = cms.string(\"%s\")\n" % self.sample["dataset"] )
-                    newlines.append( "process.eventMaker.CMS3tag = cms.string(\"%s\")\n\n" % self.sample["cms3tag"] )
-
                 newlines.append(line)
+
+            newlines.append("process.MessageLogger.cerr.FwkReport.reportEvery  = 1000\n")
+            newlines.append("process.GlobalTag.globaltag  = '%s'\n" % self.sample["gtag"])
+            newlines.append("process.out.fileName = cms.untracked.string('ntuple.root')\n")
+            newlines.append("process.eventMaker.CMS3tag = cms.string('%s')\n" % self.sample["cms3tag"])
+            newlines.append("process.eventMaker.datasetName = cms.string('%s')\n" % self.sample["dataset"])
                 
             sparms = self.sample["sparms"]
             if len(sparms) > 0:
@@ -2061,3 +2055,9 @@ class Sample:
 
 if __name__=='__main__':
     pass
+
+    # # get last sample in instructions.txt and make a pset
+    # # WOW. 3 lines ;)
+    # samp = u.read_samples("instructions.txt")[-1]
+    # s = Sample(**samp)
+    # s.make_pset(force=True)
