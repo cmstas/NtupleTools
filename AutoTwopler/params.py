@@ -39,7 +39,7 @@ pset_mc_fastsim = "MCProduction2015_FastSim_NoFilter_cfg.py"
 pset_mc = "MCProduction2015_NoFilter_cfg.py"
 
 
-campaign = "80X_moriond_CMS4"
+campaign = "92X_data"
 
 if campaign == "74X":
     scram_arch="slc6_amd64_gcc491"
@@ -114,3 +114,9 @@ elif campaign == "80X_moriond_CMS4":
     cms3tag="CMS4_V00-00-02"
     cmssw_ver="CMSSW_8_0_21"
     jecs = ''
+
+elif campaign == "92X_data":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS4_V00-00-03_workaround"
+    cmssw_ver="CMSSW_9_2_1"
+    jecs = 'Spring16_25nsV1_MC.db'

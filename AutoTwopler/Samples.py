@@ -298,6 +298,9 @@ class Sample:
         if "/Run2016" in ds:
             self.sample["isdata"] = True
             self.sample["pset"] = self.params.pset_data
+        if "/Run2017" in ds:
+            self.sample["isdata"] = True
+            self.sample["pset"] = self.params.pset_data
         if self.sample["isdata"]: 
             self.do_log("recognized that this is data")
             self.do_skip_tail = False
