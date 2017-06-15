@@ -416,7 +416,7 @@ class Sample:
         copy_cmds = []
         for output_name in output_names:
             output_name_noext = output_name.rsplit(".",1)[0]
-            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=%s/%s/%s_${IMERGED}.root --checksum ADLER32" \
+            copy_cmd = "gfal-copy -p -f -t 4200 file://`pwd`/%s gsiftp://gftp.t2.ucsd.edu%s/%s/%s_${IMERGED}.root --checksum ADLER32" \
                     % (output_name, self.sample["baby"]["outputdir_pattern"], output_name_noext, output_name_noext)
             copy_cmds.append(copy_cmd)
 
@@ -784,7 +784,7 @@ class Sample:
             except: pass
 
         try:
-            cmdname = 'statusold'
+            cmdname = 'status'
             out = crabCommand(cmdname, dir=self.sample["crab"]["taskdir"], long=do_long, **self.proxy_file_dict)
             if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
                 self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
