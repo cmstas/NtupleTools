@@ -52,7 +52,7 @@ echo "ls -lrth"
 ls -lrth
 
 echo "Sending output file $OUTPUTNAME.root"
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUTNAME}.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${OUTPUTDIR}/${OUTPUTNAME}_${IFILE}.root
+gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUTNAME}.root gsiftp://gftp.t2.ucsd.edu${OUTPUTDIR}/${OUTPUTNAME}_${IFILE}.root
 
 # cd ../
 # echo "cleaning up"
