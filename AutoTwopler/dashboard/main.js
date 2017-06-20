@@ -1,6 +1,6 @@
 var alldata = {};
 var jsonFile = "data.json";
-var baseDir = '/home/users/namin/duck_80x/NtupleTools/AutoTwopler';
+var baseDir = "BASEDIR_PLACEHOLDER";
 var refreshSecs = 10*60;
 var detailsVisible = false;
 var duckMode = false;
