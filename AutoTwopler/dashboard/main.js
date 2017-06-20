@@ -1,6 +1,6 @@
 var alldata = {};
 var jsonFile = "data.json";
-var baseDir = "BASEDIR_PLACEHOLDER"
+var baseDir = "BASEDIR_PLACEHOLDER";
 var refreshSecs = 10*60;
 var detailsVisible = false;
 var duckMode = false;
