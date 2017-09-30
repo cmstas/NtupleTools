@@ -577,9 +577,94 @@ class Sample:
 
         query_str = "%s,sample_type=CMS3 | grep cms3tag,location" % self.sample["dataset"]
         response = dis.query(query_str, typ='snt')
-        finaldir = response["response"]["payload"][0]["location"]
-        cms3tag = response["response"]["payload"][0]["cms3tag"]
+        samples = response["response"]["payload"]
+        do_cms3 = self.params.do_cms3
+        if do_cms3:
+            samples = [sample for sample in samples if "CMS3" in sample["cms3tag"]]
+
+        finaldir = samples[0]["location"]
+        cms3tag = samples[0]["cms3tag"]
         filenames = glob.glob("%s/merged_ntuple_*.root" % finaldir)
+
+        if self.params.data2016_nebraska:
+            if "Run2016" in self.sample["dataset"]:
+                lookup = {
+                        "Run2016B_DoubleEG_MINIAOD_03Feb2017_ver2-v2":         1180,
+                        "Run2016B_DoubleMuon_MINIAOD_03Feb2017_ver2-v2":       514,
+                        "Run2016B_HTMHT_MINIAOD_03Feb2017_ver2-v2":            344,
+                        "Run2016B_JetHT_MINIAOD_03Feb2017_ver2-v2":            1101,
+                        "Run2016B_MuonEG_MINIAOD_03Feb2017_ver2-v2":           272,
+                        "Run2016B_SingleElectron_MINIAOD_03Feb2017_ver2-v2":   1948,
+                        "Run2016B_SingleMuon_MINIAOD_03Feb2017_ver2-v2":       972,
+                        "Run2016C_DoubleMuon_MINIAOD_03Feb2017-v1":            208,
+                        "Run2016C_MuonEG_MINIAOD_03Feb2017-v1":                142,
+                        "Run2016C_SingleElectron_MINIAOD_03Feb2017-v1":        814,
+                        "Run2016D_DoubleEG_MINIAOD_03Feb2017-v1":              467,
+                        "Run2016D_DoubleMuon_MINIAOD_03Feb2017-v1":            321,
+                        "Run2016D_HTMHT_MINIAOD_03Feb2017-v1":                 337,
+                        "Run2016D_JetHT_MINIAOD_03Feb2017-v1":                 658,
+                        "Run2016D_MuonEG_MINIAOD_03Feb2017-v1":                222,
+                        "Run2016D_SingleElectron_MINIAOD_03Feb2017-v1":        1261,
+                        "Run2016D_SingleMuon_MINIAOD_03Feb2017-v1":            684,
+                        "Run2016E_DoubleEG_MINIAOD_03Feb2017-v1":              464,
+                        "Run2016E_DoubleMuon_MINIAOD_03Feb2017-v1":            215,
+                        "Run2016E_JetHT_MINIAOD_03Feb2017-v1":                 669,
+                        "Run2016E_MET_MINIAOD_03Feb2017-v1":                   178,
+                        "Run2016E_MuonEG_MINIAOD_03Feb2017-v1":                224,
+                        "Run2016E_SingleElectron_MINIAOD_03Feb2017-v1":        1008,
+                        "Run2016E_SingleMuon_MINIAOD_03Feb2017-v1":            637,
+                        "Run2016E_SinglePhoton_MINIAOD_03Feb2017-v1":          240,
+                        "Run2016F_DoubleEG_MINIAOD_03Feb2017-v1":              332,
+                        "Run2016F_DoubleMuon_MINIAOD_03Feb2017-v1":            151,
+                        "Run2016F_HTMHT_MINIAOD_03Feb2017-v1":                 146,
+                        "Run2016F_JetHT_MINIAOD_03Feb2017-v1":                 475,
+                        "Run2016F_MuonEG_MINIAOD_03Feb2017-v1":                156,
+                        "Run2016F_SingleMuon_MINIAOD_03Feb2017-v1":            456,
+                        "Run2016G_DoubleEG_MINIAOD_03Feb2017-v1":              823,
+                        "Run2016G_HTMHT_MINIAOD_03Feb2017-v1":                 372,
+                        "Run2016G_MuonEG_MINIAOD_03Feb2017-v1":                341,
+                        "Run2016G_SingleMuon_MINIAOD_03Feb2017-v1":            1083,
+                        "Run2016G_SinglePhoton_MINIAOD_03Feb2017-v1":          328,
+                        "Run2016H_DoubleEG_MINIAOD_03Feb2017_ver3-v1":         39,
+                        "Run2016H_DoubleMuon_MINIAOD_03Feb2017_ver3-v1":       12,
+                        "Run2016H_HTMHT_MINIAOD_03Feb2017_ver2-v1":            413,
+                        "Run2016H_HTMHT_MINIAOD_03Feb2017_ver3-v1":            13,
+                        "Run2016H_JetHT_MINIAOD_03Feb2017_ver2-v1":            1187,
+                        "Run2016H_JetHT_MINIAOD_03Feb2017_ver3-v1":            31,
+                        "Run2016H_MET_MINIAOD_03Feb2017_ver2-v1":              340,
+                        "Run2016H_MET_MINIAOD_03Feb2017_ver3-v1":              9,
+                        "Run2016H_SingleElectron_MINIAOD_03Feb2017_ver2-v1":   1149,
+                        "Run2016H_SingleElectron_MINIAOD_03Feb2017_ver3-v1":   27,
+                        "Run2016H_SingleMuon_MINIAOD_03Feb2017_ver2-v1":       1201,
+                        "Run2016H_SingleMuon_MINIAOD_03Feb2017_ver3-v1":       30,
+                        "Run2016H_SinglePhoton_MINIAOD_03Feb2017_ver2-v1":     341,
+                        "Run2016H_SinglePhoton_MINIAOD_03Feb2017_ver3-v1":     11,
+                        "Run2016G_JetHT_MINIAOD_03Feb2017-v1":                 1185,
+                        "Run2016B_MET_MINIAOD_03Feb2017_ver2-v2":              250,
+                        "Run2016B_SinglePhoton_MINIAOD_03Feb2017_ver2-v2":     420,
+                        "Run2016C_DoubleEG_MINIAOD_03Feb2017-v1":              435,
+                        "Run2016C_HTMHT_MINIAOD_03Feb2017-v1":                 195,
+                        "Run2016C_JetHT_MINIAOD_03Feb2017-v1":                 414,
+                        "Run2016C_MET_MINIAOD_03Feb2017-v1":                   144,
+                        "Run2016C_SingleMuon_MINIAOD_03Feb2017-v1":            425,
+                        "Run2016C_SinglePhoton_MINIAOD_03Feb2017-v1":          188,
+                        "Run2016D_MET_MINIAOD_03Feb2017-v1":                   184,
+                        "Run2016D_SinglePhoton_MINIAOD_03Feb2017-v1":          248,
+                        "Run2016E_HTMHT_MINIAOD_03Feb2017-v1":                 248,
+                        "Run2016F_MET_MINIAOD_03Feb2017-v1":                   108,
+                        "Run2016F_SingleElectron_MINIAOD_03Feb2017-v1":        721,
+                        "Run2016F_SinglePhoton_MINIAOD_03Feb2017-v1":          153,
+                        "Run2016G_DoubleMuon_MINIAOD_03Feb2017-v1":            355,
+                        "Run2016G_MET_MINIAOD_03Feb2017-v1":                   231,
+                        "Run2016G_SingleElectron_MINIAOD_03Feb2017-v1":        1317,
+                        "Run2016H_DoubleEG_MINIAOD_03Feb2017_ver2-v1":         1144,
+                        "Run2016H_DoubleMuon_MINIAOD_03Feb2017_ver2-v1":       374,
+                        "Run2016H_MuonEG_MINIAOD_03Feb2017_ver2-v1":           308,
+                        "Run2016H_MuonEG_MINIAOD_03Feb2017_ver3-v1":           12,
+                }
+                short = finaldir.split("/")[7]
+                finaldir = finaldir.replace("/hadoop/cms","")
+                filenames = [(finaldir+"/merged_ntuple_{0}.root".format(i)).replace("//","/") for i in range(1,lookup[short]+1)]
 
         return filenames, cms3tag
 
@@ -1792,18 +1877,23 @@ class Sample:
             self.do_log("see if you can make it manually. if not, switch to another uaf.")
             raise Exception("can't make log file directory: %s" % std_log_files)
 
+        site = "T2_US_UCSD"
+        if self.params.data2016_nebraska:
+            if "Run2016" in self.sample["dataset"]:
+                site = "T2_US_Nebraska"
         condor_params = {
                 "exe": executable_script,
                 "inpfiles": input_files,
                 "condorlog": condor_log_files,
                 "stdlog": std_log_files,
                 "proxy": proxy_file,
+                "site": site,
                 "requestname": "BABY_%s_%s_%s" % (analysis, tag, shortname),
                 }
 
         cfg_format = "universe=Vanilla \n" \
-                     "+DESIRED_Sites=\"T2_US_UCSD\" \n" \
-                     "+remote_DESIRED_Sites=\"T2_US_UCSD\" \n" \
+                     "+DESIRED_Sites=\"{site}\" \n" \
+                     "+remote_DESIRED_Sites=\"{site}\" \n" \
                      "executable={exe} \n" \
                      "arguments={args} \n" \
                      "transfer_executable=True \n" \

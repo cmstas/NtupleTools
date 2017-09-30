@@ -13,6 +13,8 @@ sweepRoot_scripts = [] # put absolute path to a bash script which takes 1 argume
 merging_scripts = [] # same story as above for merging_scripts
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/" # where final merged babies will end up - useless if merging is disabled (empty list above)
 merge_babies_on_condor = False # if you're weird like MT2 and need to merge on condor
+data2016_nebraska = False # in sept/oct of 2017, moved unmerged cms3 2016 data to Nebraska due to space issues
+do_cms3 = True # when querying DIS, only consider CMS3 samples and ignore CMS4 (otherwise CMS4 gets preference)
 
 ### ANALYSIS-SPECIFIC STUFF FOR BABIES
 # Prepare a file like same_sign.py in this directory with parameters that override the above defaults (default = no merging, no sweeprooting)
