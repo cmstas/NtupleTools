@@ -868,7 +868,7 @@ class Sample:
             except: pass
 
         try:
-            cmdname = 'statusold'
+            cmdname = 'status'
             out = crabCommand(cmdname, dir=self.sample["crab"]["taskdir"], long=do_long, **self.proxy_file_dict)
             if "statusFailureMsg" in out and "timed out after" in out["statusFailureMsg"]:
                 self.do_log("crab status --long failed with timeout: %s" %  out["statusFailureMsg"])
