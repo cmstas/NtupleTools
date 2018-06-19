@@ -160,6 +160,7 @@ class Sample:
                 "sweepRooted": 0,
             }
             self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
+            self.sample["baby"]["package"] = self.sample["crab"]["taskdir"] + "/package.tar.gz"
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
 
             self.misc["update_dis_when_done"] = False
@@ -396,7 +397,7 @@ class Sample:
 
         # copy the user package and move it here. at this point, we can just force the name to be package.tar.gz 
         # since the user isn't the one extracting it on the WN
-        u.cmd( "cp %s %s/%s/package.tar.gz" % (user_package, self.sample["basedir"], self.misc["pfx_babies"]) )
+        u.cmd( "cp %s %s/package.tar.gz" % (user_package, self.sample["crab"]["taskdir"]) )
         u.cmd( "cp %s %s/%s/executable.sh" % (user_executable, self.sample["basedir"], self.misc["pfx_babies"]) )
 
         # if the user specified a sweepRoot file in the params.py, then copy it over
