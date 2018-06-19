@@ -82,6 +82,12 @@ elif campaign == "SS_babymaker":
     cmssw_ver="CMSSW_7_4_12"
     jecs = 'Spring16_25nsV1_MC.db'
 
+elif campaign == "FT_babymaker":
+    scram_arch="slc6_amd64_gcc530"
+    cms3tag="CMS3_V08-00-05"
+    cmssw_ver="CMSSW_9_2_8"
+    jecs = 'Spring16_25nsV1_MC.db'
+
 elif campaign == "80X_miniaodv2_vince":
     scram_arch="slc6_amd64_gcc530"
     cms3tag="CMS3_V08-00-12"
