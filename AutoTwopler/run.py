@@ -100,7 +100,8 @@ def main(instructions=None, params=None, do_one_iteration=False):
                         if not params.open_datasets and s.is_babymaking_done():
                             s.set_status("done")
                         else:
-                            s.sweep_babies()
+                            # s.sweep_babies()
+                            s.sweep_babies_parallel()
                             s.submit_baby_jobs()
 
                     elif stat == "done":

@@ -12,7 +12,7 @@ try:
     from CRABClient.UserUtilities import setConsoleLogLevel, getUsernameFromSiteDB
     from CRABClient.ClientUtilities import LOGLEVEL_MUTE
     # I recommend putting `Root.ErrorIgnoreLevel: Error` in your .rootrc file
-    from ROOT import TFile, TH1F, TChain
+    from ROOT import TFile, TH1F, TChain, TTree
 except:
     print ">>> Make sure to source setup.sh first!"
     sys.exit()
@@ -30,6 +30,16 @@ FAKE_BABY_NJOBS = 0 # how many fake merged ntuples
 FAKE_BABY_MERGED = False # fake the initial merged ntuples to run over
 FAKE_BABY_SUBMIT = False # fake submission and checking on condor to see if they're running
 FAKE_BABY_MAKEPERITERATION = 0 # every run.py iteration, how many babies should we "make" by putting fake files into the output directory?
+
+def sweeproot(args):
+    idx, fname = args
+    f1 = TFile(fname,"read");
+    if not f1 or f1.IsZombie():
+        return idx, fname, 1
+    t = f1.Get("t")
+    if not t:
+        return idx, fname, 1
+    return idx, fname, 0
 
 class Sample:
 
@@ -151,6 +161,8 @@ class Sample:
             }
             self.sample["crab"]["taskdir"] = self.misc["pfx_babies"]+"/babies_"+self.sample["crab"]["requestname"]+"_"+self.sample["baby"]["baby_tag"]
             self.sample["baby"]["finaldir"] = self.sample["baby"]["outputdir_pattern"].replace("${ANALYSIS}", analysis).replace("${BABY_TAG}", baby_tag).replace("${SHORTNAME}", self.sample["shortname"]) 
+
+            self.misc["update_dis_when_done"] = False
 
 
         self.logger = logging.getLogger(self.params.log_file.replace(".","_"))
@@ -1810,6 +1822,57 @@ class Sample:
             return stat == 0 # 0 is good, anything else is bad
 
         return True
+
+    def sweep_babies_parallel(self):
+        from multiprocessing import Pool
+
+        imerged_swept_set = set(self.sample["baby"]["imerged_swept"])
+        output_names = self.sample["baby"]["output_names"]
+        merged_dir = self.sample["baby"]["finaldir"]
+
+        processing_list, processing_ID_list = self.get_condor_submitted()
+        processing_set = set(processing_list)
+        not_swept = self.get_merged_done() - processing_set - imerged_swept_set
+
+        # print self.get_merged_done(),  imerged_swept_set, not_swept
+        if len(not_swept) > 0:
+            self.do_log("sweeprooting %i output files" % len(not_swept))
+        d_idx_fnames = {}
+        to_sweep = []
+        for isweep, imerged in enumerate(not_swept):
+            fnames = []
+            for output_name in output_names:
+                output_name_noext = output_name.rsplit(".",1)[0]
+                outfile = "%s/%s/%s_%i.root" % (merged_dir, output_name_noext, output_name_noext, imerged)
+                fnames.append(outfile)
+                to_sweep.append([imerged,outfile])
+            d_idx_fnames[imerged] = fnames
+
+        pool = Pool(10)
+
+        d_results = {}
+        for ret in pool.imap_unordered(sweeproot, to_sweep):
+            idx, fname, code = ret
+            self.do_log("sweeprooting file index %i" % (idx+1))
+            d_results[fname] = code
+
+        for isweep, imerged in enumerate(not_swept):
+            fnames = d_idx_fnames[imerged]
+            # all output files must be good for this imerged to be good
+            good = True
+            for fname in fnames:
+                if d_results[fname] != 0:
+                    good = False
+                    break
+            if good:
+                self.sample["baby"]["imerged_swept"].append(imerged)
+            else:
+                # delete all if even one of them is bad since we will have to run the whole job again anyways
+                for fname in fnames:
+                    os.system("rm -f %s" % outfile)
+                    self.do_log("Deleted the baby file %s because this job failed sweepRooting." % (fname.rsplit("/")[-1]))
+
+        self.sample["baby"]["sweepRooted"] = len(self.sample["baby"]["imerged_swept"])
 
     def sweep_babies(self):
         imerged_swept_set = set(self.sample["baby"]["imerged_swept"])
