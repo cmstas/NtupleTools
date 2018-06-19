@@ -1857,6 +1857,9 @@ class Sample:
             self.do_log("sweeprooting file index %i" % (idx+1))
             d_results[fname] = code
 
+        pool.close()
+        pool.join()
+
         for isweep, imerged in enumerate(not_swept):
             fnames = d_idx_fnames[imerged]
             # all output files must be good for this imerged to be good
