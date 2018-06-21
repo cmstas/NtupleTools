@@ -1873,7 +1873,7 @@ class Sample:
             else:
                 # delete all if even one of them is bad since we will have to run the whole job again anyways
                 for fname in fnames:
-                    os.system("rm -f %s" % outfile)
+                    os.system("rm -f %s" % fname)
                     self.do_log("Deleted the baby file %s because this job failed sweepRooting." % (fname.rsplit("/")[-1]))
 
         self.sample["baby"]["sweepRooted"] = len(self.sample["baby"]["imerged_swept"])
