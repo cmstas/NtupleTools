@@ -456,7 +456,7 @@ class Sample:
             fhout.write("echo exe_args: $EXE_ARGS\n")
             fhout.write("echo imerged: $IMERGED\n")
             fhout.write("\n\n\n\n")
-            fhout.write("echo Extracting package tar file\ntar -xzf package.tar.gz\n\n")
+            fhout.write("echo Extracting package tar file\ntar -xf package.tar.gz\n\n")
             fhout.write("echo Before executable\necho Date: $(date +%s)\nhostname\nls -l\n\n")
             fhout.write("# ----------------- BEGIN USER EXECUTABLE -----------------\n")
             with open(user_executable, "r") as fhin:
