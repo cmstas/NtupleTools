@@ -16,3 +16,6 @@ instantiating too many tasks. Of course don't comment them out if they are not d
 `python triple.py`
 
 
+### Misc scripts
+* `misc/checkminiaodv3.py` -- paste in MINIAODSIM names of 2016 MiniAODv3 MC samples, and then query past SNT samples for xsec information. Spit out the format needed in the other metis submission scripts.
+

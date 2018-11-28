@@ -12,6 +12,7 @@ import data2018_102x
 import prompt10x_data
 import moriondremc # 2016 80X CMS4, CMS4_V00-00-02_2017Sep27 tag
 import moriondremc_private # same as above, private samples
+import moriondremc_isotracks # same as above (but -00-03 tag and including isotracks for MT2shorttrack)
 
 if __name__ == "__main__":
 
@@ -19,17 +20,21 @@ if __name__ == "__main__":
         total_summary = {}
         tasks = []
         # tasks.extend(data2016_94x_v2.get_tasks())
-        # tasks.extend(mc2016_94x_v3.get_tasks())
+        tasks.extend(mc2016_94x_v3.get_tasks())
         # tasks.extend(data2017_94x_v2.get_tasks())
-        tasks.extend(mc2017_94x_v2.get_tasks())
-        tasks.extend(data2018_102x.get_tasks())
-        tasks.extend(prompt10x_data.get_tasks())
-        tasks.extend(moriondremc.get_tasks())
-        tasks.extend(moriondremc_private.get_tasks())
+        # tasks.extend(mc2017_94x_v2.get_tasks())
+        # tasks.extend(data2018_102x.get_tasks())
+        # tasks.extend(prompt10x_data.get_tasks())
+        # tasks.extend(moriondremc.get_tasks())
+        # tasks.extend(moriondremc_private.get_tasks())
+        # tasks.extend(moriondremc_isotracks.get_tasks())
         for task in tasks:
             dsname = task.get_sample().get_datasetname()
             try:
-                if not task.complete(): task.process()
+                if not task.complete():
+                    # condor chirp for expert monitoring
+                    # task.additional_input_files = ["/home/users/namin/2017/ProjectMetis/metis/executables/condor_chirp"]
+                    task.process()
             except:
                 traceback_string = traceback.format_exc()
                 print "Runtime error:\n{0}".format(traceback_string)
@@ -45,5 +50,6 @@ if __name__ == "__main__":
             data2018_102x,
             prompt10x_data,
             moriondremc,
+            moriondremc_isotracks,
             moriondremc_private,
             ])
