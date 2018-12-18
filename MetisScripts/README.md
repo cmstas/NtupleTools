@@ -1,5 +1,5 @@
 # Metis submission scripts for 2016,2017,2018 data and MC
-Current as of Nov 28, 2018
+Current as of Dec 18, 2018
 
 ### Setup
 `git clone https://github.com/aminnj/ProjectMetis` and get environment (`cd ProjectMetis ; source setup.sh`)
