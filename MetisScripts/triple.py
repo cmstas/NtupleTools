@@ -9,6 +9,7 @@ import data2017_94x_v2
 import mc2017_94x_v2
 import mc2016_94x_v3
 import data2018_102x
+import mc2018_102x_v1
 import prompt10x_data
 import moriondremc # 2016 80X CMS4, CMS4_V00-00-02_2017Sep27 tag
 import moriondremc_private # same as above, private samples
@@ -20,7 +21,7 @@ if __name__ == "__main__":
         total_summary = {}
         tasks = []
         # tasks.extend(data2016_94x_v2.get_tasks())
-        tasks.extend(mc2016_94x_v3.get_tasks())
+        # tasks.extend(mc2016_94x_v3.get_tasks())
         # tasks.extend(data2017_94x_v2.get_tasks())
         # tasks.extend(mc2017_94x_v2.get_tasks())
         # tasks.extend(data2018_102x.get_tasks())
@@ -28,6 +29,7 @@ if __name__ == "__main__":
         # tasks.extend(moriondremc.get_tasks())
         # tasks.extend(moriondremc_private.get_tasks())
         # tasks.extend(moriondremc_isotracks.get_tasks())
+        # tasks.extend(data2018_102x.get_tasks()) # NOTE open dataset because WTF DAS can add files after the datset is marked as valid? NOTE remember to flush eventually
         for task in tasks:
             dsname = task.get_sample().get_datasetname()
             try:
@@ -48,6 +50,7 @@ if __name__ == "__main__":
             mc2017_94x_v2,
             mc2016_94x_v3,
             data2018_102x,
+            mc2018_102x_v1,
             prompt10x_data,
             moriondremc,
             moriondremc_isotracks,
