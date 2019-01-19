@@ -4,7 +4,7 @@ import sys
 import itertools
 import traceback
 
-from metis.Sample import DBSSample
+from metis.Sample import DBSSample, DirectorySample
 from metis.CMSSWTask import CMSSWTask
 from metis.StatsParser import StatsParser
 from metis.Utils import send_email, interruptible_sleep
@@ -540,6 +540,21 @@ def get_master_list():
                 )
         }
 
+    infos = [
+             "/VHToWW_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/phchang/metis/private_miniaod/VHToWW_M125_13TeV_amcatnloFXFX_madspin_pythia8_PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-ext1-v2_MINIAODSIM_/|94X_mc2017_realistic_v14",
+             "/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/user/phchang/metis/private_miniaod/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_/|94X_mc2017_realistic_v14",
+        ]
+
+    dinfos["mc_2017_94x_v2_private"] = {
+            "samples": infos,
+            "params": dict(
+                files_per_output = 60,
+                condor_submit_params = {"sites":"T2_US_UCSD"},
+                snt_dir = False,
+                )
+        }
+    dinfos["mc_2017_94x_v2_private"]["params"].update(dinfos["mc_2017_94x_v2"]["params"])
+
     ########################################
     ############## MC 2018 v1 ##############
     ########################################
@@ -661,7 +676,13 @@ if __name__ == "__main__":
             # Make all the tasks for a campaign
             tasks = []
             for sampstr in info["samples"]:
-                if "MINIAODSIM" in sampstr:
+                if "PRIVATE" in sampstr:
+                    dataset = sampstr.split("|")[0].strip()
+                    location = sampstr.split("|")[1].strip()
+                    globber = "*.root"
+                    gtag = sampstr.split("|")[2].strip()
+                    sample = DirectorySample(location=location,dataset=dataset,globber=globber,gtag=gtag)
+                elif "MINIAODSIM" in sampstr:
                     dsname = sampstr.split("|")[0].strip()
                     xsec = float(sampstr.split("|")[1].strip())
                     kfact = float(sampstr.split("|")[2].strip())
@@ -677,7 +698,10 @@ if __name__ == "__main__":
             for task in tasks:
                 try:
                     if not task.complete():
-                        task.process(optimizer=optimizer)
+                        if "PRIVATE" in task.get_sample().get_datasetname():
+                            task.process()
+                        else:
+                            task.process(optimizer=optimizer)
                 except:
                     traceback_string = traceback.format_exc()
                     print "Runtime error:\n{0}".format(traceback_string)
