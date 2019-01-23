@@ -168,12 +168,12 @@ def get_master_list():
     ########### Data 2018 prompt ###########
     ########################################
     pds = [
-            # "MuonEG",
-            # "JetHT",
-            # "MET",
-            # "SingleMuon",
-            # "EGamma",
-            # "DoubleMuon",
+            "MuonEG",
+            "JetHT",
+            "MET",
+            "SingleMuon",
+            "EGamma",
+            "DoubleMuon",
             ]
     proc_vers = [
             ("Run2018A","v1"),
@@ -379,6 +379,7 @@ def get_master_list():
             "/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|841200000.0|1.0|0.0016",
             "/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|1267000000.0|1.0|0.002633",
             "/QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|118100|1.0|0.07022",
+            "/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM|122700|1.0|0.17",
             "/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|399100000.0|1.0|0.0124",
             "/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|562700000.0|1.0|0.007087",
             "/QCD_Pt-300to470_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|7820.25|1.0|0.10196",
