@@ -11,6 +11,9 @@ from metis.Utils import send_email, interruptible_sleep
 from metis.Optimizer import Optimizer
 from pprint import pprint
 
+# # /nfs-7 mount is screwed up from uaf-4, so mirror stuff for now
+# tarballdir = "/nfs-7/userdata/libCMS3"
+tarballdir = "/home/users/namin/2017/ProjectMetis/tarmirror"
 
 def get_master_list():
 
@@ -57,9 +60,9 @@ def get_master_list():
                 # FIXME at some point we want to remake these with the bugfixed tag for els_ecalPFClusterIso/hcalPFClusterIso
                 # Keep using "buggy" tag right now since MT2, which uses these, doesn't care about those 2 branches, but eventually SS wants them.
                 # tag = "CMS4_V10-02-05",
-                # tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-05_1025.tar.xz",
+                # tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
                 tag = "CMS4_V10-02-04",
-                tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-04_1025.tar.xz",
+                tarfile = "{}/lib_CMS4_V10-02-04_1025.tar.xz".format(tarballdir),
                 )
             }
 
@@ -88,7 +91,7 @@ def get_master_list():
                 global_tag = "94X_dataRun2_v11",
                 is_data = True,
                 tag = "CMS4_V10-02-05",
-                tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-05_1025.tar.xz",
+                tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
                 events_per_output = 250e3,
                 )
             }
@@ -119,9 +122,9 @@ def get_master_list():
                 # FIXME at some point we want to remake these with the bugfixed tag for els_ecalPFClusterIso/hcalPFClusterIso
                 # Keep using "buggy" tag right now since MT2, which uses these, doesn't care about those 2 branches, but eventually SS wants them.
                 # tag = "CMS4_V10-02-05",
-                # tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-05_1025.tar.xz",
+                # tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
                 tag = "CMS4_V10-02-04",
-                tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-04_1025.tar.xz",
+                tarfile = "{}/lib_CMS4_V10-02-04_1025.tar.xz".format(tarballdir),
                 )
             }
 
@@ -329,7 +332,7 @@ def get_master_list():
                 special_dir = "run2_mc2016_94x/",
                 global_tag = "94X_mcRun2_asymptotic_v3",
                 tag = "CMS4_V10-02-05",
-                tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-05_1025.tar.xz",
+                tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
                 )
         }
 
@@ -553,7 +556,7 @@ def get_master_list():
                 special_dir = "run2_mc2017/",
                 global_tag = "94X_mc2017_realistic_v17",
                 tag = "CMS4_V10-02-05",
-                tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-05_1025.tar.xz",
+                tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
                 events_per_output = 250e3,
                 )
         }
@@ -710,7 +713,7 @@ if __name__ == "__main__":
             cmssw_version = "CMSSW_10_2_5",
             tag = "CMS4_V10-02-04",
             pset = "/home/users/namin/2017/ProjectMetis/pset_CMS4_V10-02-04.py",
-            tarfile = "/nfs-7/userdata/libCMS3/lib_CMS4_V10-02-04_1025.tar.xz",
+            tarfile = "{}/lib_CMS4_V10-02-04_1025.tar.xz".format(tarballdir),
             publish_to_dis = True,
             snt_dir = True,
             additional_input_files = ["/home/users/namin/2017/ProjectMetis/metis/executables/condor_chirp"],
@@ -762,11 +765,10 @@ if __name__ == "__main__":
             tasks = []
             for sampstr in info["samples"]:
                 if "PRIVATE" in sampstr:
-                    dataset = sampstr.split("|")[0].strip()
+                    dsname = sampstr.split("|")[0].strip()
                     location = sampstr.split("|")[1].strip()
-                    globber = "*.root"
                     gtag = sampstr.split("|")[2].strip()
-                    sample = DirectorySample(location=location,dataset=dataset,globber=globber,gtag=gtag)
+                    sample = DirectorySample(location=location,dataset=dsname,globber="*.root",gtag=gtag)
                 elif "MINIAODSIM" in sampstr:
                     dsname = sampstr.split("|")[0].strip()
                     xsec = float(sampstr.split("|")[1].strip())
@@ -787,15 +789,11 @@ if __name__ == "__main__":
                     if not task.complete():
                     # if (not task.complete()) or (task.get_sample().get_datasetname() in special):
                         task.kwargs["condor_submit_params"] = dict(
-                                classads=[
-                                    ["JobBatchName",campaign],
-                                    ],
+                                classads=[ ["JobBatchName",campaign], ],
                                 )
-                        if "PRIVATE" in task.get_sample().get_datasetname():
-                            task.process()
+                        if "PRIVATE" in task.get_sample().get_datasetname(): task.process()
                         else:
                             task.process(optimizer=optimizer)
-                        task.process(optimizer=optimizer)
                 except:
                     traceback_string = traceback.format_exc()
                     print "Runtime error:\n{0}".format(traceback_string)
