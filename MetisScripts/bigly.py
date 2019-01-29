@@ -337,6 +337,23 @@ def get_master_list():
         }
 
     ########################################
+    ######### MC 2016 94x Fastsim ##########
+    ########################################
+    infos = [
+            "/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1",
+            ]
+    dinfos["mc_2016_94x_v3_fastsim"] = {
+            "samples": infos,
+            "params": dict(
+                pset_args = "data=False year=2016 fastsim=True",
+                special_dir = "run2_mc2016_94x/",
+                global_tag = "94X_mcRun2_asymptotic_v3",
+                tag = "CMS4_V10-02-05",
+                tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
+                )
+        }
+
+    ########################################
     ############## MC 2017 v2 ##############
     ########################################
     infos = [
@@ -561,6 +578,24 @@ def get_master_list():
                 )
         }
 
+    ########################################
+    ########## MC 2017 v2 Fastsim ##########
+    ########################################
+    infos = [
+            "/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3/MINIAODSIM|1|1|1",
+            ]
+    dinfos["mc_2017_94x_v2_fastsim"] = {
+            "samples": infos,
+            "params": dict(
+                pset_args = "data=False year=2017 metrecipe=True fastsim=True",
+                special_dir = "run2_mc2017/",
+                global_tag = "94X_mc2017_realistic_v17",
+                tag = "CMS4_V10-02-05",
+                tarfile = "{}/lib_CMS4_V10-02-05_1025.tar.xz".format(tarballdir),
+                events_per_output = 200e3,
+                )
+        }
+
     infos = [
              "/VHToWW_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/phchang/metis/private_miniaod/VHToWW_M125_13TeV_amcatnloFXFX_madspin_pythia8_PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-ext1-v2_MINIAODSIM_/|94X_mc2017_realistic_v14",
              "/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/user/phchang/metis/private_miniaod/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_PRIVATE_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_/|94X_mc2017_realistic_v14",
@@ -601,6 +636,7 @@ def get_master_list():
             "/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|1005|1.0|1.0",
             "/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|101.8|1.0|1.0",
             "/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|20.54|1.0|1.0",
+            "/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM|1267000000.0|1.0|0.002633",
             "/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|407300|1.0|0.1636",
             "/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|479500.0|1.0|0.04958",
             "/QCD_Pt-120to170_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|410800.0|1.0|0.04773",
@@ -655,6 +691,13 @@ def get_master_list():
             "/W4JetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM|524.2|1.0|1.0",
             "/WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v1/MINIAODSIM|405.271|1.0|1.0",
             "/WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|405.271|1.0|1.0",
+            "/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|1379|1.21|0.961",
+            "/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|359.7|1.21|1.089",
+            "/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|48.91|1.21|1.138",
+            "/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|12.05|1.21|1.161",
+            "/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|5.501|1.21|1.119",
+            "/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|1.329|1.21|1.118",
+            "/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|0.03216|1.21|1.0",
             "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM|50690|1.21|1",
             "/WWG_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|0.2147|1.0|1.0",
             "/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|0.2086|1.0|1.0",
