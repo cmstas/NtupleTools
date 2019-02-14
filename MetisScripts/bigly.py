@@ -606,7 +606,9 @@ def get_master_list():
             "/SMS-T2bb_mSbot-1650to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM|1|1|1|skip90",
             "/SMS-T2bb_mSbot-1650to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pileupfromucsd_94X_mc2017_realistic_v15-v2/MINIAODSIM|1|1|1|skip90",
             "/SMS-T2qq_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM|1|1|1|skip90",
+            "/SMS-T2qq_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM|1|1|1|skip90",
             "/SMS-T2qq_mSq-1850to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM|1|1|1|skip90",
+            "/SMS-T2qq_mSq-1850to2600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM|1|1|1|skip90",
             # # FIXME Comment these out for now because there's a boatload of xrootd errors
             "/SMS-T6ttWW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM|1|1|1|skip90",
             "/SMS-T2tt_mStop-1200to2000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM|1|1|1|skip90",
