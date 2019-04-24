@@ -1158,6 +1158,24 @@ def get_master_list():
                 )
         }
 
+    ########################################
+    ########## MC 2018 Fastsim V3 ##########
+    ########################################
+    infos = [
+            "/SMS-T2bt-LLChipm_ctau-50_mStop-1550to2500_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-PUFall18Fast_102X_upgrade2018_realistic_v15-v3/MINIAODSIM|1|1|1|v08",
+            ]
+    dinfos["mc_2018_102x_v3_fastsim"] = {
+            "samples": infos,
+            "params": dict(
+                pset_args = "data=False year=2018 fastsim=True",
+                special_dir = "run2_mc2018/",
+                global_tag = "102X_upgrade2018_realistic_v15",
+                tag = "CMS4_V10-02-08",
+                tarfile = "{}/lib_CMS4_V10-02-08_1025.tar.xz".format(tarballdir),
+                events_per_output = 200e3,
+                )
+        }
+
     return dinfos
 
 if __name__ == "__main__":
