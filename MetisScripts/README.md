@@ -6,7 +6,7 @@ Current as of May 19, 2019
 
 ### Submission
 
-Main submission script is `bigly.py` because it subits **bigly**. Of course read the script source and modify it appropriately before blindly executing things.
+Main submission script is `bigly.py` because it submits **bigly**. Of course read the script source and modify it appropriately before blindly executing things.
 
 ### Misc scripts
 * `misc/checkminiaodv3.py` -- paste in MINIAODSIM names of 2016 MiniAODv3 MC samples, and then query past SNT samples for xsec information. Spit out the format needed in the other metis submission scripts.
