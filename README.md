@@ -2,7 +2,7 @@
 Old readme is left below, but basically all of the old functionality is contained within
 * [https://github.com/aminnj/ProjectMetis](https://github.com/aminnj/ProjectMetis)
 * [https://github.com/aminnj/dis](https://github.com/aminnj/dis)
-* [misc/MetisScripts](misc/MetisScripts)
+* [MetisScripts](MetisScripts)
 
 # Old readme below
 
