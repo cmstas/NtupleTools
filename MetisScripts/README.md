@@ -1,30 +1,15 @@
 # Metis submission scripts for 2016,2017,2018 data and MC
-Current as of Dec 18, 2018
+Current as of May 19, 2019
 
 ### Setup
 `git clone https://github.com/aminnj/ProjectMetis` and get environment (`cd ProjectMetis ; source setup.sh`)
 
-### Edit
-
-#### Old
-Read scripts before submitting.
-`triple.py` is the driver script. It loads tasks from the other python files and processes them.
-To select which datasets to process, edit the corresponding script. Comment out various years in `triple.py`
-to speed up the loop over tasks, and comment out PDs/datasets/etc in the other scripts to also avoid
-instantiating too many tasks. Of course don't comment them out if they are not done.
-
-#### New
-Look at `bigly.py` instead.
-
 ### Submission
 
-#### Old
-`python triple.py`
-
-#### New
-Look at `bigly.py` instead. It will submit bigly.
-
+Main submission script is `bigly.py` because it subits **bigly**. Of course read the script source and modify it appropriately before blindly executing things.
 
 ### Misc scripts
 * `misc/checkminiaodv3.py` -- paste in MINIAODSIM names of 2016 MiniAODv3 MC samples, and then query past SNT samples for xsec information. Spit out the format needed in the other metis submission scripts.
+* `misc/to_backup.py` -- has functions to print out directories containing samples we care about (i.e., latest CMS4 tags, not ones scheduled for deletion, etc)
+* `misc/find_corruptions.py` -- uses `misc/to_backup.py` and `hdfs fsck` to find corrupted files that we care to remake
 
