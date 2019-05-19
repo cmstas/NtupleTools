@@ -1,3 +1,11 @@
+# NtupleTools
+Old readme is left below, but basically all of the old functionality is contained within
+* [https://github.com/aminnj/ProjectMetis](https://github.com/aminnj/ProjectMetis)
+* [https://github.com/aminnj/dis](https://github.com/aminnj/dis)
+* [misc/MetisScripts](misc/MetisScripts)
+
+# Old readme below
+
 #NtupleTools
 
 This repository is used to facilitate running the NtupleMaker directory at scale.  This allows CMS3 Ntuples to be quickly made.  
