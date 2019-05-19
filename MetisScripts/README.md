@@ -12,4 +12,6 @@ Main submission script is `bigly.py` because it subits **bigly**. Of course read
 * `misc/checkminiaodv3.py` -- paste in MINIAODSIM names of 2016 MiniAODv3 MC samples, and then query past SNT samples for xsec information. Spit out the format needed in the other metis submission scripts.
 * `misc/to_backup.py` -- has functions to print out directories containing samples we care about (i.e., latest CMS4 tags, not ones scheduled for deletion, etc)
 * `misc/find_corruptions.py` -- uses `misc/to_backup.py` and `hdfs fsck` to find corrupted files that we care to remake
+* `misc/find_older_cms4.py` -- example script to find outdated CMS4 according to DIS
+* `misc/get_local_commands.py` -- example script that prints out cmsRun commands to run CMS4 metis jobs locally
 
