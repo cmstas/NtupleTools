@@ -671,6 +671,7 @@ def get_master_list():
 
             # Note that the ZH cross sections for nominal vs tune are slightly different due to final state and filtering differences
             "/ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUGenV7011_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|0.75182|0.00074903|1.0",
+            "/ZHiggs0MToZZ_4LFilter_M125_13TeV_JHUGenV7011_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v11-v1/MINIAODSIM|2.28689|0.000748727|1.0",
             # "/ZH_HToZZ_4LFilter_M125_13TeV_tunedown_powheg-minlo-HWJ_JHUgenV700_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM|0.783960|0.00074903|1.0",
             # "/ZH_HToZZ_4LFilter_M125_13TeV_tuneup_powheg-minlo-HWJ_JHUgenV700_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM|0.783960|0.00074903|1.0",
 
