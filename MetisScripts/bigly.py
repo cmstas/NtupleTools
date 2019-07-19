@@ -873,6 +873,9 @@ def get_master_list():
             "/SMS-T2bt-LLChipm_ctau-50_mLSP-2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
             "/SMS-T2bt-LLChipm_ctau-50_mLSP-300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-1925_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",
+            # Jul 19
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-1275_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-1600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v3/MINIAODSIM|1|1|1|v09",
             ]
     dinfos["mc_2016_94x_v3"] = {
             "samples": infos,
