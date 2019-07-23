@@ -372,7 +372,6 @@ def get_master_list():
             "/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|0.215|1.0|1.0",
             # "/ttZJets_13TeV_madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|0.7826|1|1",
             "/VHToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|0.952|1|1",
-            # "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_pilot_94X_mcRun2_asymptotic_v3-v4/MINIAODSIM|1|1|1", # FIXME uncomment when phedex stops being a piece of shit
 
             "/TTWW_TuneCUETP8M2T4_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|0.0115|1|1",
             "/TTWZ_TuneCUETP8M2T4_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|0.003884|1|1",
@@ -947,6 +946,33 @@ def get_master_list():
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-575_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-825_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-875_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",            
+            # Jul 23
+            "/SMS-T1qqqq-LLChipm_ctau-10_mLSP-400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-10_mLSP-1300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-10_mLSP-1700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-10_mLSP-2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-75_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",            
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_pilot_94X_mcRun2_asymptotic_v3-v5/MINIAODSIM|1|1|1|v09",            
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",            
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-1100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-1700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-2300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-50_mLSP-2575_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-25_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-75_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-150_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1475_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-1975_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",   
+            "/SMS-T1qqqq-LLChipm_ctau-200_mLSP-2175_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
             ]
     dinfos["mc_2016_94x_v3"] = {
             "samples": infos,
