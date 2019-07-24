@@ -984,6 +984,40 @@ def get_master_list():
             "/SMS-T2qq-LLChipm_ctau-200_mLSP-900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-250_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",    
             "/SMS-T2qq-LLChipm_ctau-50_mLSP-700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",    
+
+            # Last chunk of T2qq, Jul 24
+            
+            "SMS-T2qq-LLChipm_ctau-10_mLSP-1175_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-10_mLSP-1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-10_mLSP-1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-10_mLSP-1600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-1100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-1475_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-1775_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-1875_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            # Should show up soon
+            "SMS-T2qq-LLChipm_ctau-50_mLSP-2125_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-1100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-1875_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            # These last 3 aren't even close to done yet, but including them just in case a miracle happens
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-1575_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-2075_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+            "/SMS-T2qq-LLChipm_ctau-200_mLSP-2100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+
+
+            # To do, finish last chunk of T2bt
+            "/SMS-T2bt-LLChipm_ctau-10_mLSP-1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+
+            "/SMS-T2bt-LLChipm_ctau-200_mLSP-900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_longlived_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|1|1|1|v09",    
+
+            
             ]
     dinfos["mc_2016_94x_v3"] = {
             "samples": infos,
