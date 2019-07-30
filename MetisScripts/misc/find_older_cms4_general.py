@@ -5,18 +5,22 @@ import glob
 import pandas as pd
 from tqdm import tqdm
 
+def split_into_chunks(l,size=512):
+    for i in range(0,len(l),size): yield l[i:i+size]
+
 def get_df(dirs):
     """
     Given list a hadoop directories, return physical directory sizes in GB
     """
-    cmd = "hadoop fs -du -s {0}".format(" ".join([d.replace("/hadoop","") for d in dirs]))
-    stat,out = commands.getstatusoutput(cmd)
     sizes = {}
-    for line in out.strip().splitlines():
-        try:
-            sizes["/hadoop"+line.split()[1]] = int(line.split()[0])*1.0e-9
-        except:
-            pass
+    for chunk in split_into_chunks(dirs):
+        cmd = "hadoop fs -du -s {0}".format(" ".join(chunk)).replace("/hadoop","")
+        stat,out = commands.getstatusoutput(cmd)
+        for line in out.strip().splitlines():
+            try:
+                sizes["/hadoop"+line.split()[2]] = int(line.split()[0])*1.0e-9
+            except:
+                pass
     data = []
     # for path,size in tqdm(sizes.items()):
     for path,size in sizes.items():
