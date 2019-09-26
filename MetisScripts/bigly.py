@@ -1855,6 +1855,9 @@ def get_master_list():
     infos = [
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v1/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X/|102X_upgrade2018_realistic_v12",
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v2/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X_Sep3/|102X_upgrade2018_realistic_v12",
+             "WH_hadronic_2018_mnlsp-500_mlsp-150_MadGraph5-pythia8/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_500_150/|102X_upgrade2018_realistic_v19",
+             "WH_hadronic_2018_mnlsp-750_mlsp-1_MadGraph5-pythia8/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_750_1/|102X_upgrade2018_realistic_v19",
+
         ]
 
     dinfos["mc_2018_102x_v1_private"] = {
