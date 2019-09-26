@@ -1857,7 +1857,6 @@ def get_master_list():
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v2/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X_Sep3/|102X_upgrade2018_realistic_v12",
              "/SMS-TChiWH_mC1-500_mLSP-150_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_500_150|102X_upgrade2018_realistic_v19",
              "/SMS-TChiWH_mC1-750_mLSP-1_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_750_1|102X_upgrade2018_realistic_v19"
-
         ]
 
     dinfos["mc_2018_102x_v1_private"] = {
