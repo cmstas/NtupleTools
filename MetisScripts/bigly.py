@@ -1098,6 +1098,21 @@ def get_master_list():
                 )
         }
 
+	
+    infos = [
+             "/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8/PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM | /hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1_MINIAODSIM_ | v3",
+        ]
+
+    dinfos["mc_2016_94x_v3_private"] = {
+            "samples": infos,
+            "params": dict(
+                files_per_output = 1,
+                condor_submit_params = {"sites":"T2_US_UCSD"},
+                snt_dir = False,
+                )
+        }
+    dinfos["mc_2016_94x_v3_private"]["params"].update(dinfos["mc_2016_94x_v3"]["params"])
+
     ########################################
     ######### MC 2016 94x Fastsim ##########
     ########################################
@@ -1903,6 +1918,7 @@ def get_master_list():
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v2/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X_Sep3/|102X_upgrade2018_realistic_v12",
              "/SMS-TChiWH_mC1-500_mLSP-150_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_500_150/miniAOD/|102X_upgrade2018_realistic_v19|v09",
              "/SMS-TChiWH_mC1-750_mLSP-1_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_750_1/miniAOD/|102X_upgrade2018_realistic_v19|v09",
+			 "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM | /hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_ | v15 " ,
         ]
 
     dinfos["mc_2018_102x_v1_private"] = {
