@@ -392,7 +392,7 @@ def get_master_list():
             "/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|0.01398|1.0|1.0",
             "/tZq_ll_4f_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|0.0758|1.0|1.0",
             "/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|0.215|1.0|1.0",
-            "/ttH_HToInvisible_M125_TuneCUETP8M1_13TeV_powheg_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|0.5071|1.0|1.0",
+            "/ttH_HToInvisible_M125_TuneCUETP8M1_13TeV_powheg_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|0.5071|1.0|1.0|open",
             "/ttZJets_13TeV_madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|0.7826|1|1",
             "/VHToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM|0.952|1|1",
             "/WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM|0.159|1|1",
@@ -1102,13 +1102,13 @@ def get_master_list():
 
 
     infos = [
-             "/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8/PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM | /hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1_MINIAODSIM_ | v3",
+             "/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8/PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1_MINIAODSIM_|94X_mcRun2_asymptotic_v3|v10,ignoredups,skip80",
         ]
 
     dinfos["mc_2016_94x_v3_private"] = {
             "samples": infos,
             "params": dict(
-                files_per_output = 1,
+                files_per_output = 60,
                 condor_submit_params = {"sites":"T2_US_UCSD"},
                 snt_dir = False,
                 )
@@ -1343,8 +1343,8 @@ def get_master_list():
             "/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|48.91|1.21|1.186",
             "/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|12.05|1.21|1.196",
             "/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|5.501|1.21|1.173",
-            "/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|1.329|1.21|1.077",
-            "/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM|0.03216|1.21|1.044",
+            "/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|1.329|1.21|1.077|skip97",
+            "/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM|0.03216|1.21|1.044|skip97",
             "/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/MINIAODSIM|52940|1.21|1.0",
             "/WWG_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM|0.2147|1|1",
             "/WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|49.997|1|1",
@@ -1606,7 +1606,7 @@ def get_master_list():
              "/VHToWW_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv3-PU2017_2Apr2020_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/yxiang/metis/private_miniaod/VBSWWH_TuneCP5_13TeV-madgraph-pythia8_checkv4_01_2_100KE_PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_/|94X_mc2017_realistic_v14",
              "/VHToWWLep_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv3-PU2017_2Apr2020_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/yxiang/metis/private_miniaod/VBSWWHLEP_TuneCP5_13TeV-madgraph-pythia8_checkv4_07_2_100KE_PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_|94X_mc2017_realistic_v14",
 	     "/VBSWWHLep_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv3-PU2017_2Apr2020_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/yxiang/metis/private_miniaod/VBSWWHINC_TuneCP5_13TeV-madgraph-pythia8_check_06_19_H6nModel_100KE_100PE_PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_|94X_mc2017_realistic_v14",
-             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_MINIAODSIM_/|94X_mc2017_realistic_v14|v10",
+             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_MINIAODSIM_/|94X_mc2017_realistic_v14|v11,nolhehandler",
         ]
 
     dinfos["mc_2017_94x_v2_private"] = {
@@ -1922,7 +1922,7 @@ def get_master_list():
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v2/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X_Sep3/|102X_upgrade2018_realistic_v12",
              "/SMS-TChiWH_mC1-500_mLSP-150_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_500_150/miniAOD/|102X_upgrade2018_realistic_v19|v09",
              "/SMS-TChiWH_mC1-750_mLSP-1_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_750_1/miniAOD/|102X_upgrade2018_realistic_v19|v09",
-             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM | /hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_ | v15 " ,
+             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_|102X_upgrade2018_realistic_v19|v09,ignoredups,skip80",
         ]
 
     dinfos["mc_2018_102x_v1_private"] = {
@@ -2128,6 +2128,16 @@ if __name__ == "__main__":
                         if "v09" in extra: # another short track branch (decayZ)
                             task_params["tag"] = "CMS4_V10-02-09"
                             task_params["tarfile"] = "{}/lib_CMS4_V10-02-09_1025.tar.xz".format(tarballdir)
+                        if "v10" in extra: # another corner case PDF weight fixed
+                            task_params["tag"] = "CMS4_V10-02-10"
+                            task_params["tarfile"] = "{}/lib_CMS4_V10-02-10_1025.tar.xz".format(tarballdir)
+                        if "v11" in extra: # another corner case PDF weight fixed
+                            task_params["tag"] = "CMS4_V10-02-11"
+                            task_params["tarfile"] = "{}/lib_CMS4_V10-02-11_1025.tar.xz".format(tarballdir)
+                        if "nolhehandler" in extra:
+                            task_params["pset_args"] += " useLHEHandler=False"
+                        if "ignoredups" in extra:
+                            task_params["pset"] = "/home/users/namin/2017/ProjectMetis/pset_CMS4_V10-02-04_ignoredups.py"
                 elif "MINIAODSIM" in sampstr:
                     dsname = sampstr.split("|")[0].strip()
                     xsec = float(sampstr.split("|")[1].strip())

@@ -77,10 +77,10 @@ if __name__ == "__main__":
 
     dirs = []
 
-    # # ~90 TB
-    # dirs += get_folders("run2_mc2016_94x")
-    # dirs += get_folders("run2_mc2017")
-    # dirs += get_folders("run2_mc2018")
+    # # ~90 TB + whatever fastsim is
+    # dirs += get_folders("run2_mc2016_94x",exclude_fastsim=False)
+    # dirs += get_folders("run2_mc2017",exclude_fastsim=False)
+    # dirs += get_folders("run2_mc2018",exclude_fastsim=False)
 
     # # ~80 TB
     dirs += get_folders("run2_data2016_94x") # ~25TB

@@ -7,9 +7,9 @@ if __name__ == "__main__":
         get_folders("run2_data2016_94x"), # ~25TB
         get_folders("run2_data2017"), # ~27TB
         get_folders("run2_data2018"), # ~28TB
-        get_folders("run2_mc2016_94x"),
-        get_folders("run2_mc2017"),
-        get_folders("run2_mc2018"),
+        get_folders("run2_mc2016_94x",exclude_fastsim=False),
+        get_folders("run2_mc2017",exclude_fastsim=False),
+        get_folders("run2_mc2018",exclude_fastsim=False),
         ], [])
     print "# Found {} folders housing the latest/greatest ntuples".format(len(good_folders))
 
