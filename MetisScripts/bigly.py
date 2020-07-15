@@ -1088,6 +1088,10 @@ def get_master_list():
             # ttbar + DM samples
             "/TTbarDMJets_Inclusive_scalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIISummer16MiniAODv3-PUMoriond17_rp_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v10,sparms",
             "/TTbarDMJets_Inclusive_pseudoscalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIISummer16MiniAODv3-PUMoriond17_rp_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1|v10,sparms",
+
+            #TChi WH FullSim
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino750_mLSP1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1",
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino350_mLSP100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM|1|1|1",
             ]
     dinfos["mc_2016_94x_v3"] = {
             "samples": infos,
@@ -1907,6 +1911,10 @@ def get_master_list():
             # ttbar + DM samples
             "/TTbarDMJets_Inclusive_scalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM|1|1|1|v10,sparms",
             "/TTbarDMJets_Inclusive_pseudoscalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM|1|1|1|v10,sparms",
+
+            #TChi WH FullSim
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino750_mLSP1_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM|1|1|1",
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino350_mLSP100_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM|1|1|1",
         ]
     dinfos["mc_2018_102x_v1"] = {
             "samples": infos,
