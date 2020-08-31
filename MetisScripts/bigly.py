@@ -1106,7 +1106,7 @@ def get_master_list():
 
 
     infos = [
-             "/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8/PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1_MINIAODSIM_|94X_mcRun2_asymptotic_v3|v10,ignoredups,skip80",
+             "/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8/PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCUETP8M2T4_13TeV-madgraph-pythia8_PRIVATE-RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1_MINIAODSIM_|94X_mcRun2_asymptotic_v3|v10,ignoredups,skip80",
         ]
 
     dinfos["mc_2016_94x_v3_private"] = {
@@ -1611,6 +1611,7 @@ def get_master_list():
              "/VHToWWLep_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv3-PU2017_2Apr2020_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/yxiang/metis/private_miniaod/VBSWWHLEP_TuneCP5_13TeV-madgraph-pythia8_checkv4_07_2_100KE_PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_|94X_mc2017_realistic_v14",
 	     "/VBSWWHLep_M125_13TeV_amcatnloFXFX_madspin_pythia8/PRIVATE_RunIIFall17MiniAODv3-PU2017_2Apr2020_94X_mc2017_realistic_v14-ext1-v2/MINIAODSIM|/hadoop/cms/store/user/yxiang/metis/private_miniaod/VBSWWHINC_TuneCP5_13TeV-madgraph-pythia8_check_06_19_H6nModel_100KE_100PE_PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_|94X_mc2017_realistic_v14",
              "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_MINIAODSIM_/|94X_mc2017_realistic_v14|v11,nolhehandler",
+             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_ext1/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_PRIVATE-RunIIFall17_MINIAODSIM_/|94X_mc2017_realistic_v14|v11,nolhehandler",
         ]
 
     dinfos["mc_2017_94x_v2_private"] = {
@@ -1930,7 +1931,7 @@ def get_master_list():
              "/VH/PRIVATE_RunIIAutumn18MiniAOD-v2/MINIAODSIM|/hadoop/cms/store/user/namin/ashah/MiniAOD_VH_FulllSimulation_102X_Sep3/|102X_upgrade2018_realistic_v12",
              "/SMS-TChiWH_mC1-500_mLSP-150_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_500_150/miniAOD/|102X_upgrade2018_realistic_v19|v09",
              "/SMS-TChiWH_mC1-750_mLSP-1_WToQQ_HToBB_TuneCP2_13TeV-madgraphMLM-pythia8/PRIVATE_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM|/hadoop/cms/store/user/mibryson/WH_hadronic/WH_had_750_1/miniAOD/|102X_upgrade2018_realistic_v19|v09",
-             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_|102X_upgrade2018_realistic_v19|v09,ignoredups,skip80",
+             "/TTHH_TuneCP5_13TeV-madgraph-pythia8/PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM|/hadoop/cms/store/user/fsetti/metis/private_miniaod/TTHH_TuneCP5_13TeV-madgraph-pythia8_PRIVATE-RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2_MINIAODSIM_|102X_upgrade2018_realistic_v19|v09,ignoredups,skip80",
         ]
 
     dinfos["mc_2018_102x_v1_private"] = {
