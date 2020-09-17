@@ -1491,7 +1491,11 @@ def get_master_list():
             # ttbar + DM samples
             "/TTbarDMJets_Inclusive_scalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/MINIAODSIM|1|1|1|v10,sparms",
             "/TTbarDMJets_Inclusive_pseudoscalar_LO_TuneCP5_13TeV-madgraph-mcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/MINIAODSIM|1|1|1|v10,sparms",
-        ]
+        
+            #TChi WH FullSim
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino350_mLSP100_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM|1|1|1",
+            "/SMS_TChiWH_WToLNu_HToBB_mChargino750_mLSP1_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM|1|1|1",
+            ]
     dinfos["mc_2017_94x_v2"] = {
             "samples": infos,
             "params": dict(
